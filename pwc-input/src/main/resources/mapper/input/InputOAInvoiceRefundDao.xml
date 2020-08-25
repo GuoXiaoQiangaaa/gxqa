@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputOAInvoiceRefundDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.pwc.modules.input.entity.InputOAInvoiceRefund" id="invoiceRefundMap">
+        <result property="id" column="id"/>
+        <result property="invoiceId" column="invoice_id"/>
+        <result property="refundReason" column="refund_reason"/>
+        <result property="detailedReason" column="detailed_reason"/>
+        <result property="expressCompany" column="express_company"/>
+        <result property="expressNo" column="express_no"/>
+        <result property="refundUser" column="refund_user"/>
+        <result property="refundTime" column="refund_time"/>
+    </resultMap>
+    <sql id="invoiceRefund">
+        id AS "id",
+        invoice_id AS "invoiceId",
+        refund_reason AS "refundReason",
+        detailed_reason AS "detailedReason",
+        express_company AS "expressCompany",
+        express_no AS "expressNo",
+        refund_user AS "refundUser",
+        refund_time AS "refundTime"
+    </sql>
+    <update id="updateByInvoiceId">
+        update input_oa_invoice_refund
+        set
+            detailed_reason =#{detailedReason},
+            express_company =#{expressCompany},
+            express_no =#{expressNo},
+            refund_user =#{refundUser},
+            refund_time =#{refundTime}
+        where invoice_id =#{invoiceId}
+    </update>
+    <select id="getByInvoiceId" resultType="com.pwc.modules.input.entity.InputOAInvoiceRefund">
+        SELECT
+        <include refid="invoiceRefund"/>
+        FROM input_oa_invoice_refund a
+        WHERE a.invoice_id = #{invoiceId}
+    </select>
+</mapper>

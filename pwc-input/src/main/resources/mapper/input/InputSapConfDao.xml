@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputSapConfEntityDao">
+    <sql id="sapConfColumns">
+        a.id AS "id",
+        a.ashost AS "ashost",
+        a.client AS "client",
+        a.lang AS "lang",
+        a.pass_word AS "passWord",
+        a.sysnr AS "sysnr",
+        a.user AS "user",
+        a.name AS "name",
+        a.post_url AS "postUrl"
+    </sql>
+
+    <select id="getOneById" resultType="com.pwc.modules.input.entity.InputSapConfEntity">
+        SELECT
+        <include refid="sapConfColumns"/>
+        FROM input_sap_conf a
+        WHERE  id = #{id}
+    </select>
+</mapper>

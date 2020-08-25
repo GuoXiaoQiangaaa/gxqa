@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputInvoiceVoucherDao">
+
+    <sql id="invoiceVoucherColumns">
+		a.id as "id",
+		a.invoice_batch_number as "invoiceBatchNumber",
+		a.invoice_number as "invoiceNumber",
+		a.voucher_number as "voucherNumber",
+		a.duplicate AS "duplicate"
+	</sql>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO input_invoice_voucher(
+		    invoice_batch_number,
+			invoice_number,
+			voucher_number,
+			duplicate
+		) VALUES (
+		    #{invoiceBatchNumber},
+			#{invoiceNumber},
+			#{voucherNumber},
+			#{duplicate}
+		)
+	</insert>
+
+    <select id="getListByBatchId" resultType="com.pwc.modules.input.entity.InputInvoiceVoucherEntity">
+        SELECT
+        <include refid="invoiceVoucherColumns"/>
+        FROM input_invoice_voucher a
+        where a.invoice_batch_number=#{invoiceBatchNumber}
+    </select>
+
+    <select id="getListByBatchIdAndVoucherNumber"
+            resultType="com.pwc.modules.input.entity.InputInvoiceVoucherEntity">
+        SELECT
+        <include refid="invoiceVoucherColumns"/>
+        FROM input_invoice_voucher a
+        where a.invoice_batch_number=#{invoiceBatchNumber} and a.voucher_number=#{voucherNumber}
+    </select>
+
+    <select id="getListGroupBy" resultType="com.pwc.modules.input.entity.InputInvoiceVoucherEntity">
+		SELECT
+	      vo.voucher_number as "voucherNumber",vo.invoice_number as "invoiceNumber"
+        FROM
+	      input_invoice_voucher vo
+--         LEFT JOIN input_invoice inv ON inv.id = vo.invoice_number
+          <where>
+	              vo.invoice_number in
+            <foreach collection="invoiceIds" index="index" item="item" open="(" separator="," close=")">
+              #{item}
+            </foreach>
+              and vo.invoice_batch_number=#{invoiceBatchNumber}
+          </where>
+                  GROUP BY vo.voucher_number
+	</select>
+
+
+    <select id="getListByInvoiceNumberAndBatchNumber" resultType="com.pwc.modules.input.entity.InputInvoiceVoucherEntity">
+        SELECT
+        vo.voucher_number,
+        vo.invoice_number
+        FROM
+        input_invoice_voucher vo
+        WHERE
+        vo.invoice_number in
+        <foreach collection="invoiceIds" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and vo.invoice_batch_number=#{invoiceBatchNumber}
+    </select>
+
+
+    <select id="getListByInvoiceNumberAndBatchNumberGroupBy" resultType="com.pwc.modules.input.entity.InputInvoiceVoucherEntity">
+        SELECT
+        vo.voucher_number
+        FROM
+        input_invoice_voucher vo
+        WHERE
+        vo.invoice_number in
+        <foreach collection="invoiceIds" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and vo.invoice_batch_number=#{invoiceBatchNumber}
+        group by vo.voucher_number
+    </select>
+
+    <select id="getListByBatchIdGroupInvoiceNumber" resultType="com.pwc.modules.input.entity.InputInvoiceVoucherEntity">
+        SELECT
+        <include refid="invoiceVoucherColumns"/>
+        FROM
+        input_invoice_voucher a
+        WHERE
+        a.invoice_batch_number=#{invoiceBatchNumber}
+        group by a.invoice_number
+    </select>
+
+    <select id="getListByBatchAndInvoiceNumber" resultType="com.pwc.modules.input.entity.InputInvoiceVoucherEntity">
+        SELECT
+        <include refid="invoiceVoucherColumns"/>
+        FROM
+        input_invoice_voucher a
+        WHERE
+        a.invoice_batch_number=#{invoiceBatchNumber}
+        and
+        a.invoice_number=#{invoiceNumber}
+    </select>
+
+    <select id="getById" resultType="com.pwc.modules.input.entity.InputInvoiceVoucherEntity">
+        SELECT
+        <include refid="invoiceVoucherColumns"/>
+        FROM input_invoice_voucher a
+        WHERE a.id = #{id}
+    </select>
+
+    <update id="update">
+        UPDATE input_invoice_voucher
+        <set>
+            invoice_number = #{invoiceNumber},
+            voucher_number = #{voucherNumber},
+        </set>
+        <where>
+            id = #{id}
+        </where>
+    </update>
+
+    <delete id="delete">
+        DELETE FROM input_invoice_voucher
+        WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByBatchId">
+        DELETE FROM input_invoice_voucher
+        WHERE invoice_batch_number = #{invoiceBatchNumber}
+    </delete>
+</mapper>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.data.dao.OutputCustomerNewDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.pwc.modules.data.entity.OutputCustomerNewEntity" id="outputCustomerNewMap">
+        <result property="customerId" column="customer_id"/>
+        <result property="sapCode" column="sap_code"/>
+        <result property="deptCode" column="dept_code"/>
+        <result property="name" column="name"/>
+        <result property="nameCn" column="name_cn"/>
+        <result property="taxCode" column="tax_code"/>
+        <result property="address" column="address"/>
+        <result property="contact" column="contact"/>
+        <result property="bank" column="bank"/>
+        <result property="bankAccount" column="bank_account"/>
+        <result property="email" column="email"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+
+</mapper>

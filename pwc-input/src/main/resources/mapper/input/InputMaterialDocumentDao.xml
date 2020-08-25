@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pwc.modules.input.dao.InputMaterialDocumentDao">
+        <sql id="MaterialDocumentColumns">
+		a.id AS "id",
+		a.material_document_number AS "materialDocumentNumber",
+		a.material_number AS "materialNumber",
+		a.material_description AS "materialDescription",
+		a.material_count AS "materialCount",
+		a.material_price AS "materialPrice",
+		a.material_total_price AS "materialTotalPrice",
+		a.material_free_price AS "materialFreePrice",
+		a.material_tax_rate AS "materialTaxRate",
+		a.material_dead_date AS "materialDeadDate",
+		a.material_order_number AS "materialOrderNumber",
+		a.material_order_type AS "materialOrderType",
+		a.material_company_code AS "materialCompanyCode",
+		a.material_supplier AS "materialSupplier"
+	    </sql>
+
+        <sql id="MaterialDocumentJoins">
+
+        </sql>
+
+        <select id="get" resultType="com.pwc.modules.input.entity.InputMaterialDocumentEntity">
+            SELECT
+            <include refid="MaterialDocumentColumns"/>
+            FROM input_material_document a
+            <include refid="MaterialDocumentJoins"/>
+            WHERE a.id = #{id}
+        </select>
+
+        <select id="findList" resultType="com.pwc.modules.input.entity.InputMaterialDocumentEntity">
+            SELECT
+            <include refid="MaterialDocumentColumns"/>
+            FROM input_material_document a
+            <include refid="MaterialDocumentJoins"/>
+            <where>
+
+            </where>
+        </select>
+
+        <select id="getList" resultType="com.pwc.modules.input.entity.InputMaterialDocumentEntity">
+            SELECT
+            <include refid="MaterialDocumentColumns"/>
+            FROM input_material_document a
+            <include refid="MaterialDocumentJoins"/>
+            <where>
+                <if test="materialNumber != null and materialNumber != ''">
+                    AND a.material_number = #{materialNumber}
+                </if>
+            </where>
+
+        </select>
+
+        <select id="findAllList" resultType="com.pwc.modules.input.entity.InputMaterialDocumentEntity">
+            SELECT
+            <include refid="MaterialDocumentColumns"/>
+            FROM input_material_document a
+            <include refid="MaterialDocumentJoins"/>
+            <where>
+
+            </where>
+            <choose>
+                <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                    ORDER BY ${page.orderBy}
+                </when>
+                <otherwise>
+                </otherwise>
+            </choose>
+        </select>
+
+        <insert id="save">
+		INSERT INTO input_material_document(
+            id,
+            material_document_number,
+            material_number,
+            material_description,
+            material_count,
+            material_price,
+            material_total_price,
+            material_free_price,
+            material_tax_rate,
+            material_dead_date,
+            material_order_numbero,
+            material_order_type,
+            material_company_code,
+            material_supplier
+		) VALUES (
+		    #{id}
+			#{materialDocumentNumber},
+			#{materialNumber},
+			#{materialDescription},
+			#{materialCount},
+			#{materialPrice},
+			#{materialTotalPrice},
+			#{materialFreePrice},
+			#{materialTaxRate},
+			#{materialDeadDate},
+			#{materialOrderNumbero},
+			#{materialOrderType},
+			#{materialCompanyCode},
+			#{materialSupplier}
+		)
+	</insert>
+    <select id="getListByInvoiceId" resultType="com.pwc.modules.input.entity.InputMaterialDocumentEntity">
+        SELECT
+        <include refid="MaterialDocumentColumns" />
+        FROM input_material_document a
+        WHERE a.invoice_id = #{id}
+    </select>
+
+        <update id="update">
+            UPDATE input_material_document
+            <set>
+                <if test="materialDocumentNumber != null and materialDocumentNumber != ''">
+                    material_document_number = #{materialDocumentNumber},
+                </if>
+                <if test="materialNumber != null and materialNumber != ''">
+                    material_number = #{materialNumber},
+                </if>
+                <if test="materialDescription!= null and materialDescription != ''">
+                    material_description = #{materialDescription},
+                </if>
+                <if test="materialCount != null and materialCount != ''">
+                    material_count = #{materialCount},
+                </if>
+                <if test="materialPrice != null and materialPrice != ''">
+                    material_price = #{materialPrice},
+                </if>
+                <if test="materialTotalPrice != null and materialTotalPrice != ''">
+                    material_total_price = #{materialTotalPrice},
+                </if>
+                <if test="materialFreePrice != null and materialFreePrice != ''">
+                    material_free_price = #{materialFreePrice},
+                </if>
+                <if test="materialTaxRate != null and materialTaxRate != ''">
+                    material_taxRate = #{materialTaxRate},
+                </if>
+                <if test="materialDeadDate != null and materialDeadDate != ''">
+                    material_deadDate = #{materialDeadDate},
+                </if>
+                <if test="materialOrderNumbero!= null and materialOrderNumbero != ''">
+                    material_order_numbero = #{materialOrderNumbero},
+                </if>
+                <if test="materialOrderType != null and materialOrderType != ''">
+                    material_order_type = #{materialOrderType},
+                </if>
+                <if test="materialCompanyCode != null and materialCompanyCode != ''">
+                    material_company_code = #{materialCompanyCode},
+                </if>
+                <if test="materialSupplier != null and materialSupplier != ''">
+                    material_supplier = #{materialSupplier},
+                </if>
+            </set>
+            WHERE id = #{id}
+        </update>
+
+        <update id="delete">
+		DELETE FROM input_material_document
+		WHERE id = #{id}
+	</update>
+</mapper>

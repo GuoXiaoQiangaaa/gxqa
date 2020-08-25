@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputOaExpenseInvoicetypeMappingDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.pwc.modules.input.entity.InputOaExpenseInvoicetypeMappingEntity" id="oaExpenseInvoicetypeMappingMap">
+        <result property="id" column="id"/>
+        <result property="expenseNo" column="expense_no"/>
+        <result property="invoicesAmount" column="invoices_amount"/>
+        <result property="avaliableAmount" column="avaliable_amount"/>
+        <result property="invoiceType" column="invoice_type"/>
+        <result property="invoicesCount" column="invoices_count"/>
+    </resultMap>
+
+
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO input_oa_expense_invoicetype_mapping (
+            id,
+            expense_no,
+            invoices_amount,
+            avaliable_amount,
+            invoice_type,
+            invoices_count
+
+		) VALUES (
+		    #{id}
+			#{expenseNo},
+			#{invoicesAmount},
+			#{avaliableAmount},
+			#{invoiceType},
+			#{invoicesCount}
+
+		)
+	</insert>
+
+
+    <select id="getById" resultType="com.pwc.modules.input.entity.InputOaExpenseInvoicetypeMappingEntity">
+        SELECT
+        FROM input_oa_expense_invoicetype_mapping a
+        WHERE a.id = #{id}
+    </select>
+
+    <delete id="removeByIds"  >
+        DELETE FROM input_oa_expense_invoicetype_mapping
+        WHERE id in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <select id="getOaExpenseInvoicetypeMappingEntitiesByExpenseNo" resultType="com.pwc.modules.input.entity.InputOaExpenseInvoicetypeMappingEntity">
+      SELECT
+        FROM input_oa_expense_invoicetype_mapping a
+        WHERE a.expense_no = #{id}
+    </select>
+
+
+
+
+
+</mapper>

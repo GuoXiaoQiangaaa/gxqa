@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputInvoiceVoDao">
+    <select id="getListById" resultType="com.pwc.modules.input.entity.InputInvoiceVo">
+        (SELECT
+        0 AS "materId",
+        a.id AS "sapId",
+        a.mblnr AS "mblnr",
+        a.zeile AS "zeile",
+        null AS "sphXh",
+        concat('*',a.matkl,'*',a.maktx) AS "maktx",
+        a.wgbez AS "matkl",
+        null AS "sphGgxh",
+        a.meins AS "sphJldw",
+        /*(a.zzkkbhs / a.menge_qm) AS "sphDj",*/
+        cast(a.zzkkbhs/a.menge_qm as decimal(18,8)) AS "sphDj",
+        a.menge_qm AS "sphSl",
+        a.wmwst AS "sphSe",
+        a.zzkkbhs AS "sphJe",
+        a.wrbtr AS "sphHsje",
+        a.ebeln AS "ebeln",
+        concat(SUBSTRING(a.kbetr,3),'%') AS "sphSlv",
+        a.mate AS "status",
+        a.cmzterm AS "cmzterm",
+        a.irzterm AS "irzterm",
+        a.matnr AS "matnr"
+        FROM input_invoice_material_sap a
+        WHERE a.id in
+        <foreach collection="sapIds" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>)
+        UNION
+        (SELECT
+        b.id AS "materId",
+        0 AS "sapId",
+        null AS "mblnr",
+        b.sph_xh AS "zeile",
+        concat(d.invoice_number,'_',b.sph_xh) AS "sphXh",
+        b.sph_spmc AS "maktx",
+        null AS "matkl",
+        b.sph_ggxh AS "sphGgxh",
+        b.sph_jldw AS "sphJldw",
+        b.sph_dj AS "sphDj",
+        b.sph_sl AS "sphSl",
+        b.sph_se AS "sphSe",
+        b.sph_je AS "sphJe",
+        (b.sph_je + b.sph_se) AS "sphHsje",
+        null AS "ebeln",
+        b.sph_slv AS sphSlv,
+        b.status AS "status",
+        null AS "cmzterm",
+        null AS "irzterm",
+        null AS "matnr"
+        FROM input_invoice_material b
+        LEFT JOIN input_invoice d on d.id = b.invoice_id
+        WHERE b.id in
+        <foreach collection="materialIds" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>)
+    </select>
+</mapper>

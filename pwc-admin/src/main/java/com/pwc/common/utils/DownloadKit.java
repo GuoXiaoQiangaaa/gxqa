@@ -1,0 +1,112 @@
+package com.pwc.common.utils;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+
+/**
+ * @ClassName DownloadKit
+ * @Description 文件下载
+ * @author 薏米滴答-西安-ZhangPY
+ */
+public class DownloadKit {
+
+
+    /**
+     * 文件下载
+     * @param response
+     * @param sourcePath
+     * @param fileName
+     * @return
+     */
+    public static boolean download(HttpServletResponse response, String sourcePath, String fileName) throws IOException{
+        File sourceFile = new File(sourcePath);
+        if (!sourceFile.exists()) {
+            throw new RuntimeException("您下载的资源已不存在");
+        }
+        FileInputStream in = null;
+        BufferedInputStream bis = null;
+        OutputStream out = null;
+        try {
+            /** 解决下载文件名乱码 */
+            fileName = URLEncoder.encode(fileName, "UTF-8");
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("application/force-download");
+            response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
+            in = new FileInputStream(sourceFile);
+            bis =new BufferedInputStream(in);
+            out = response.getOutputStream();
+            byte[] buffer = new byte[1024];
+            int readTmp = bis.read(buffer);
+            while (readTmp != -1) {
+                out.write(buffer, 0, readTmp);
+                readTmp = bis.read(buffer);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(fileName + " 下载出错,若有问题请与管理员联系");
+        } finally {
+            out.close();
+            in.close();
+            bis.close();
+        }
+        return true;
+    }
+
+    /**
+     * Java通过URL下载网络文件，获取文件流并修改文件名
+     * @param urlM
+     * @param name
+     * @param request
+     * @param response
+     * @throws Exception
+     */
+    public static void downloadNetFile(String urlM, String name, HttpServletRequest request , HttpServletResponse response) throws Exception{
+
+        BufferedInputStream bis = null;
+        BufferedOutputStream bos = null;
+
+        /** 如果不存在乱码的情况可以忽略，由于请求参数文件名为中文，到后台会乱码，考虑客户端浏览器默认编码 */
+        String userAgent = request.getHeader("User-Agent");
+        if (userAgent.contains("MSIE") || userAgent.contains("Trident")) {
+            name = URLEncoder.encode(name, "UTF-8");
+        } else {
+            /** 非IE浏览器的处理 */
+            name = new String(name.getBytes("UTF-8"), "ISO-8859-1");
+        }
+        /** 响应二进制流 */
+        response.setContentType("application/octet-stream");
+        /** 清除response中的缓存 */
+        response.reset();
+        /** 根据网络文件地址创建URL */
+        URL url = new URL(urlM);
+        /** 获取此路径的连接 */
+        URLConnection conn = url.openConnection();
+        /** 获取文件大小 */
+        Long fileLength = conn.getContentLengthLong();
+        /** 设置reponse响应头，真实文件名重命名，就是在这里设置，设置编码 */
+        response.setHeader("Content-Disposition",
+                "attachment; filename=" + name);
+        response.setHeader("Content-Length", String.valueOf(fileLength));
+        /** 构造读取流 */
+        bis = new BufferedInputStream(conn.getInputStream());
+        /** 构造输出流 */
+        bos = new BufferedOutputStream(response.getOutputStream());
+        byte[] buff = new byte[1024];
+        int bytesRead;
+        /** 每次读取缓存大小的流，写到输出流 */
+        while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+            bos.write(buff, 0, bytesRead);
+        }
+        /** 将所有的读取的流返回给客户端 */
+        response.flushBuffer();
+
+        bis.close();
+
+        bos.close();
+    }
+}

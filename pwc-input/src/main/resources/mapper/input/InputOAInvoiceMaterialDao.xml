@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputOAInvoiceMaterialDao">
+    <sql id="invoiceColumns">
+        a.id AS "id",
+        a.invoice_id AS "invoiceId",
+        a.sph_xh AS "sphXh",
+        a.sph_spmc AS "sphSpmc",
+        a.sph_ggxh AS "sphGgxh",
+        a.sph_jldw AS "sphJldw",
+        a.sph_sl AS "sphSl",
+        a.sph_dj AS "sphDj",
+        a.sph_je AS "sphJe",
+        a.sph_slv AS "sphSlv",
+        a.sph_se AS "sphSe"
+    </sql>
+
+    <select id="getByInvoiceId" resultType="com.pwc.modules.input.entity.InputOAInvoiceMaterial">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_oa_invoice_material a
+        WHERE a.invoice_id = #{invoiceId}
+    </select>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO input_oa_invoice_material (
+          id,
+          invoice_id,
+          sph_xh,
+          sph_spmc,
+          sph_ggxh,
+          sph_jldw,
+          sph_sl,
+          sph_dj,
+          sph_je,
+          sph_slv,
+          sph_se
+        ) VALUES (
+          #{id},
+          #{invoiceId},
+          #{sphXh},
+          #{sphSpmc},
+          #{sphGgxh},
+          #{sphJldw},
+          #{sphSl},
+          #{sphDj},
+          #{sphJe},
+          #{sphSlv},
+          #{sphSe}
+        )
+    </insert>
+
+    <delete id="deleteByInvoiceId">
+        DELETE FROM input_oa_invoice_material
+        WHERE invoice_id = #{id}
+    </delete>
+</mapper>

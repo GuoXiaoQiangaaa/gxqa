@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pwc.modules.input.dao.InputInvoiceBatchDao">
+
+    <sql id="invoiceColumns">
+      a.id as "id",
+      a.invoice_batch_number as "invoiceBatchNumber",
+      a.invoice_batch_image as "invoiceBatchImage",
+      a.invoice_batch_from as "invoiceBatchFrom",
+      a.create_time as "createTime",
+      a.update_time as "updateTime",
+      a.belnr as "belnr",
+      a.express_number AS "expressNumber",
+      a.upload_account as "uploadAccount",
+      a.entry_date AS "entryDate",
+      a.company_id AS "companyId",
+      a.express_number AS "expressNumber",
+      a.invoice_batch_status as "invoiceBatchStatus",
+      a.entry_msg AS "entryMsg",
+      a.error_info AS "errorInfo",
+      a.check_white_black_status AS "checkWhiteBlackStatus",
+      a.entry_success_code AS "entrySuccessCode",
+      a.update_by AS "updateBy",
+      a.create_by as "createBy"
+	</sql>
+
+    <sql id="invoiceJoins">
+
+    </sql>
+
+    <select id="get" resultType="com.pwc.modules.input.entity.InputInvoiceBatchEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice_batch a
+        <include refid="invoiceJoins"/>
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="findList" resultType="com.pwc.modules.input.entity.InputInvoiceBatchEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice_batch a
+        <include refid="invoiceJoins"/>
+        <where>
+            <if test="invoiceBatchNumber != null and invoiceBatchNumber != ''">
+                AND a.invoice_batch_number = #{invoiceBatchNumber}
+            </if>
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="getList" resultType="com.pwc.modules.input.entity.InputInvoiceBatchEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice_batch a
+        order by id desc
+    </select>
+
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(distinct a.id)
+        FROM input_invoice_batch a left join invoice i on i.invoice_batch_number = a.id
+        <where>
+            a.invoice_batch_status != "4"
+            <if test="invoicePurchaserCompany != null and invoicePurchaserCompany != ''">
+                i.invoice_purchaser_company like concat('%',#{invoicePurchaserCompany},'%')
+            </if>
+            <if test="invoiceSellCompany != null and invoiceSellCompany != ''">
+                AND i.invoice_sell_company like concat('%',#{invoiceSellCompany},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="getListBatch" resultType="com.pwc.modules.input.entity.InputInvoiceBatchEntity">
+        SELECT
+        a.id as "id",
+      CONCAT(STR_TO_DATE(left(a.invoice_batch_number,8),"%Y%m%d"),"批次") as "invoiceBatchNumber",
+      a.invoice_batch_image as "invoiceBatchImage",
+      a.invoice_batch_from as "invoiceBatchFrom",
+      a.create_time as "createTime",
+      a.update_time as "updateTime",
+      a.invoice_batch_status as "invoiceBatchStatus"
+        FROM input_invoice_batch a
+        order by id desc
+    </select>
+
+
+    <select id="getLastOne" resultType="com.pwc.modules.input.entity.InputInvoiceBatchEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice_batch a
+        order by id desc limit 0,1
+    </select>
+
+    <select id="findAllList" resultType="com.pwc.modules.input.entity.InputInvoiceBatchEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice_batch a
+        <include refid="invoiceJoins"/>
+        <where>
+
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+    </select>
+
+    <insert id="save" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO input_invoice_batch(
+		  create_by,
+          invoice_batch_number,
+          invoice_batch_image,
+          invoice_batch_from,
+          create_time,
+          update_time,
+          upload_account,
+          invoice_batch_status
+		) VALUES (
+		  #{createBy},
+          #{invoiceBatchNumber},
+          #{invoiceBatchImage},
+          #{invoiceBatchFrom},
+          #{createTime},
+          #{updateTime},
+          #{uploadAccount},
+          #{invoiceBatchStatus}
+		)
+	</insert>
+
+    <update id="update">
+        UPDATE input_invoice_batch
+        <set>
+            <if test="updateBy != null and updateBy != ''">
+                update_by = #{updateBy},
+            </if>
+            <if test="belnr != null">
+                belnr = #{belnr},
+            </if>
+            <if test="entryDate != null">
+                entry_date = #{entryDate},
+            </if>
+            <if test="invoiceBatchFrom != null and invoiceBatchFrom != ''">
+                invoice_batch_from = #{invoiceBatchFrom},
+            </if>
+            <if test="expressNumber != null">
+                express_number = #{expressNumber},
+            </if>
+            <if test="invoiceBatchStatus != null and invoiceBatchStatus != ''">
+                invoice_batch_status = #{invoiceBatchStatus},
+            </if>
+            <if test="checkWhiteBlackStatus != null">
+                check_white_black_status = #{checkWhiteBlackStatus},
+            </if>
+            <if test="companyId != null">
+                company_id = #{companyId},
+            </if>
+            <if test="threeErrorDescription != null">
+                error_info = #{threeErrorDescription},
+            </if>
+            <if test="entrySuccessCode != null and entrySuccessCode != ''">
+                entry_success_code = #{entrySuccessCode},
+            </if>
+            <if test="invoiceBatchImage != null and invoiceBatchImage != ''">
+                invoice_batch_image = #{invoiceBatchImage},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="delete">
+		DELETE FROM input_invoice_batch
+		WHERE id = #{id}
+	</update>
+
+    <update id="deleteByInvoiceBatchNumber">
+		DELETE FROM input_invoice_batch
+		WHERE invoice_batch_number = #{invoiceBatchNumber}
+	</update>
+
+    <update id="deleteBatch">
+		DELETE FROM input_invoice_batch
+		WHERE id = #{id}
+	</update>
+
+    <select id="getByInvoiceBatchId" resultType="com.pwc.modules.input.entity.InputInvoiceBatchEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice_batch a
+        LEFT join invoice i on i.invoice_batch_number=a.id
+        <where>
+            a.id in
+            <foreach collection="invoiceIds" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+    </select>
+
+    <select id="getListById" resultType="com.pwc.modules.input.entity.InputInvoiceBatchEntity">
+        SELECT
+        <include refid="invoiceColumns"/>,
+        i.invoice_purchaser_company as invoicePurchaserCompany,
+        i.invoice_purchaser_paragraph as invoicePurchaserParagraph,
+        i.invoice_sell_company as invoiceSellCompany,
+        i.invoice_status AS invoiceStatus,
+        i.invoice_entry_message AS invoiceEntryMessage,
+        i.invoice_sell_paragraph as invoiceSellParagraph,
+        a.create_by AS "createBy"
+        FROM input_invoice_batch a left join input_invoice i on i.invoice_batch_number = a.id
+        WHERE a.id IN
+        <foreach collection="array" index="index" item="item"  open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        GROUP BY a.id
+        ORDER BY a.id DESC
+    </select>
+
+    <select id="getListByShow" resultType="int">
+        SELECT count(DISTINCT(a.id))
+        FROM input_invoice_batch a
+        left join input_invoice i on i.invoice_batch_number = a.id
+        <where>
+            <if test="companyIds != null and companyIds != ''">
+                AND (a.company_id in
+                <foreach collection="companyIds" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+                OR a.company_id is null)
+            </if>
+        </where>
+        AND i.invoice_return != '1'
+        AND i.invoice_delete != '1'
+    </select>
+
+    <select id="findListForThree" resultType="com.pwc.modules.input.entity.InputInvoiceBatchEntity">
+        SELECT
+        <include refid="invoiceColumns"/>,
+        i.invoice_purchaser_company as invoicePurchaserCompany,
+        i.invoice_purchaser_paragraph as invoicePurchaserParagraph,
+        i.invoice_sell_company as invoiceSellCompany,
+        i.invoice_status AS invoiceStatus,
+        i.invoice_entry_message AS invoiceEntryMessage,
+        i.invoice_sell_paragraph as invoiceSellParagraph,
+        a.create_by AS "createBy"
+        FROM input_invoice_batch a left join input_invoice i on i.invoice_batch_number = a.id
+        <where>
+            1=1
+            <if test="updateBy != null and updateBy != ''">
+                AND a.update_by = #{updateBy}
+            </if>
+            <if test="createTime != null and createTime != ''">
+                AND a.create_time &gt;= DATE_FORMAT(#{createTime},'%Y-%m-%d %H:%i:%s')
+            </if>
+            <if test="createTime2 != null and createTime2 != ''">
+                and a.create_time &lt;= DATE_FORMAT(#{createTime2},'%Y-%m-%d %H:%i:%s')
+            </if>
+            <if test="createBy != null and createBy != ''">
+                and a.create_by =#{createBy}
+            </if>
+            <if test="invoicePurchaserCompany != null and invoicePurchaserCompany != ''">
+                and i.invoice_purchaser_company like concat('%',#{invoicePurchaserCompany},'%')
+            </if>
+            <if test="invoiceSellCompany != null and invoiceSellCompany != ''">
+                AND i.invoice_sell_company like concat('%',#{invoiceSellCompany},'%')
+            </if>
+            <if test="statusSql != null and statusSql != ''">
+                and ${statusSql}
+            </if>
+            <if test="array != null and array != ''">
+                AND i.invoice_batch_number in
+                <foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="invoiceCode != null and invoiceCode != ''">
+                and i.invoice_code =#{invoiceCode}
+            </if>
+            <if test="invoiceNumber != null and invoiceNumber != ''">
+                and i.invoice_number =#{invoiceNumber}
+            </if>
+            <if test="invoiceEntity != null and invoiceEntity != ''">
+                and i.invoice_entity =#{invoiceEntity}
+            </if>
+            <if test="invoiceType != null and invoiceType != ''">
+                and i.invoice_type =#{invoiceType}
+            </if>
+            <if test="invoiceCreateDateBegin != null and invoiceCreateDateBegin != ''">
+                and i.invoice_create_date &gt;= DATE_FORMAT(#{invoiceCreateDateBegin},'%Y-%m-%d %H:%i:%s')
+            </if>
+            <if test="invoiceCreateDateEnd != null and invoiceCreateDateEnd != ''">
+                and i.invoice_create_date &lt;= DATE_FORMAT(#{invoiceCreateDateEnd},'%Y-%m-%d %H:%i:%s')
+            </if>
+            <if test="entryDateBegin != null and entryDateBegin != ''">
+                and i.entry_date &gt;= DATE_FORMAT(#{entryDateBegin},'%Y-%m-%d %H:%i:%s')
+            </if>
+            <if test="entryDateEnd != null and entryDateEnd != ''">
+                and i.entry_date &lt;= DATE_FORMAT(#{entryDateEnd},'%Y-%m-%d %H:%i:%s')
+            </if>
+            <if test="minAmount != null and minAmount != ''">
+                and i.invoice_total_price &gt; #{minAmount}
+            </if>
+            <if test="maxAmount != null and maxAmount != ''">
+                and i.invoice_total_price &lt; #{maxAmount}
+            </if>
+            <if test="sqlFilter != null and sqlFilter != ''">
+                AND ${sqlFilter}
+            </if>
+        </where>
+        GROUP BY a.id
+        ORDER BY a.invoice_batch_number desc
+        limit #{offset, jdbcType=INTEGER},#{limit, jdbcType=INTEGER}
+    </select>
+
+    <select id="findListForThree2" resultType="int">
+        SELECT
+        count(DISTINCT(a.id))
+        FROM input_invoice_batch a left join input_invoice i on i.invoice_batch_number = a.id
+        <where>
+            1=1
+            <if test="updateBy != null and updateBy != ''">
+                AND a.update_by = #{updateBy}
+            </if>
+            <if test="createTime != null and createTime != ''">
+                AND a.create_time &gt;= DATE_FORMAT(#{createTime},'%Y-%m-%d %H:%i:%s')
+            </if>
+            <if test="createTime2 != null and createTime2 != ''">
+                and a.create_time &lt;= DATE_FORMAT(#{createTime2},'%Y-%m-%d %H:%i:%s')
+            </if>
+            <if test="createBy != null and createBy != ''">
+                and a.create_by = #{createBy}
+            </if>
+            <if test="invoicePurchaserCompany != null and invoicePurchaserCompany != ''">
+                and i.invoice_purchaser_company like concat('%',#{invoicePurchaserCompany},'%')
+            </if>
+            <if test="invoiceSellCompany != null and invoiceSellCompany != ''">
+                AND i.invoice_sell_company like concat('%',#{invoiceSellCompany},'%')
+            </if>
+            <if test="statusSql != null and statusSql != ''">
+                and ${statusSql}
+            </if>
+            <if test="array != null and array != ''">
+                AND i.invoice_batch_number in
+                <foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="invoiceCode != null and invoiceCode != ''">
+                and i.invoice_code =#{invoiceCode}
+            </if>
+            <if test="invoiceNumber != null and invoiceNumber != ''">
+                and i.invoice_number =#{invoiceNumber}
+            </if>
+            <if test="invoiceEntity != null and invoiceEntity != ''">
+                and i.invoice_entity =#{invoiceEntity}
+            </if>
+            <if test="invoiceType != null and invoiceType != ''">
+                and i.invoice_type =#{invoiceType}
+            </if>
+            <if test="invoiceCreateDateBegin != null and invoiceCreateDateBegin != ''">
+                and i.invoice_create_date &gt;= DATE_FORMAT(#{invoiceCreateDateBegin},'%Y-%m-%d %H:%i:%s')
+            </if>
+            <if test="invoiceCreateDateEnd != null and invoiceCreateDateEnd != ''">
+                and i.invoice_create_date &lt;= DATE_FORMAT(#{invoiceCreateDateEnd},'%Y-%m-%d %H:%i:%s')
+            </if>
+            <if test="entryDateBegin != null and entryDateBegin != ''">
+                and i.entry_date &gt;= DATE_FORMAT(#{entryDateBegin},'%Y-%m-%d %H:%i:%s')
+            </if>
+            <if test="entryDateEnd != null and entryDateEnd != ''">
+                and i.entry_date &lt;= DATE_FORMAT(#{entryDateEnd},'%Y-%m-%d %H:%i:%s')
+            </if>
+            <if test="minAmount != null and minAmount != ''">
+                and i.invoice_total_price &gt; #{minAmount}
+            </if>
+            <if test="maxAmount != null and maxAmount != ''">
+                and i.invoice_total_price &lt; #{maxAmount}
+            </if>
+            <if test="sqlFilter != null and sqlFilter != ''">
+                AND ${sqlFilter}
+            </if>
+        </where>
+    </select>
+
+    <select id="info" resultType="com.pwc.modules.input.entity.InputInvoiceBatchEntity">
+        SELECT
+        <include refid="invoiceColumns"/>,
+        i.invoice_purchaser_company as invoicePurchaserCompany,
+        i.invoice_purchaser_paragraph as invoicePurchaserParagraph,
+        i.invoice_sell_company as invoiceSellCompany,
+        i.invoice_sell_paragraph as invoiceSellParagraph
+        FROM input_invoice_batch a left join input_invoice i on i.invoice_batch_number = a.id
+        where a.id=#{id}
+    </select>
+
+    <select id="getBatchNumbersById" resultType="com.pwc.modules.input.entity.InputInvoiceBatchEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice_batch a
+        WHERE a.id IN
+        <foreach collection="array" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="getBatchNumber" resultType="com.pwc.modules.input.entity.InputInvoiceBatchEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice_batch a
+        WHERE a.id = #{invoiceBatchNumber}
+    </select>
+
+    <select id="getMigrationList" resultType="com.pwc.modules.input.entity.InputInvoiceBatchEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice_batch a
+    </select>
+</mapper>

@@ -1,0 +1,157 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<groupId>com.pwc</groupId>
+		<artifactId>filing-platform</artifactId>
+		<version>4.0.0</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>pwc-admin</artifactId>
+	<packaging>jar</packaging>
+	<description>pwc-admin</description>
+
+	<properties>
+		<quartz.version>2.3.0</quartz.version>
+
+		<aliyun.oss.version>2.5.0</aliyun.oss.version>
+		<qcloud.cos.version>4.4</qcloud.cos.version>
+		<swagger.version>2.7.0</swagger.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.pwc</groupId>
+			<artifactId>pwc-authority</artifactId>
+			<version>4.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.pwc</groupId>
+			<artifactId>pwc-common</artifactId>
+			<version>4.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.pwc</groupId>
+			<artifactId>pwc-filing</artifactId>
+			<version>4.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.pwc</groupId>
+			<artifactId>pwc-input</artifactId>
+			<version>4.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.pwc</groupId>
+			<artifactId>pwc-openAPI</artifactId>
+			<version>4.0.0</version>
+		</dependency>
+		<!-- 集群环境，需要打开注释 -->
+		<!--<dependency>-->
+			<!--<groupId>org.springframework.session</groupId>-->
+			<!--<artifactId>spring-session-data-redis</artifactId>-->
+		<!--</dependency>-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-freemarker</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz</artifactId>
+			<version>${quartz.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.mchange</groupId>
+					<artifactId>c3p0</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.zaxxer</groupId>
+					<artifactId>HikariCP-java6</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<version>${swagger.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+			<version>${swagger.version}</version>
+		</dependency>
+
+
+        <dependency>
+            <groupId>com.pwc</groupId>
+            <artifactId>pwc-dynamic-datasource</artifactId>
+            <version>4.0.0</version>
+            <scope>test</scope>
+        </dependency>
+
+
+    </dependencies>
+
+	<build>
+		<finalName>${project.artifactId}</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<executable>true</executable>
+					<includeSystemScope>true</includeSystemScope>
+				</configuration>
+			</plugin>
+			<!-- 跳过单元测试 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<skipTests>true</skipTests>
+				</configuration>
+			</plugin>
+			<!-- migration -->
+<!--			<plugin>-->
+<!--				<groupId>org.mybatis.maven</groupId>-->
+<!--				<artifactId>migrations-maven-plugin</artifactId>-->
+<!--				<version>1.1.2</version>-->
+<!--				<configuration>-->
+<!--					<repository>${basedir}/src/main/resources/migrate</repository>-->
+<!--				</configuration>-->
+<!--				<executions>-->
+<!--					<execution>-->
+<!--						<id>migration-package</id>-->
+<!--						<phase>package</phase>-->
+<!--						<goals>-->
+<!--							<goal>pending</goal>-->
+<!--						</goals>-->
+<!--					</execution>-->
+<!--				</executions>-->
+<!--				<dependencies>-->
+<!--					<dependency>-->
+<!--						<groupId>mysql</groupId>-->
+<!--						<artifactId>mysql-connector-java</artifactId>-->
+<!--						<version>${mysql.version}</version>-->
+<!--					</dependency>-->
+<!--				</dependencies>-->
+<!--			</plugin>-->
+<!--			<plugin>-->
+<!--				<groupId>com.spotify</groupId>-->
+<!--				<artifactId>docker-maven-plugin</artifactId>-->
+<!--				<version>0.4.14</version>-->
+<!--				<configuration>-->
+<!--					<imageName>/admin</imageName>-->
+<!--					<dockerDirectory>${project.basedir}</dockerDirectory>-->
+<!--					<resources>-->
+<!--						<resource>-->
+<!--							<targetPath>/</targetPath>-->
+<!--							<directory>${project.build.directory}</directory>-->
+<!--							<include>${project.build.finalName}.jar</include>-->
+<!--						</resource>-->
+<!--					</resources>-->
+<!--				</configuration>-->
+<!--				&lt;!&ndash; 运行命令 mvn clean package docker:build 打包并生成docker镜像 &ndash;&gt;-->
+<!--			</plugin>-->
+		</plugins>
+	</build>
+</project>

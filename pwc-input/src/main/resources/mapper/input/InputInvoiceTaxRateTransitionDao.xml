@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputInvoiceTaxRateTransitionDao">
+    <sql id="invoiceColumns">
+        a.id AS "id",
+        a.tax_code AS "taxCode",
+        a.tax_rate AS "taxRate",
+        a.is_delete AS "isDelete"
+    </sql>
+
+    <update id="updateByDelete">
+        UPDATE input_invoice_taxrate_transition
+        <set>
+            is_delete = #{isDelete},
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <insert id="save">
+        INSERT INTO input_invoice_taxrate_transition (
+          tax_code,
+          tax_rate,
+          is_delete
+        ) VALUES (
+          #{taxCode},
+          #{taxRate},
+          #{isDelete}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE input_invoice_taxrate_transition
+        <set>
+            <if test="taxCode != null and taxCode != ''">
+                tax_code = #{taxCode},
+            </if>
+            <if test="taxRate != null and taxRate != ''">
+                tax_rate = #{taxRate},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="get" resultType="com.pwc.modules.input.entity.InputInvoiceTaxRateTransition">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice_taxrate_transition a
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="getByTaxRate" resultType="com.pwc.modules.input.entity.InputInvoiceTaxRateTransition">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice_taxrate_transition a
+        WHERE a.tax_rate = #{taxRate}
+    </select>
+</mapper>

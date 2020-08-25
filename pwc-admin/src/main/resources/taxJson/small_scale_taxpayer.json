@@ -1,0 +1,188 @@
+{
+  "taxParam": {
+    "year": 2018,
+    "beginMonth": 6,
+    "endMonth": 6,
+    "period": 6,
+    "skssqq": "2018-02-01",
+    "skssqz": "2018-02-28",
+    "yzpzzlDm": "BDA0610611"
+  },
+  "xgmData": {
+    "zzssyyxgmnsr": {
+      "zzsxgmGrid": {
+        "zzsxgmGridlb": [
+          {
+            "ewblxh": "1",
+            "yzzzsbhsxse": "0",
+            "swjgdkdzzszyfpbhsxse": "0",
+            "skqjkjdptfpbhsxse": "0",
+            "xsczbdcbhsxse": "0",
+            "swjgdkdzzszyfpbhsxse1": "0",
+            "skqjkjdptfpbhsxse2": "0",
+            "xssygdysgdzcbhsxse": "0",
+            "skqjkjdptfpbhsxse1": "0",
+            "msxse": "0",
+            "xwqymsxse": "0",
+            "wdqzdxse": "0",
+            "qtmsxse": "0",
+            "ckmsxse": "0",
+            "skqjkjdptfpxse1": "0",
+            "hdxse": "0",
+            "bqynse": "0",
+            "hdynse": "0",
+            "bqynsejze": "0",
+            "bqmse": "0",
+            "xwqymse": "0",
+            "wdqzdmse": "0",
+            "ynsehj": "0",
+            "bqyjse1": "0",
+            "bqybtse": "0",
+            "bdcxse": "0"
+          },
+          {
+            "ewblxh": "2",
+            "yzzzsbhsxse": "0",
+            "swjgdkdzzszyfpbhsxse": "0",
+            "skqjkjdptfpbhsxse": "0",
+            "xsczbdcbhsxse": "0",
+            "swjgdkdzzszyfpbhsxse1": "0",
+            "skqjkjdptfpbhsxse2": "0",
+            "xssygdysgdzcbhsxse": "0",
+            "skqjkjdptfpbhsxse1": "0",
+            "msxse": "0",
+            "xwqymsxse": "0",
+            "wdqzdxse": "0",
+            "qtmsxse": "0",
+            "ckmsxse": "0",
+            "skqjkjdptfpxse1": "0",
+            "hdxse": "0",
+            "bqynse": "0",
+            "hdynse": "0",
+            "bqynsejze": "0",
+            "bqmse": "0",
+            "xwqymse": "0",
+            "wdqzdmse": "0",
+            "ynsehj": "0",
+            "bqyjse1": "0",
+            "bqybtse": "0",
+            "bdcxse": "0"
+          }
+        ]
+      },
+      "slxxForm": {
+        "bsrxm": "",
+        "cwfzrxm": "",
+        "fddbrxm": "",
+        "bsrlxdh": "",
+        "dlrmc": "",
+        "jbrxm": "",
+        "jbrlxdh": "",
+        "slrxm": "",
+        "slrq": "",
+        "slswjgDm": "",
+        "slswjgMc": ""
+      }
+    },
+    "zzsxgmflzl": {
+      "flzlForm": {
+        "qcye": "0",
+        "bqfse": "0",
+        "bqkce": "0",
+        "qmye": "0",
+        "ysfwxsqbhssr": "0",
+        "ysfwxsbqkce": "0",
+        "ysfwxshsxse": "0",
+        "ysfwxsbhsxse": "0",
+        "qcye5": "0",
+        "bqfse5": "0",
+        "bqkce5": "0",
+        "qmye5": "0",
+        "ysfwxsqbhssr5": "0",
+        "ysfwxsbqkce5": "0",
+        "ysfwxshsxse5": "0",
+        "ysfwxsbhsxse5": "0"
+      }
+    },
+    "zzsjmssbmxb": {
+      "zzsjmssbmxbjsxmGrid": {
+        "zzsjmssbmxbjsxmGridlbVO": [
+          {
+            "ewbhxh": "1",
+            "hmc": "合计",
+            "swsxDm": "",
+            "qcye": "0",
+            "bqfse": "0",
+            "bqydjse": "0",
+            "bqsjdjse": "0",
+            "qmye": "0"
+          }
+        ]
+      },
+      "zzsjmssbmxbmsxmGrid": {
+        "zzsjmssbmxbmsxmGridlbVO": [
+          {
+            "ewbhxh": "1",
+            "hmc": "合计",
+            "swsxDm": "",
+            "mzzzsxmxse": "0",
+            "bqsjkcje": "0",
+            "kchmsxse": "0",
+            "msxsedyjxse": "0",
+            "mse": "0"
+          },
+          {
+            "ewbhxh": "2",
+            "hmc": "出口免税",
+            "swsxDm": "",
+            "mzzzsxmxse": "0",
+            "bqsjkcje": "0",
+            "kchmsxse": "0",
+            "msxsedyjxse": "0",
+            "mse": "0"
+          },
+          {
+            "ewbhxh": "3",
+            "hmc": "其中：跨境服务",
+            "swsxDm": "",
+            "mzzzsxmxse": "0",
+            "bqsjkcje": "0",
+            "kchmsxse": "0",
+            "msxsedyjxse": "0",
+            "mse": "0"
+          },
+          {
+            "ewbhxh": "4",
+            "hmc": "",
+            "swsxDm": "",
+            "mzzzsxmxse": "0",
+            "bqsjkcje": "0",
+            "kchmsxse": "0",
+            "msxsedyjxse": "0",
+            "mse": "0"
+          }
+        ]
+      }
+    },
+    "zzsxgmxsbdcqkb": {
+      "sdrq": "",
+      "jsr": "",
+      "xsbdcbhsxse": "0",
+      "swjgdkdzzszyfpbhsxse": "0"
+    },
+    "zzsxgmkcxmqd": {
+      "kcxmqdmx": [
+        {
+          "pzzl": "1",
+          "kpfnsrsbh": "",
+          "kpfdwmc": "",
+          "fpdm": "",
+          "fphm": "",
+          "fwxmmc": "",
+          "yxkcxmje": "0",
+          "kjrq": ""
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputOASendMessageDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+
+
+
+    <sql id="OASendMessageColumns">
+		a.id AS "id",
+		a.REQUEST_ID as "requestId",
+		a.BARCODE as "BARCODE",
+		a.SHIFOUDZFP as "SHIFOUDZFP",
+		a.DOCIDLIST as "DOCIDLIST",
+		a.RETURN_VALUE as "RETURNVALUE",
+		a.RETURN_MSG as "RETURNMSG",
+		a.type as "type",
+		a.create_time as "createTime",
+		a.WEBSITE as "WEBSITE",
+		a.POST_FLAG as "postFlag",
+		a.RETURN_FLAG as "returnFlag",
+		a.is_processing as "isProcessing",
+		a.POST_FLAG AS "postFlag",
+		a.POST_DATE AS "postDate",
+		a.is_error as "isError",
+		a.is_pass_entry as "isPassEntry",
+		a.is_refund as "isRefund",
+		a.error_info as "errorInfo",
+		a.url_content as "urlContent"
+	</sql>
+
+	<insert id="save" useGeneratedKeys="true" keyProperty="id" parameterType="com.pwc.modules.input.entity.InputOASendMessage">
+		INSERT INTO input_oa_send_message(
+            id,
+            REQUEST_ID,
+            BARCODE,
+            SHIFOUDZFP,
+            DOCIDLIST,
+            RETURN_VALUE,
+			RETURN_MSG,
+            type,
+            create_time,
+            is_processing,
+            is_error,
+            is_pass_entry,
+            is_refund,
+            error_info,
+            url_content
+		) VALUES (
+		    #{id},
+			#{requestId},
+			#{BARCODE},
+			#{SHIFOUDZFP},
+			#{DOCIDLIST},
+			#{returnValue},
+			#{returnMsg},
+			#{type},
+			#{createTime},
+			#{isProcessing},
+			#{isError},
+			"0",
+			"0",
+			#{errorInfo},
+			#{urlContent}
+		)
+	</insert>
+    <insert id="insertLog">
+		insert into input_log(
+		interface_name,
+		in_param,
+		out_param,
+		time,
+		request_id
+		)values (
+		#{interfaceName},
+		#{inParam},
+		#{outParam},
+		#{time},
+		#{requestId}
+		)
+	</insert>
+
+    <select id="getByRequestId" resultType="com.pwc.modules.input.entity.InputOASendMessage">
+		SELECT
+		<include refid="OASendMessageColumns"/>
+		FROM input_oa_send_message a
+		where a.request_id =#{requestId}
+	</select>
+
+	<select id="getCountByRequestId" resultType="java.lang.Integer">
+		SELECT
+		count(*)
+		FROM input_oa_send_message a
+		where a.request_id =#{requestId}
+	</select>
+
+	<select id="getCountByBarCode" resultType="java.lang.Integer">
+		SELECT
+		count(*)
+		FROM input_oa_send_message a
+		where a.barcode =#{barcode}
+	</select>
+
+	<update id="update">
+		UPDATE input_oa_send_message
+		<set>
+			<if test="requestId != null and requestId != ''">
+				REQUEST_ID = #{requestId},
+			</if>
+			<if test="BARCODE != null and BARCODE != ''">
+				BARCODE = #{BARCODE},
+			</if>
+			<if test="SHIFOUDZFP != null">
+				SHIFOUDZFP = #{SHIFOUDZFP},
+			</if>
+			<if test="DOCIDLIST != null and DOCIDLIST != ''">
+				DOCIDLIST = #{DOCIDLIST},
+			</if>
+			<if test="returnValue != null">
+				RETURN_VALUE = #{returnValue},
+			</if>
+			<if test="returnMsg != null and returnMsg != ''">
+				RETURN_MSG = #{returnMsg},
+			</if>
+			<if test="type != null and type != ''">
+				type = #{type},
+			</if>
+			<if test="WEBSITE != null and WEBSITE != ''">
+				WEBSITE = #{WEBSITE},
+			</if>
+			<if test="postFlag != null and postFlag != ''">
+				POST_FLAG = #{postFlag},
+			</if>
+			<if test="returnFlag != null and returnFlag != ''">
+				RETURN_FLAG = #{returnFlag},
+			</if>
+			<if test="isProcessing != null and isProcessing != ''">
+				is_processing = #{isProcessing},
+			</if>
+			<if test="postDate != null and postDate != ''">
+				POST_DATE = #{postDate},
+			</if>
+			<if test="isError != null and isError != ''">
+				is_error = #{isError},
+			</if>
+			<if test="isPassEntry != null and isPassEntry != ''">
+				is_pass_entry = #{isPassEntry},
+			</if>
+			<if test="isRefund != null and isRefund != ''">
+				is_refund = #{isRefund},
+			</if>
+			<if test="errorInfo != null and errorInfo != ''">
+				error_info = #{errorInfo},
+			</if>
+			<if test="urlContent != null and urlContent != ''">
+				url_content = #{urlContent}
+			</if>
+		</set>
+		WHERE
+		id = #{id}
+	</update>
+
+	<select id="getOASendMessageByBarCode" resultType="com.pwc.modules.input.entity.InputOASendMessage">
+		SELECT
+		<include refid="OASendMessageColumns"/>
+		FROM input_oa_send_message a
+		WHERE a.BARCODE = #{BARCODE}
+	</select>
+
+
+	<select id="getOASendMessageByRequestId" resultType="com.pwc.modules.input.entity.InputOASendMessage">
+		SELECT
+		<include refid="OASendMessageColumns"/>
+		FROM input_oa_send_message a
+		WHERE a.REQUEST_ID = #{requestId}
+		limit 0,1
+	</select>
+
+	<select id="getOASendMessageList" resultType="com.pwc.modules.input.entity.InputOASendMessage">
+		select <include refid="OASendMessageColumns"/>
+		from input_oa_send_message a
+		where a.is_refund!= "1" and a.is_pass_entry!="1" and  a.is_processing="1" and a.is_error="1" and a.create_time &gt;= DATE_FORMAT(DATE_SUB(NOW(),INTERVAL 3 DAY),'%Y-%m-%d %H:%i:%s') and a.create_time &lt;= DATE_FORMAT(NOW(),'%Y-%m-%d %H:%i:%s')
+	</select>
+
+	<!--<select id="getOASendMessageList" resultType="InputOASendMessage">-->
+		<!--SELECT-->
+		<!--<include refid="OASendMessageColumns"/>-->
+<!--FROM-->
+	<!--input_oa_send_message a-->
+<!--WHERE-->
+	<!--a.is_refund != '1'-->
+<!--AND a.is_pass_entry != '1'-->
+<!--AND a.is_processing = '1'-->
+<!--AND a.is_error = '1'-->
+<!--AND a.create_time BETWEEN '2019-06-19' and '2019-08-19'-->
+	<!--</select>-->
+
+	<select id="getByCondition" resultType="com.pwc.modules.input.entity.InputOASendMessage">
+		SELECT
+		<include refid="OASendMessageColumns"/>
+		FROM input_oa_send_message a
+		WHERE a.create_time between '2019-09-01' and '2019-09-03'
+	</select>
+</mapper>

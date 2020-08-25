@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pwc.modules.input.dao.InputSapInvoiceMappingIdDao">
+
+    <sql id="SapInvoiceMappingIdColumns">
+		a.id AS "id",
+		a.sap_id as "sapId",
+		a.responsible_id as "responsibleId",
+		a.goods_matnr_id as "goodsMatnrId"
+	</sql>
+
+    <select id="getOneBySapId" resultType="com.pwc.modules.input.entity.InputSapInvoiceMappingIdEntity">
+        SELECT
+        <include refid="SapInvoiceMappingIdColumns"/>
+        FROM input_sap_invoice_mappingid a
+        where a.sap_id =#{sapId}
+    </select>
+
+    <select id="getListByTaxOrName" resultType="com.pwc.modules.input.entity.InputSapInvoiceMappingIdEntity">
+        SELECT
+        <include refid="SapInvoiceMappingIdColumns"/>
+        FROM input_sap_invoice_mappingid a
+        <where>
+        1=1
+            <if test="responsibleId != null">
+                AND a.responsible_id != #{responsibleId}
+            </if>
+            <if test="goodsMatnrId != null">
+                AND a.goods_matnr_id != #{goodsMatnrId}
+            </if>
+        </where>
+    </select>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO input_sap_invoice_mappingid(
+            sap_id,
+            responsible_id,
+            goods_matnr_id
+		) VALUES (
+			#{sapId},
+			#{responsibleId},
+			#{goodsMatnrId}
+		)
+	</insert>
+
+    <update id="update">
+        UPDATE input_sap_invoice_mappingid
+        <set>
+            <if test="sapId != null">
+                sap_id = #{sapId},
+            </if>
+            <if test="responsibleId != null">
+                responsible_id = #{responsibleId},
+            </if>
+            <if test="goodsMatnrId != null">
+                goods_matnr_id = #{goodsMatnrId}
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+</mapper>

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputInvoiceUnitDifferentDao">
+    <sql id="invoiceColumns">
+        a.id AS "id",
+        a.sap_mblnr AS "sapMblnr",
+        a.sap_details as "sapDetails",
+        a.unit_classification1 AS "unitClassification1",
+        a.unit_classification2 AS "unitClassification2",
+        a.quantity_unit1 AS "quantityUnit1",
+        a.quantity_unit2 AS "quantityUnit2",
+        a.is_delete AS "isDelete"
+    </sql>
+
+    <select id="getList" resultType="int">
+        SELECT COUNT(1)
+        FROM input_invoice_unit_different
+    </select>
+
+    <update id="updateByDelete">
+        UPDATE input_invoice_unit_different
+        <set>
+            is_delete = #{isDelete},
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <insert id="save">
+        INSERT INTO input_invoice_unit_different (
+          sap_mblnr,
+          sap_details,
+          unit_classification1,
+          unit_classification2,
+          quantity_unit1,
+          quantity_unit2,
+          is_delete
+        ) VALUES (
+          #{sapMblnr},
+          #{sapDetails},
+          #{unitClassification1},
+          #{unitClassification2},
+          #{quantityUnit1},
+          #{quantityUnit2},
+          #{isDelete}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE input_invoice_unit_different
+        <set>
+            <if test="sapMblnr != null and sapMblnr != ''">
+                sap_mblnr = #{sapMblnr},
+            </if>
+            <if test="sapDetails != null and sapDetails != ''">
+                sap_details = #{sapDetails},
+            </if>
+            <if test="unitClassification1 != null and unitClassification1 != ''">
+                unit_classification1 = #{unitClassification1},
+            </if>
+            <if test="unitClassification2 != null and unitClassification2 != ''">
+                unit_classification2 = #{unitClassification2},
+            </if>
+            <if test="quantityUnit1 != null">
+                quantity_unit1 = #{quantityUnit1},
+            </if>
+            <if test="quantityUnit2 != null">
+                quantity_unit2 = #{quantityUnit2},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="get" resultType="com.pwc.modules.input.entity.InputInvoiceUnitDifferent">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice_unit_different a
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="getByThree" resultType="com.pwc.modules.input.entity.InputInvoiceUnitDifferent">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice_unit_different a
+        WHERE a.sap_mblnr = #{sapMblnr}
+        AND ((a.unit_classification1 = #{unitClassification1}
+        And a.unit_classification2 = #{unitClassification2})
+        OR (a.unit_classification1 = #{unitClassification2}
+        And a.unit_classification2 = #{unitClassification1}))
+        <if test="isDelete != null and isDelete != ''">
+            AND a.is_delete = #{isDelete}
+        </if>
+    </select>
+
+    <select id="getByUnit" resultType="com.pwc.modules.input.entity.InputInvoiceUnitDifferent">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice_unit_different a
+        WHERE
+        a.sap_mblnr = #{mblnr}
+        AND (a.unit_classification1 = #{unit}
+        OR a.unit_classification2 = #{unit})
+    </select>
+</mapper>

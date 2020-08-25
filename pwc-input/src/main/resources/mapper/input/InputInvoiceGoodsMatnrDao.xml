@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputInvoiceGoodsMatnrDao">
+    <sql id="InvoiceGoodsMatnrColumns">
+        a.id AS "id",
+        a.maktx AS "maktx",
+        a.goods_name AS "goodsName",
+        a.goods_type AS "goodsType",
+        a.used AS "used",
+        a.type AS "type"
+    </sql>
+
+    <select id="getById" resultType="com.pwc.modules.input.entity.InputInvoiceGoodsMatnr">
+        SELECT
+        <include refid="InvoiceGoodsMatnrColumns"/>
+        FROM input_invoice_goods_matnr a
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="findList" resultType="com.pwc.modules.input.entity.InputInvoiceGoodsMatnr">
+        SELECT
+        <include refid="InvoiceGoodsMatnrColumns"/>
+        FROM input_invoice_goods_matnr a
+        <where>
+            <if test="goodsName != null and goodsName != ''">
+                a.goods_name = #{goodsName},
+            </if>
+            <if test="matnr != null and matnr != ''">
+                a.maktx = #{maktx},
+            </if>
+            <if test="used != null and used != ''">
+                a.used = #{used},
+            </if>
+            <if test="matnr != null and matnr != ''">
+                a.type = #{type},
+            </if>
+        </where>
+
+    </select>
+
+        <select id="getOneByCondition" resultType="com.pwc.modules.input.entity.InputInvoiceGoodsMatnr">
+        SELECT
+        a.*
+        FROM input_invoice_goods_matnr a
+        where
+                a.maktx = #{maktx}
+                and a.goods_name = #{goodsName}
+                and a.goods_type = #{goodsType}
+                and a.used = #{used}
+
+    </select>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO input_invoice_goods_matnr(
+          goods_name,
+          goods_type,
+          maktx,
+          used,
+          type
+        ) VALUE (
+          #{goodsName},
+          #{goodsType},
+          #{maktx},
+          #{used},
+          #{type}
+        )
+    </insert>
+    <insert id="insertAll">
+        insert into input_invoice_goods_matnr(
+        goods_name,
+        goods_type,
+        maktx,
+        used,
+        type
+        )values
+        <foreach collection="list" index="index" item="item" separator=",">
+            (
+            #{item.goodsName},
+            #{item.goodsType},
+            #{item.maktx},
+            #{item.used},
+            #{item.type}
+            )
+        </foreach>
+    </insert>
+
+    <update id="update">
+        update input_invoice_goods_matnr
+        <set>
+            <if test="goodsName != null and goodsName != ''">
+                goods_name = #{goodsName},
+            </if>
+            <if test="matnr != null and matnr != ''">
+                maktx = #{maktx},
+            </if>
+            used = 1,
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="delete">
+        update input_invoice_goods_matnr
+        <set>
+            <if test="used == '1'">
+                used = 0
+            </if>
+            <if test="used == '0'">
+                used = 1
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="getByThreeBasic" resultType="com.pwc.modules.input.entity.InputInvoiceGoodsMatnr">
+        SELECT
+        <include refid="InvoiceGoodsMatnrColumns"/>
+        FROM input_invoice_goods_matnr a
+        WHERE a.maktx = #{maktx}
+        AND a.goods_name = #{goodsName}
+        AND a.goods_type = #{goodsType}
+    </select>
+    <select id="getListAll" resultType="com.pwc.modules.input.entity.InputInvoiceGoodsMatnr">
+        select
+        <include refid="InvoiceGoodsMatnrColumns"/>
+        from input_invoice_goods_matnr a
+        where a.used=1
+    </select>
+
+
+    <delete id="deleteByIds">
+        DELETE FROM input_invoice_goods_matnr
+        WHERE id IN (
+        <foreach collection="array" index="index" item="item" close="" open="" separator=",">
+            #{item}
+        </foreach>
+        )
+    </delete>
+    <delete id="deleteAll">
+        delete  from input_invoice_goods_matnr
+        where used=1
+    </delete>
+
+    <update id="updateByThreebasic">
+        UPDATE input_invoice_goods_matnr
+        <set>
+            used = 0
+        </set>
+        WHERE maktx = #{maktx}
+        AND goods_name = #{goodsName}
+        AND goods_type = #{goodsType}
+    </update>
+</mapper>

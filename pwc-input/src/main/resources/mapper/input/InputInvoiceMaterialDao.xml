@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputInvoiceMaterialDao">
+
+    <sql id="invoiceColumns">
+		a.id AS "id",
+		a.invoice_id AS "invoiceId",
+		a.sph_xh AS "sphXh",
+		a.sph_spmc AS "sphSpmc",
+        a.sph_ggxh AS "sphGgxh",
+        a.sph_jldw AS "sphJldw",
+        a.sph_sl AS "sphSl",
+        a.sph_dj AS "sphDj",
+        a.sph_je AS "sphJe",
+        a.sph_slv AS "sphSlv",
+        a.sph_se AS "sphSe",
+        a.status AS "status",
+        a.message AS "message",
+        a.match_status as "matchStatus"
+	</sql>
+
+	<select id="findList" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialEntity">
+		SELECT
+		<include refid="invoiceColumns"/>
+		FROM input_invoice_material a
+	</select>
+
+	<select id="list" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialEntity">
+		SELECT
+		<include refid="invoiceColumns"/>
+		FROM input_invoice_material a
+	</select>
+
+	<select id="get" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialEntity">
+		SELECT
+		<include refid="invoiceColumns"/>
+		FROM input_invoice_material a
+		WHERE a.invoice_id = #{invoiceId}
+	</select>
+
+	<select id="getById" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialEntity">
+		SELECT
+		<include refid="invoiceColumns"/>
+		FROM input_invoice_material a
+		WHERE a.id = #{id}
+	</select>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO input_invoice_material(
+		    invoice_id,
+            sph_xh,
+            sph_spmc,
+            sph_ggxh,
+            sph_jldw,
+            sph_sl,
+            sph_dj,
+            sph_je,
+            sph_slv,
+            sph_se,
+            status,
+            match_status
+		) VALUES (
+			#{invoiceId},
+			#{sphXh},
+			#{sphSpmc},
+			#{sphGgxh},
+			#{sphJldw},
+			#{sphSl},
+			#{sphDj},
+			#{sphJe},
+			#{sphSlv},
+			#{sphSe},
+			#{status},
+			#{matchStatus}
+		)
+	</insert>
+
+	<select id="getListByInvoiceId" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialEntity">
+		SELECT
+		<include refid="invoiceColumns"/>,
+		i.invoice_number AS invoiceNumber,
+		i.invoice_group as invoiceGroup,
+		i.invoice_code AS invoiceCode,
+		i.invoice_total_price AS "totalPrice",
+        (case when a.sph_je is NOT NULL and a.sph_se is NOT NULL then
+        a.sph_je + a.sph_se
+        else null end) AS "materialTotalPrice",
+		i.invoice_entity AS invoiceType,
+		i.invoice_status AS invoiceStatus,
+		i.invoice_create_date AS invoiceCreateDate
+		FROM input_invoice_material a
+		LEFT join input_invoice i on i.id=a.invoice_id
+		<where>
+			1=1
+			<if test="status != null and status != ''">
+				and a.status=#{status}
+			</if>
+
+
+			and a.invoice_id in
+			<foreach collection="invoiceIds" index="index" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+			<if test="pitch != null and pitch != ''">
+				and a.sph_spmc in
+				<foreach collection="pitch" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+
+		</where>
+	</select>
+
+
+	<select id="getListByMaterialId" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialEntity">
+		SELECT
+		<include refid="invoiceColumns"/>,i.invoice_number AS invoiceNumber,i.invoice_group as invoiceGroup,
+		i.invoice_code AS invoiceCode,i.invoice_total_price AS "totalPrice",i.invoice_entity AS invoiceType,i.invoice_status AS invoiceStatus,i.invoice_create_date AS invoiceCreateDate
+		FROM input_invoice_material a
+		LEFT join input_invoice i on i.id=a.invoice_id
+		<where>
+			a.id = #{id}
+		</where>
+	</select>
+
+	<update id="mateLose">
+		UPDATE input_invoice_material
+		<set>
+			status = "0",
+		</set>
+		WHERE id IN
+		<foreach collection="ids" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+
+	<update id="updateDeleteTax">
+		UPDATE input_invoice_material
+		<set>
+			status = #{status},
+			match_status=#{matchStatus}
+		</set>
+		WHERE id IN
+		<foreach collection="ids" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+
+	<select id="getByIds" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialEntity">
+		SELECT
+		<include refid="invoiceColumns"/>
+		FROM input_invoice_material a
+		WHERE a.id IN
+		<foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+
+
+	<!--<select id="getByIds" resultType="InputInvoiceMaterialEntity">-->
+		<!--SELECT-->
+		<!--<include refid="invoiceColumns"/>-->
+		<!--FROM input_invoice_material a-->
+		<!--WHERE a.id IN-->
+		<!--<foreach collection="array" index="index" item="item" open="(" separator="," close=")">-->
+			<!--#{item}-->
+		<!--</foreach>-->
+		<!--group by a.invoice_id-->
+	<!--</select>-->
+
+	<select id="getListByIds" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialEntity">
+		SELECT
+		<include refid="invoiceColumns"/>
+		,i.invoice_number AS invoiceNumber,
+		i.invoice_group as invoiceGroup,
+		i.invoice_code AS invoiceCode,
+		i.invoice_total_price AS "totalPrice",
+		i.invoice_entity AS invoiceType,
+		(case when a.sph_je is NOT NULL and a.sph_se is NOT NULL then
+		a.sph_je + a.sph_se
+		else null end) AS "materialTotalPrice",
+		i.invoice_status AS invoiceStatus,
+		i.invoice_create_date AS invoiceCreateDate
+		FROM input_invoice_material a
+		LEFT join input_invoice i on i.id=a.invoice_id
+		WHERE a.id IN
+		<foreach collection="ids" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+
+	</select>
+
+
+	<select id="getByInvoiceId" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialEntity">
+		SELECT
+		<include refid="invoiceColumns"/>
+		FROM input_invoice_material a
+		WHERE a.invoice_id = #{invoiceId}
+		<if test="status != null and status != ''">
+			and a.status = #{status}
+		</if>
+	</select>
+
+	<update id="update">
+		UPDATE input_invoice_material
+		<set>
+			<if test="status != null and status != ''">
+				status = #{status},
+			</if>
+			<if test="matchStatus != null and matchStatus != ''">
+				match_status = #{matchStatus}
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<update id="updateMatchStatus3">
+		UPDATE input_invoice_material
+		<set>
+			<if test="matchStatus != null and matchStatus != ''">
+				match_status = #{matchStatus}
+			</if>
+		</set>
+		where id IN
+		<foreach collection="ids" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+
+	<delete id="deleteInvoiceMaterialByInvoiceId">
+		delete from input_invoice_material
+		where
+		invoice_id
+		 in
+		<foreach collection="invoiceIds" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<update id="updateStatus">
+		UPDATE input_invoice_material
+		<set>
+			<if test="status != null and status != ''">
+				status = #{status},
+			</if>
+			<if test="matchStatus != null and matchStatus != ''">
+				match_status = #{matchStatus},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<select id="getMaterialListByInvoiceId" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialEntity">
+		SELECT
+		<include refid="invoiceColumns"/>
+		FROM input_invoice_material a
+		WHERE a.invoice_id = #{id}
+	</select>
+
+	<select id="getByInvoiceIds" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialEntity">
+		SELECT
+		<include refid="invoiceColumns"/>,b.invoice_number AS "invoiceNumber"
+		FROM input_invoice_material a
+		LEFT JOIN input_invoice b on a.invoice_id = b.id
+		WHERE invoice_id in
+		<foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+
+	<update id="updateByEnter">
+	<foreach collection="list" item="item" index="index" open="" close="" separator=";">
+		UPDATE input_invoice_material
+		<set>
+			<if test="item.message != null and item.message != ''">
+				message = #{item.message},
+			</if>
+			<if test="item.matchStatus != null and item.matchStatus != ''">
+				match_status = #{item.matchStatus},
+			</if>
+		</set>
+		WHERE id = #{item.id}
+	</foreach>
+	</update>
+</mapper>

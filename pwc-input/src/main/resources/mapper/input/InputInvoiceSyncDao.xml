@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputInvoiceSyncDao">
+
+    <insert id="insertDetailsBatch">
+        insert into input_company_task_details
+        (company_id,type,statistics_month,invoice_type,deduct_invoice_num,deduct_amount,deduct_tax,un_deduct_invoice_num,un_deduct_amount,un_deduct_tax)
+        values
+        <foreach collection="details" item="i" index="index" separator=",">
+            (#{companyEntity.id},#{companyEntity.applyResult},#{companyEntity.statisticsMonth},
+            #{i.invoiceType},#{i.deductInvoiceNum},#{i.deductAmount},#{i.deductTax},#{i.unDeductInvoiceNum},
+            #{i.unDeductAmount},#{i.unDeductTax}
+            )
+        </foreach>
+    </insert>
+
+    <insert id="insertDifferenceBatch">
+        insert into input_company_task_difference
+        (company_id,type,statistics_month,invoice_type,invoice_code,invoice_number,amount,valid_tax,export_reject_no,invoice_status,manage_status,deduct_type,tax,payment_certificate_no)
+        values
+        <foreach collection="differenceInvoices" item="i" index="index" separator=",">
+            (#{companyEntity.id},#{companyEntity.applyResult},#{companyEntity.statisticsMonth},
+            #{i.invoiceType},#{i.invoiceCode},#{i.invoiceNumber},#{i.amount},#{i.validTax},
+            #{i.exportRejectNo},#{i.invoiceStatus},#{i.manageStatus},#{i.deductType},#{i.tax},#{i.paymentCertificateNo})
+        </foreach>
+    </insert>
+    <insert id="insertInvoicesBatch">
+        insert into input_company_task_invoices
+        (company_id,type,statistics_month,invoice_type,invoice_code,invoice_number,amount,valid_tax,
+        export_reject_no,invoice_status,manage_status,deduct_type,tax,payment_certificate_no)
+        values
+        <foreach collection="invoices" item="i" index="index" separator=",">
+            (#{companyEntity.id},#{companyEntity.applyResult},#{companyEntity.statisticsMonth},
+            #{i.invoiceType},#{i.invoiceCode},#{i.invoiceNumber},#{i.amount},#{i.validTax},
+            #{i.exportRejectNo},#{i.invoiceStatus},#{i.manageStatus},#{i.deductType},#{i.tax},#{i.paymentCertificateNo}
+            )
+        </foreach>
+    </insert>
+
+    <delete id="deleteDetailsByCompanyId">
+       delete from input_company_task_details where company_id=#{id}
+
+    </delete>
+
+    <delete id="deleteDifferenceByCompanyId">
+       delete from input_company_task_difference where company_id=#{id}
+
+    </delete>
+    <delete id="deleteInvoicesByCompanyId">
+       delete from input_company_task_invoices where company_id=#{id}
+
+    </delete>
+</mapper>

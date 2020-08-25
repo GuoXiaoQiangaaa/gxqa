@@ -1,0 +1,835 @@
+{
+	"info": {
+		"_postman_id": "666b25e5-d2c7-4c44-8452-40a3fd46cc61",
+		"name": "PwC_Filing",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "登录",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "44717bfa-0c5f-4357-aabe-9b570b0cd15e",
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"TOKEN\", jsonData.token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/sys/login?username=admin&password=admin&captcha=35ep3",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"sys",
+								"login"
+							],
+							"query": [
+								{
+									"key": "username",
+									"value": "admin"
+								},
+								{
+									"key": "password",
+									"value": "admin"
+								},
+								{
+									"key": "captcha",
+									"value": "35ep3"
+								}
+							]
+						},
+						"description": "###### 接口功能\n> 登录\n\n###### 支持格式\n> FORM\n\n###### HTTP请求方式\n> POST\n\n###### 请求消息\n>  请求参数\n\n  |参数     |必选    |类型  |说明    |\n  |:-----   |:-------|:-----|-----   |\n  |username |ture    |string|登录名  |\n  |password |true    |string|登录密码|\n  |captcha  |true    |string|验证码  |\n\n###### 响应消息\n> 响应参数\n\n  |返回字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n  |token    |string  |token认证      |\n\n###### 接口请求示例\n\n``` \n{{url}}/sys/login?username=admin&password=admin&captcha=35ep3\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0,\n    \"token\": \"d69184e2-bbab-4b66-ae5c-6784beb9b4fd\"\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "验证码",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{url}}/captcha.jpg",
+						"description": "###### 接口功能\n> 登录\n\n###### 支持格式\n> FORM\n\n###### HTTP请求方式\n> GET\n\n###### 请求参数\n> 无\n###### 返回字段\n> 无\n\n###### 接口请求示例\n\n``` \n{{url}}/captcha.jpg\n\n```\n###### 接口返回示例\n\n```\n无\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "退出登录",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": "{{url}}/logout"
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "组织架构",
+			"item": [
+				{
+					"name": "选择组织",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": "{{url}}/sys/dept/select",
+						"description": "###### 接口功能\n> 选择组织\n\n###### 支持格式\n> FORM\n\n###### HTTP请求方式\n> GET\n\n###### 请求参数\n> 无\n\n###### 响应消息\n> 响应参数\n\n  |返回字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n  |deptList |array   |组织列表       |\n\n###### 接口请求示例\n\n``` \n{{url}}/sys/dept/select\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0,\n    \"deptList\": [\n        {\n            \"deptId\": 1,\n            \"parentId\": 0,\n            \"name\": \"测试集团\",\n            \"parentName\": null,\n            \"orderNum\": 0,\n            \"delFlag\": 0,\n            \"address\": null,\n            \"taxCode\": null,\n            \"owner\": null,\n            \"contact\": null,\n            \"provinceName\": null,\n            \"cityName\": null,\n            \"districtName\": null,\n            \"provinceCode\": null,\n            \"cityCode\": null,\n            \"districtCode\": null,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"deptId\": 2,\n            \"parentId\": 1,\n            \"name\": \"长沙分公司\",\n            \"parentName\": \"测试集团\",\n            \"orderNum\": 1,\n            \"delFlag\": 0,\n            \"address\": null,\n            \"taxCode\": null,\n            \"owner\": null,\n            \"contact\": null,\n            \"provinceName\": null,\n            \"cityName\": null,\n            \"districtName\": null,\n            \"provinceCode\": null,\n            \"cityCode\": null,\n            \"districtCode\": null,\n            \"open\": null,\n            \"list\": null\n        }\n    ]\n}\n```\n###### 备注\n> header中传值authorization用户验证"
+					},
+					"response": []
+				},
+				{
+					"name": "组织列表",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": "{{url}}/sys/dept/treeList",
+						"description": "###### 接口功能\n> 组织列表\n\n###### 支持格式\n> FORM\n\n###### HTTP请求方式\n> GET\n\n###### 请求消息\n> 请求参数\n  \n  无\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n  |deptList     |array     |组织列表       |\n   \n> deptList字段数据结构说明\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |deptId   |int     | 组织ID        |\n  |parentId |int     |上级组织ID     |\n  |name     |string  |组织名称       |\n  |parentName |string  |上级组织名称       |\n  |orderNum |int  |字段排序号       |\n  |delFlag |int  |删除标记 -1 已删除       |\n  |address |string  |详细地址      |\n  |taxCode |string  |税号      |\n  |owner   |string  |责任人      |\n  |contact   |string  |联系方式      |\n  |provinceName   |string  |省名      |\n  |cityName   |string  |市名      |\n  |districtName   |string  |区名      |\n  |provinceCode   |string  |省编码      |\n  |cityCode   |string  |市编码      |\n  |districtCode   |string  |区编码      |\n\n###### 接口请求示例\n\n``` \n{{url}}/sys/dept/treeList\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0,\n    \"deptList\": [\n        {\n            \"deptId\": 1,\n            \"parentId\": 0,\n            \"name\": \"测试集团\",\n            \"parentName\": null,\n            \"orderNum\": 0,\n            \"delFlag\": 0,\n            \"address\": null,\n            \"taxCode\": null,\n            \"owner\": null,\n            \"contact\": null,\n            \"provinceName\": null,\n            \"cityName\": null,\n            \"districtName\": null,\n            \"provinceCode\": null,\n            \"cityCode\": null,\n            \"districtCode\": null,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"deptId\": 2,\n            \"parentId\": 1,\n            \"name\": \"长沙分公司\",\n            \"parentName\": \"测试集团\",\n            \"orderNum\": 1,\n            \"delFlag\": 0,\n            \"address\": null,\n            \"taxCode\": null,\n            \"owner\": null,\n            \"contact\": null,\n            \"provinceName\": null,\n            \"cityName\": null,\n            \"districtName\": null,\n            \"provinceCode\": null,\n            \"cityCode\": null,\n            \"districtCode\": null,\n            \"open\": null,\n            \"list\": null\n        }\n    ]\n}\n```\n###### 备注\n> header中传值Authorization用户验证"
+					},
+					"response": []
+				},
+				{
+					"name": "组织详情",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{url}}/sys/dept/info/7",
+						"description": "###### 接口功能\n> 组织详情\n\n###### 支持格式\n> RESTFul\n\n###### HTTP请求方式\n> GET\n\n###### 请求消息\n> 请求参数\n  \n  |参数     |必选    |类型  |说明    |\n  |:-----   |:-------|:-----|-----   |\n  |deptId   |ture    |int   |组织ID  |\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n  |dept     |obj     |组织详情       |\n   \n> dept字段数据结构说明\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |deptId   |int     | 组织ID        |\n  |parentId |int     |上级组织ID     |\n  |name     |string  |组织名称       |\n  |parentName |string  |上级组织名称       |\n  |orderNum |int  |字段排序号       |\n  |delFlag |int  |删除标记 -1 已删除       |\n  |address |string  |详细地址      |\n  |taxCode |string  |税号      |\n  |owner   |string  |责任人      |\n  |contact   |string  |联系方式      |\n  |provinceName   |string  |省名      |\n  |cityName   |string  |市名      |\n  |districtName   |string  |区名      |\n  |provinceCode   |string  |省编码      |\n  |cityCode   |string  |市编码      |\n  |districtCode   |string  |区编码      |\n\n###### 接口请求示例\n\n``` \n{{url}}/sys/dept/info/{deptId}\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0,\n    \"dept\": {\n        \"deptId\": 7,\n        \"parentId\": 6,\n        \"name\": \"测试部门更新1\",\n        \"parentName\": null,\n        \"orderNum\": 0,\n        \"delFlag\": 0,\n        \"address\": null,\n        \"taxCode\": null,\n        \"owner\": null,\n        \"contact\": null,\n        \"provinceName\": null,\n        \"cityName\": null,\n        \"districtName\": null,\n        \"provinceCode\": null,\n        \"cityCode\": null,\n        \"districtCode\": null,\n        \"open\": null,\n        \"list\": null\n    }\n}\n```\n###### 备注\n> header中传值authorization用户验证"
+					},
+					"response": []
+				},
+				{
+					"name": "修改组织信息",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"deptId\": 7,\n\"parentId\": 6,\n\"name\": \"测试部门更新1\",\n\"parentName\": \"测试部门\",\n\"orderNum\": 0,\n\"delFlag\": 0,\n\"address\": null,\n\"taxCode\": null,\n\"owner\": null,\n\"contact\": null,\n\"provinceName\": null,\n\"cityName\": null,\n\"districtName\": null,\n\"provinceCode\": null,\n\"cityCode\": null,\n\"districtCode\": null,\n\"open\": null,\n\"list\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/sys/dept/update",
+						"description": "###### 接口功能\n> 修改组织信息\n\n###### 支持格式\n> JSON\n\n###### HTTP请求方式\n> POST\n\n###### 请求消息\n> 请求参数\n  \n  |参数     |必选    |类型  |说明    |\n  |:-----   |:-------|:-----|-----   |\n  |deptId   |true |int     | 组织ID        |\n  |parentId |true |int     |上级组织ID     |\n  |name     |true |string  |组织名称       |\n  |orderNum |false |int  |字段排序号       |\n  |address |true |string  |详细地址      |\n  |taxCode |true |string  |税号      |\n  |owner   |true |string  |责任人      |\n  |contact   |true |string  |联系方式      |\n  |provinceName   |true |string  |省名      |\n  |cityName   |true |string  |市名      |\n  |districtName   |true |string  |区名      |\n  |provinceCode   |true |string  |省编码      |\n  |cityCode   |true |string  |市编码      |\n  |districtCode   |true |string  |区编码      |\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n\n###### 接口请求示例\n\n``` \n{\n\t\"deptId\": 7,\n\t\"parentId\": 6,\n\t\"name\": \"测试部门更新1\",\n\t\"parentName\": \"测试部门\",\n\t\"orderNum\": 0,\n\t\"delFlag\": 0,\n\t\"address\": null,\n\t\"taxCode\": null,\n\t\"owner\": null,\n\t\"contact\": null,\n\t\"provinceName\": null,\n\t\"cityName\": null,\n\t\"districtName\": null,\n\t\"provinceCode\": null,\n\t\"cityCode\": null,\n\t\"districtCode\": null\n}\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0\n}\n```\n###### 备注\n> header中传值authorization用户验证"
+					},
+					"response": []
+				},
+				{
+					"name": "添加组织",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"parentId\": 6,\n    \"name\": \"测试部门更新1\",\n    \"parentName\": \"测试部门\",\n    \"orderNum\": 0,\n    \"address\": \"地址\",\n    \"taxCode\": null,\n    \"owner\": null,\n    \"contact\": null,\n    \"provinceName\": null,\n    \"cityName\": null,\n    \"districtName\": null,\n    \"provinceCode\": null,\n    \"cityCode\": null,\n    \"districtCode\": null\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/sys/dept/save",
+						"description": "###### 接口功能\n> 添加组织\n\n###### 支持格式\n> JSON\n\n###### HTTP请求方式\n> POST\n\n###### 请求消息\n> 请求参数\n  \n  |参数     |必选    |类型  |说明    |\n  |:-----   |:-------|:-----|-----   |\n  |parentId |true |int     |上级组织ID     |\n  |name     |true |string  |组织名称       |\n  |orderNum |false |int  |字段排序号       |\n  |address |true |string  |详细地址      |\n  |taxCode |true |string  |税号      |\n  |owner   |true |string  |责任人      |\n  |contact   |true |string  |联系方式      |\n  |provinceName   |true |string  |省名      |\n  |cityName   |true |string  |市名      |\n  |districtName   |true |string  |区名      |\n  |provinceCode   |true |string  |省编码      |\n  |cityCode   |true |string  |市编码      |\n  |districtCode   |true |string  |区编码      |\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n\n###### 接口请求示例\n\n``` \n{\n\t\"parentId\": 6,\n\t\"name\": \"测试部门更新1\",\n\t\"parentName\": \"测试部门\",\n\t\"orderNum\": 0,\n\t\"address\": null,\n\t\"taxCode\": null,\n\t\"owner\": null,\n\t\"contact\": null,\n\t\"provinceName\": null,\n\t\"cityName\": null,\n\t\"districtName\": null,\n\t\"provinceCode\": null,\n\t\"cityCode\": null,\n\t\"districtCode\": null\n}\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0\n}\n```\n###### 备注\n> header中传值authorization用户验证"
+					},
+					"response": []
+				},
+				{
+					"name": "删除组织",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/sys/dept/delete?deptId=9",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"sys",
+								"dept",
+								"delete"
+							],
+							"query": [
+								{
+									"key": "deptId",
+									"value": "9"
+								}
+							]
+						},
+						"description": "###### 接口功能\n> 删除组织\n\n###### 支持格式\n> FROM\n\n###### HTTP请求方式\n> DELETE\n\n###### 请求消息\n> 请求参数\n  \n  |参数     |必选    |类型  |说明    |\n  |:-----   |:-------|:-----|-----   |\n  |deptId   |true |int     | 需要删除组织ID        |\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n\n###### 接口请求示例\n\n``` \n{{url}}/sys/dept/delete?deptId=9\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0\n}\n```\n###### 备注\n> header中传值Authorization用户验证"
+					},
+					"response": []
+				},
+				{
+					"name": "分页查询组织列表",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/sys/dept/list?limit=2&page=1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"sys",
+								"dept",
+								"list"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "2"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "name",
+									"value": "上海",
+									"disabled": true
+								},
+								{
+									"key": "parentId",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						},
+						"description": "###### 接口功能\n> 分页组织列表\n\n###### 支持格式\n> FORM\n\n###### HTTP请求方式\n> GET\n\n###### 请求消息\n> 请求参数\n  \n  |参数     |必选    |类型  |说明    |\n  |:-----   |:-------|:-----|-----   |\n  |name |false |string     |组织名    |\n  |contact     |false |string  |联系方式       |\n  |parentId     |false |string  |上级组织ID  |\n  |page     |true |int  |页码       |\n  |limit     |true |int  |每页显示条数       |\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n  |page     |obj     |分页数据详情       |\n   \n> page字段数据结构说明\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |totalCount   |int     | 总条数        |\n  |pageSize |int     |每页条数     |\n  |totalPage     |int  |总页数       |\n  |currPage   |int  |当前页      |\n  |list   |array  |组织信息列表      |\n  \n> list字段数据结构说明\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |deptId   |int     | 组织ID        |\n  |parentId |int     |上级组织ID     |\n  |name     |string  |组织名     |\n  |contact   |string  |联系电话      |\n  |address   |string  |公司地址      |\n  |owner   |string  |负责人      |\n  |taxCode   |string  |税号      |\n  |childNum   |int  |下级数量     |\n  |status   |int  |启用状态 0 禁用 1启用   |\n\n###### 接口请求示例\n\n``` \n{{url}}/sys/dept/list?limit=2&page=1\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0,\n    \"page\": {\n        \"totalCount\": 8,\n        \"pageSize\": 2,\n        \"totalPage\": 4,\n        \"currPage\": 1,\n        \"list\": [\n            {\n                \"deptId\": 1,\n                \"parentId\": 0,\n                \"name\": \"总集团\",\n                \"parentName\": null,\n                \"orderNum\": 0,\n                \"delFlag\": 0,\n                \"address\": null,\n                \"taxCode\": null,\n                \"owner\": null,\n                \"contact\": null,\n                \"provinceName\": null,\n                \"cityName\": null,\n                \"districtName\": null,\n                \"provinceCode\": null,\n                \"cityCode\": null,\n                \"districtCode\": null,\n                \"status\": null,\n                \"open\": null,\n                \"list\": null,\n                \"childNum\": 2\n            },\n            {\n                \"deptId\": 2,\n                \"parentId\": 1,\n                \"name\": \"长沙分公司\",\n                \"parentName\": null,\n                \"orderNum\": 1,\n                \"delFlag\": 0,\n                \"address\": null,\n                \"taxCode\": null,\n                \"owner\": null,\n                \"contact\": null,\n                \"provinceName\": null,\n                \"cityName\": null,\n                \"districtName\": null,\n                \"provinceCode\": null,\n                \"cityCode\": null,\n                \"districtCode\": null,\n                \"status\": null,\n                \"open\": null,\n                \"list\": null,\n                \"childNum\": 0\n            }\n        ]\n    }\n}\n```\n###### 备注\n> header中传值Authorization用户验证"
+					},
+					"response": []
+				},
+				{
+					"name": "禁用组织",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{TOKEN}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/sys/dept/disable?deptId=2",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"sys",
+								"dept",
+								"disable"
+							],
+							"query": [
+								{
+									"key": "deptId",
+									"value": "2"
+								}
+							]
+						},
+						"description": "###### 接口功能\n> 禁用组织\n\n###### 支持格式\n> FROM\n\n###### HTTP请求方式\n> DELETE\n\n###### 请求消息\n> 请求参数\n  \n  |参数     |必选    |类型  |说明    |\n  |:-----   |:-------|:-----|-----   |\n  |deptId   |true |int     | 需要禁用的组织ID        |\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n\n###### 接口请求示例\n\n``` \n{{url}}/sys/dept/disable?deptId=2\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0\n}\n```\n###### 备注\n> header中传值Authorization用户验证"
+					},
+					"response": []
+				},
+				{
+					"name": "启用组织",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/sys/dept/enable?deptId=2",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"sys",
+								"dept",
+								"enable"
+							],
+							"query": [
+								{
+									"key": "deptId",
+									"value": "2"
+								}
+							]
+						},
+						"description": "###### 接口功能\n> 禁用组织\n\n###### 支持格式\n> FROM\n\n###### HTTP请求方式\n> DELETE\n\n###### 请求消息\n> 请求参数\n  \n  |参数     |必选    |类型  |说明    |\n  |:-----   |:-------|:-----|-----   |\n  |deptId   |true |int     | 需要启用的组织ID        |\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n\n###### 接口请求示例\n\n``` \n{{url}}/sys/dept/enable?deptId=2\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0\n}\n```\n###### 备注\n> header中传值Authorization用户验证"
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "用户管理",
+			"item": [
+				{
+					"name": "分页查询用户列表",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/sys/user/list?limit=10&page=1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"sys",
+								"user",
+								"list"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "sidx",
+									"value": " ",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								}
+							]
+						},
+						"description": "###### 接口功能\n> 用户列表\n\n###### 支持格式\n> FORM\n\n###### HTTP请求方式\n> GET\n\n###### 请求消息\n> 请求参数\n  \n  |参数     |必选    |类型  |说明    |\n  |:-----   |:-------|:-----|-----   |\n  |username |false |string     |用户名    |\n  |mobile     |false |string  |联系方式       |\n  |page     |true |int  |页码       |\n  |limit     |true |int  |每页显示条数       |\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n  |page     |obj     |分页数据详情       |\n   \n> page字段数据结构说明\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |totalCount   |int     | 总条数        |\n  |pageSize |int     |每页条数     |\n  |totalPage     |int  |总页数       |\n  |currPage   |int  |当前页      |\n  |list   |array  |用户信息列表      |\n  \n> list字段数据结构说明\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |userId   |int     | 用户ID        |\n  |username |string     |用户名     |\n  |email     |string  |邮箱       |\n  |mobile   |string  |联系电话      |\n  |status   |int  |状态      |\n  |createTime   |string  |加入时间      |\n  |deptId   |int  |所属组织ID      |\n  |deptName   |string  |所属组织名称     |\n\n###### 接口请求示例\n\n``` \n{{url}}/sys/user/list?limit=10&page=1\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0,\n    \"page\": {\n        \"totalCount\": 1,\n        \"pageSize\": 10,\n        \"totalPage\": 1,\n        \"currPage\": 1,\n        \"list\": [\n            {\n                \"userId\": 1,\n                \"username\": \"admin\",\n                \"salt\": \"YzcmCZNvbXocrsz9dm8e\",\n                \"email\": \"root@renren.io\",\n                \"mobile\": \"13612345678\",\n                \"status\": 1,\n                \"roleIdList\": null,\n                \"createTime\": \"2016-11-11 11:11:11\",\n                \"deptId\": 1,\n                \"deptName\": \"测试集团\"\n            }\n        ]\n    }\n}\n```\n###### 备注\n> header中传值Authorization用户验证"
+					},
+					"response": []
+				},
+				{
+					"name": "当前登录用户信息",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{url}}/sys/user/info",
+						"description": "###### 接口功能\n> 用户详情详情\n\n###### 支持格式\n> RESTFul\n\n###### HTTP请求方式\n> GET\n\n###### 请求消息\n> 请求参数\n  \n  无\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n  |user     |obj     |用户详情       |\n   \n> user字段数据结构说明\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |userId   |int     | 用户ID        |\n  |username |string     |用户名     |\n  |email     |string  |邮箱       |\n  |mobile   |string  |联系电话      |\n  |status   |int  |状态      |\n  |createTime   |string  |加入时间      |\n  |deptId   |int  |所属组织ID      |\n  |deptName   |string  |所属组织名称     |\n\n###### 接口请求示例\n\n``` \n{{url}}/sys/user/info\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0,\n    \"user\": {\n        \"userId\": 1,\n        \"username\": \"admin\",\n        \"salt\": \"YzcmCZNvbXocrsz9dm8e\",\n        \"email\": \"root@renren.io\",\n        \"mobile\": \"13612345678\",\n        \"status\": 1,\n        \"roleIdList\": null,\n        \"createTime\": \"2016-11-11 11:11:11\",\n        \"deptId\": 1,\n        \"deptName\": null\n    }\n}\n```\n###### 备注\n> header中传值Authorization用户验证"
+					},
+					"response": []
+				},
+				{
+					"name": "获取用户信息",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": "{{url}}/sys/user/info/1",
+						"description": "###### 接口功能\n> 用户详情\n\n###### 支持格式\n> RESTFul\n\n###### HTTP请求方式\n> GET\n\n###### 请求消息\n> 请求参数\n  \n  |参数     |必选    |类型  |说明    |\n  |:-----   |:-------|:-----|-----   |\n  |userId   |ture    |int   |用户ID  |\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n  |user     |obj     |用户详情       |\n   \n> user字段数据结构说明\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |userId   |int     | 用户ID        |\n  |username |string     |用户名     |\n  |email     |string  |邮箱       |\n  |mobile   |string  |联系电话      |\n  |status   |int  |状态      |\n  |createTime   |string  |加入时间      |\n  |deptId   |int  |所属组织ID      |\n  |deptName   |string  |所属组织名称     |\n\n###### 接口请求示例\n\n``` \n{{url}}/sys/user/info/{userId}\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0,\n    \"user\": {\n        \"userId\": 1,\n        \"username\": \"admin\",\n        \"salt\": \"YzcmCZNvbXocrsz9dm8e\",\n        \"email\": \"root@renren.io\",\n        \"mobile\": \"13612345678\",\n        \"status\": 1,\n        \"roleIdList\": null,\n        \"createTime\": \"2016-11-11 11:11:11\",\n        \"deptId\": 1,\n        \"deptName\": null\n    }\n}\n```\n###### 备注\n> header中传值Authorization用户验证"
+					},
+					"response": []
+				},
+				{
+					"name": "添加用户",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"deptId\": 1,\n\t\"status\": 1,\n\t\"roleIdList\": [],\n\t\"username\": \"添加用户测试3\",\n\t\"password\": \"123123\",\n\t\"email\": \"123123@133.com\",\n\t\"mobile\": \"13333333333\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/sys/user/save",
+						"description": "###### 接口功能\n> 添加用户\n\n###### 支持格式\n> JSON\n\n###### HTTP请求方式\n> POST\n\n###### 请求消息\n> 请求参数\n  \n  |参数     |必选    |类型  |说明    |\n  |:-----   |:-------|:-----|-----   |\n  |deptId |true |int     |所属组织ID     |\n  |status     |true |int  |状态 1 正常 0 禁用       |\n  |orderNum |false |int  |字段排序号       |\n  |roleIdList |false |array  |角色ID列表    |\n  |username |true |string  |用户名      |\n  |password   |true |string  |密码     |\n  |mobile   |true |string  |联系方式      |\n  |email   |true |string  |邮箱    |\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n\n###### 接口请求示例\n\n``` \n{\n\t\"deptId\": 1,\n\t\"status\": 1,\n\t\"roleIdList\": [],\n\t\"username\": \"添加用户测试\",\n\t\"password\": \"123123\",\n\t\"email\": \"123123@133.com\",\n\t\"mobile\": \"13333333333\"\n}\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0\n}\n```\n###### 备注\n> header中传值Authorization用户验证"
+					},
+					"response": []
+				},
+				{
+					"name": "修改用户信息",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"userId\": 5,\n\t\"deptId\": 1,\n\t\"status\": 1,\n\t\"roleIdList\": [],\n\t\"username\": \"修改用户测试3\",\n\t\"password\": \"123123\",\n\t\"email\": \"123123@133.com\",\n\t\"mobile\": \"13333333333\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/sys/user/update",
+						"description": "###### 接口功能\n> 修改用户\n\n###### 支持格式\n> JSON\n\n###### HTTP请求方式\n> PUT\n\n###### 请求消息\n> 请求参数\n  \n  |参数     |必选    |类型  |说明    |\n  |:-----   |:-------|:-----|-----   |\n  |userId |true |int     |用户ID     |\n  |deptId |true |int     |所属组织ID     |\n  |status     |true |int  |状态 1 正常 0 禁用       |\n  |orderNum |false |int  |字段排序号       |\n  |roleIdList |false |array  |角色ID列表    |\n  |username |true |string  |用户名      |\n  |mobile   |true |string  |联系方式      |\n  |email   |true |string  |邮箱    |\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n\n###### 接口请求示例\n\n``` \n{\n\t\"userId\": 1,\n\t\"deptId\": 1,\n\t\"status\": 1,\n\t\"roleIdList\": [],\n\t\"username\": \"添加用户测试\",\n\t\"email\": \"123123@133.com\",\n\t\"mobile\": \"13333333333\"\n}\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0\n}\n```\n###### 备注\n> header中传值Authorization用户验证"
+					},
+					"response": []
+				},
+				{
+					"name": "删除用户",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[5]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/sys/user/delete",
+						"description": "###### 接口功能\n> 删除用户\n\n###### 支持格式\n> JSON\n\n###### HTTP请求方式\n> DELETE\n\n###### 请求消息\n> 请求参数\n  \n  |参数     |必选    |类型  |说明    |\n  |:-----   |:-------|:-----|-----   |\n  |userIds   |true |int  array   | 需要删除用户ID列表        |\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n\n###### 接口请求示例\n\n``` \n[5,4,3]\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0\n}\n```\n###### 备注\n> header中传值Authorization用户验证"
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "角色管理",
+			"item": [
+				{
+					"name": "菜单管理",
+					"item": [
+						{
+							"name": "导航菜单",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": "{{url}}/sys/menu/nav",
+								"description": "###### 接口功能\n> 导航菜单\n\n###### 支持格式\n> FORM\n\n###### HTTP请求方式\n> GET\n\n###### 请求消息\n> 请求参数\n  \n  无\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n  |menuList     |array   |返回菜单列表   |\n\n> menuList字段数据结构说明\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |menuId   |int     | 菜单ID        |\n  |parentId |int     |上级菜单ID    |\n  |parentName     |string  |上级菜单名      |\n  |name   |string  |当前菜单名     |\n  |perms   |string  |菜单操作权限标识，多个，隔开 如：sys:config:list,sys:config:info      |\n  |type   |int  |菜单类型 0：目录   1：菜单   2：按钮|\n  |orderNum   |int  |菜单排序号|\n  |list   |array  |子菜单|\n  \n###### 接口请求示例\n\n``` \n{{url}}/sys/menu/nav\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"menuList\": [\n        {\n            \"menuId\": 1,\n            \"parentId\": 0,\n            \"parentName\": null,\n            \"name\": \"系统管理\",\n            \"url\": null,\n            \"perms\": null,\n            \"type\": 0,\n            \"icon\": \"fa fa-cog\",\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": [\n                {\n                    \"menuId\": 2,\n                    \"parentId\": 1,\n                    \"parentName\": null,\n                    \"name\": \"管理员管理\",\n                    \"url\": \"modules/sys/user.html\",\n                    \"perms\": null,\n                    \"type\": 1,\n                    \"icon\": \"fa fa-user\",\n                    \"orderNum\": 1,\n                    \"open\": null,\n                    \"list\": null\n                },\n                {\n                    \"menuId\": 31,\n                    \"parentId\": 1,\n                    \"parentName\": null,\n                    \"name\": \"部门管理\",\n                    \"url\": \"modules/sys/dept.html\",\n                    \"perms\": null,\n                    \"type\": 1,\n                    \"icon\": \"fa fa-file-code-o\",\n                    \"orderNum\": 1,\n                    \"open\": null,\n                    \"list\": null\n                },\n                {\n                    \"menuId\": 3,\n                    \"parentId\": 1,\n                    \"parentName\": null,\n                    \"name\": \"角色管理\",\n                    \"url\": \"modules/sys/role.html\",\n                    \"perms\": null,\n                    \"type\": 1,\n                    \"icon\": \"fa fa-user-secret\",\n                    \"orderNum\": 2,\n                    \"open\": null,\n                    \"list\": null\n                },\n                {\n                    \"menuId\": 4,\n                    \"parentId\": 1,\n                    \"parentName\": null,\n                    \"name\": \"菜单管理\",\n                    \"url\": \"modules/sys/menu.html\",\n                    \"perms\": null,\n                    \"type\": 1,\n                    \"icon\": \"fa fa-th-list\",\n                    \"orderNum\": 3,\n                    \"open\": null,\n                    \"list\": null\n                },\n                {\n                    \"menuId\": 5,\n                    \"parentId\": 1,\n                    \"parentName\": null,\n                    \"name\": \"SQL监控\",\n                    \"url\": \"druid/sql.html\",\n                    \"perms\": null,\n                    \"type\": 1,\n                    \"icon\": \"fa fa-bug\",\n                    \"orderNum\": 4,\n                    \"open\": null,\n                    \"list\": null\n                },\n                {\n                    \"menuId\": 6,\n                    \"parentId\": 1,\n                    \"parentName\": null,\n                    \"name\": \"定时任务\",\n                    \"url\": \"modules/job/schedule.html\",\n                    \"perms\": null,\n                    \"type\": 1,\n                    \"icon\": \"fa fa-tasks\",\n                    \"orderNum\": 5,\n                    \"open\": null,\n                    \"list\": null\n                },\n                {\n                    \"menuId\": 27,\n                    \"parentId\": 1,\n                    \"parentName\": null,\n                    \"name\": \"参数管理\",\n                    \"url\": \"modules/sys/config.html\",\n                    \"perms\": \"sys:config:list,sys:config:info,sys:config:save,sys:config:update,sys:config:delete\",\n                    \"type\": 1,\n                    \"icon\": \"fa fa-sun-o\",\n                    \"orderNum\": 6,\n                    \"open\": null,\n                    \"list\": null\n                },\n                {\n                    \"menuId\": 30,\n                    \"parentId\": 1,\n                    \"parentName\": null,\n                    \"name\": \"文件上传\",\n                    \"url\": \"modules/oss/oss.html\",\n                    \"perms\": \"sys:oss:all\",\n                    \"type\": 1,\n                    \"icon\": \"fa fa-file-image-o\",\n                    \"orderNum\": 6,\n                    \"open\": null,\n                    \"list\": null\n                },\n                {\n                    \"menuId\": 36,\n                    \"parentId\": 1,\n                    \"parentName\": null,\n                    \"name\": \"字典管理\",\n                    \"url\": \"modules/sys/dict.html\",\n                    \"perms\": null,\n                    \"type\": 1,\n                    \"icon\": \"fa fa-bookmark-o\",\n                    \"orderNum\": 6,\n                    \"open\": null,\n                    \"list\": null\n                },\n                {\n                    \"menuId\": 29,\n                    \"parentId\": 1,\n                    \"parentName\": null,\n                    \"name\": \"系统日志\",\n                    \"url\": \"modules/sys/log.html\",\n                    \"perms\": \"sys:log:list\",\n                    \"type\": 1,\n                    \"icon\": \"fa fa-file-text-o\",\n                    \"orderNum\": 7,\n                    \"open\": null,\n                    \"list\": null\n                }\n            ]\n        }\n    ],\n    \"code\": 0\n}\n```\n###### 备注\n> header中传值Authorization用户验证"
+							},
+							"response": []
+						},
+						{
+							"name": "所有菜单列表",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": "{{url}}/sys/menu/list",
+								"description": "###### 接口功能\n> 所有菜单列表\n\n###### 支持格式\n> FORM\n\n###### HTTP请求方式\n> GET\n\n###### 请求消息\n> 请求参数\n  \n  无\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n  |menuList     |array   |返回菜单列表   |\n\n> menuList字段数据结构说明\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |menuId   |int     | 菜单ID        |\n  |parentId |int     |上级菜单ID    |\n  |parentName     |string  |上级菜单名      |\n  |name   |string  |当前菜单名     |\n  |perms   |string  |菜单操作权限标识，多个，隔开 如：sys:config:list,sys:config:info      |\n  |type   |int  |菜单类型 0：目录   1：菜单   2：按钮|\n  |orderNum   |int  |菜单排序号|\n  \n###### 接口请求示例\n\n``` \n{{url}}/sys/menu/nav\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"menuList\": [\n        {\n            \"menuId\": 1,\n            \"parentId\": 0,\n            \"parentName\": null,\n            \"name\": \"系统管理\",\n            \"url\": null,\n            \"perms\": null,\n            \"type\": 0,\n            \"icon\": \"fa fa-cog\",\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 2,\n            \"parentId\": 1,\n            \"parentName\": \"系统管理\",\n            \"name\": \"管理员管理\",\n            \"url\": \"modules/sys/user.html\",\n            \"perms\": null,\n            \"type\": 1,\n            \"icon\": \"fa fa-user\",\n            \"orderNum\": 1,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 3,\n            \"parentId\": 1,\n            \"parentName\": \"系统管理\",\n            \"name\": \"角色管理\",\n            \"url\": \"modules/sys/role.html\",\n            \"perms\": null,\n            \"type\": 1,\n            \"icon\": \"fa fa-user-secret\",\n            \"orderNum\": 2,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 4,\n            \"parentId\": 1,\n            \"parentName\": \"系统管理\",\n            \"name\": \"菜单管理\",\n            \"url\": \"modules/sys/menu.html\",\n            \"perms\": null,\n            \"type\": 1,\n            \"icon\": \"fa fa-th-list\",\n            \"orderNum\": 3,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 5,\n            \"parentId\": 1,\n            \"parentName\": \"系统管理\",\n            \"name\": \"SQL监控\",\n            \"url\": \"druid/sql.html\",\n            \"perms\": null,\n            \"type\": 1,\n            \"icon\": \"fa fa-bug\",\n            \"orderNum\": 4,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 6,\n            \"parentId\": 1,\n            \"parentName\": \"系统管理\",\n            \"name\": \"定时任务\",\n            \"url\": \"modules/job/schedule.html\",\n            \"perms\": null,\n            \"type\": 1,\n            \"icon\": \"fa fa-tasks\",\n            \"orderNum\": 5,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 7,\n            \"parentId\": 6,\n            \"parentName\": \"定时任务\",\n            \"name\": \"查看\",\n            \"url\": null,\n            \"perms\": \"sys:schedule:list,sys:schedule:info\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 8,\n            \"parentId\": 6,\n            \"parentName\": \"定时任务\",\n            \"name\": \"新增\",\n            \"url\": null,\n            \"perms\": \"sys:schedule:save\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 9,\n            \"parentId\": 6,\n            \"parentName\": \"定时任务\",\n            \"name\": \"修改\",\n            \"url\": null,\n            \"perms\": \"sys:schedule:update\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 10,\n            \"parentId\": 6,\n            \"parentName\": \"定时任务\",\n            \"name\": \"删除\",\n            \"url\": null,\n            \"perms\": \"sys:schedule:delete\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 11,\n            \"parentId\": 6,\n            \"parentName\": \"定时任务\",\n            \"name\": \"暂停\",\n            \"url\": null,\n            \"perms\": \"sys:schedule:pause\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 12,\n            \"parentId\": 6,\n            \"parentName\": \"定时任务\",\n            \"name\": \"恢复\",\n            \"url\": null,\n            \"perms\": \"sys:schedule:resume\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 13,\n            \"parentId\": 6,\n            \"parentName\": \"定时任务\",\n            \"name\": \"立即执行\",\n            \"url\": null,\n            \"perms\": \"sys:schedule:run\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 14,\n            \"parentId\": 6,\n            \"parentName\": \"定时任务\",\n            \"name\": \"日志列表\",\n            \"url\": null,\n            \"perms\": \"sys:schedule:log\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 15,\n            \"parentId\": 2,\n            \"parentName\": \"管理员管理\",\n            \"name\": \"查看\",\n            \"url\": null,\n            \"perms\": \"sys:user:list,sys:user:info\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 16,\n            \"parentId\": 2,\n            \"parentName\": \"管理员管理\",\n            \"name\": \"新增\",\n            \"url\": null,\n            \"perms\": \"sys:user:save,sys:role:select\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 17,\n            \"parentId\": 2,\n            \"parentName\": \"管理员管理\",\n            \"name\": \"修改\",\n            \"url\": null,\n            \"perms\": \"sys:user:update,sys:role:select\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 18,\n            \"parentId\": 2,\n            \"parentName\": \"管理员管理\",\n            \"name\": \"删除\",\n            \"url\": null,\n            \"perms\": \"sys:user:delete\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 19,\n            \"parentId\": 3,\n            \"parentName\": \"角色管理\",\n            \"name\": \"查看\",\n            \"url\": null,\n            \"perms\": \"sys:role:list,sys:role:info\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 20,\n            \"parentId\": 3,\n            \"parentName\": \"角色管理\",\n            \"name\": \"新增\",\n            \"url\": null,\n            \"perms\": \"sys:role:save,sys:menu:perms\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 21,\n            \"parentId\": 3,\n            \"parentName\": \"角色管理\",\n            \"name\": \"修改\",\n            \"url\": null,\n            \"perms\": \"sys:role:update,sys:menu:perms\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 22,\n            \"parentId\": 3,\n            \"parentName\": \"角色管理\",\n            \"name\": \"删除\",\n            \"url\": null,\n            \"perms\": \"sys:role:delete\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 23,\n            \"parentId\": 4,\n            \"parentName\": \"菜单管理\",\n            \"name\": \"查看\",\n            \"url\": null,\n            \"perms\": \"sys:menu:list,sys:menu:info\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 24,\n            \"parentId\": 4,\n            \"parentName\": \"菜单管理\",\n            \"name\": \"新增\",\n            \"url\": null,\n            \"perms\": \"sys:menu:save,sys:menu:select\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 25,\n            \"parentId\": 4,\n            \"parentName\": \"菜单管理\",\n            \"name\": \"修改\",\n            \"url\": null,\n            \"perms\": \"sys:menu:update,sys:menu:select\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 26,\n            \"parentId\": 4,\n            \"parentName\": \"菜单管理\",\n            \"name\": \"删除\",\n            \"url\": null,\n            \"perms\": \"sys:menu:delete\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 27,\n            \"parentId\": 1,\n            \"parentName\": \"系统管理\",\n            \"name\": \"参数管理\",\n            \"url\": \"modules/sys/config.html\",\n            \"perms\": \"sys:config:list,sys:config:info,sys:config:save,sys:config:update,sys:config:delete\",\n            \"type\": 1,\n            \"icon\": \"fa fa-sun-o\",\n            \"orderNum\": 6,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 29,\n            \"parentId\": 1,\n            \"parentName\": \"系统管理\",\n            \"name\": \"系统日志\",\n            \"url\": \"modules/sys/log.html\",\n            \"perms\": \"sys:log:list\",\n            \"type\": 1,\n            \"icon\": \"fa fa-file-text-o\",\n            \"orderNum\": 7,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 30,\n            \"parentId\": 1,\n            \"parentName\": \"系统管理\",\n            \"name\": \"文件上传\",\n            \"url\": \"modules/oss/oss.html\",\n            \"perms\": \"sys:oss:all\",\n            \"type\": 1,\n            \"icon\": \"fa fa-file-image-o\",\n            \"orderNum\": 6,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 31,\n            \"parentId\": 1,\n            \"parentName\": \"系统管理\",\n            \"name\": \"部门管理\",\n            \"url\": \"modules/sys/dept.html\",\n            \"perms\": null,\n            \"type\": 1,\n            \"icon\": \"fa fa-file-code-o\",\n            \"orderNum\": 1,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 32,\n            \"parentId\": 31,\n            \"parentName\": \"部门管理\",\n            \"name\": \"查看\",\n            \"url\": null,\n            \"perms\": \"sys:dept:list,sys:dept:info\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 33,\n            \"parentId\": 31,\n            \"parentName\": \"部门管理\",\n            \"name\": \"新增\",\n            \"url\": null,\n            \"perms\": \"sys:dept:save,sys:dept:select\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 34,\n            \"parentId\": 31,\n            \"parentName\": \"部门管理\",\n            \"name\": \"修改\",\n            \"url\": null,\n            \"perms\": \"sys:dept:update,sys:dept:select\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 35,\n            \"parentId\": 31,\n            \"parentName\": \"部门管理\",\n            \"name\": \"删除\",\n            \"url\": null,\n            \"perms\": \"sys:dept:delete\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 36,\n            \"parentId\": 1,\n            \"parentName\": \"系统管理\",\n            \"name\": \"字典管理\",\n            \"url\": \"modules/sys/dict.html\",\n            \"perms\": null,\n            \"type\": 1,\n            \"icon\": \"fa fa-bookmark-o\",\n            \"orderNum\": 6,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 37,\n            \"parentId\": 36,\n            \"parentName\": \"字典管理\",\n            \"name\": \"查看\",\n            \"url\": null,\n            \"perms\": \"sys:dict:list,sys:dict:info\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 6,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 38,\n            \"parentId\": 36,\n            \"parentName\": \"字典管理\",\n            \"name\": \"新增\",\n            \"url\": null,\n            \"perms\": \"sys:dict:save\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 6,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 39,\n            \"parentId\": 36,\n            \"parentName\": \"字典管理\",\n            \"name\": \"修改\",\n            \"url\": null,\n            \"perms\": \"sys:dict:update\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 6,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 40,\n            \"parentId\": 36,\n            \"parentName\": \"字典管理\",\n            \"name\": \"删除\",\n            \"url\": null,\n            \"perms\": \"sys:dict:delete\",\n            \"type\": 2,\n            \"icon\": null,\n            \"orderNum\": 6,\n            \"open\": null,\n            \"list\": null\n        }\n    ],\n    \"code\": 0\n}\n```\n###### 备注\n> header中传值Authorization用户验证"
+							},
+							"response": []
+						},
+						{
+							"name": "选择菜单列表",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": "{{url}}/sys/menu/select",
+								"description": "###### 接口功能\n> 选择菜单不包含按钮\n\n###### 支持格式\n> FORM\n\n###### HTTP请求方式\n> GET\n\n###### 请求消息\n> 请求参数\n  \n  无\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n  |menuList     |array   |返回菜单列表   |\n\n> menuList字段数据结构说明\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |menuId   |int     | 菜单ID        |\n  |parentId |int     |上级菜单ID    |\n  |parentName     |string  |上级菜单名      |\n  |name   |string  |当前菜单名     |\n  |perms   |string  |菜单操作权限标识，多个，隔开 如：sys:config:list,sys:config:info      |\n  |type   |int  |菜单类型 0：目录   1：菜单   2：按钮|\n  |orderNum   |int  |菜单排序号|\n  \n###### 接口请求示例\n\n``` \n{{url}}/sys/menu/nav\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"menuList\": [\n        {\n            \"menuId\": 1,\n            \"parentId\": 0,\n            \"parentName\": null,\n            \"name\": \"系统管理\",\n            \"url\": null,\n            \"perms\": null,\n            \"type\": 0,\n            \"icon\": \"fa fa-cog\",\n            \"orderNum\": 0,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 2,\n            \"parentId\": 1,\n            \"parentName\": null,\n            \"name\": \"管理员管理\",\n            \"url\": \"modules/sys/user.html\",\n            \"perms\": null,\n            \"type\": 1,\n            \"icon\": \"fa fa-user\",\n            \"orderNum\": 1,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 31,\n            \"parentId\": 1,\n            \"parentName\": null,\n            \"name\": \"部门管理\",\n            \"url\": \"modules/sys/dept.html\",\n            \"perms\": null,\n            \"type\": 1,\n            \"icon\": \"fa fa-file-code-o\",\n            \"orderNum\": 1,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 3,\n            \"parentId\": 1,\n            \"parentName\": null,\n            \"name\": \"角色管理\",\n            \"url\": \"modules/sys/role.html\",\n            \"perms\": null,\n            \"type\": 1,\n            \"icon\": \"fa fa-user-secret\",\n            \"orderNum\": 2,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 4,\n            \"parentId\": 1,\n            \"parentName\": null,\n            \"name\": \"菜单管理\",\n            \"url\": \"modules/sys/menu.html\",\n            \"perms\": null,\n            \"type\": 1,\n            \"icon\": \"fa fa-th-list\",\n            \"orderNum\": 3,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 5,\n            \"parentId\": 1,\n            \"parentName\": null,\n            \"name\": \"SQL监控\",\n            \"url\": \"druid/sql.html\",\n            \"perms\": null,\n            \"type\": 1,\n            \"icon\": \"fa fa-bug\",\n            \"orderNum\": 4,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 6,\n            \"parentId\": 1,\n            \"parentName\": null,\n            \"name\": \"定时任务\",\n            \"url\": \"modules/job/schedule.html\",\n            \"perms\": null,\n            \"type\": 1,\n            \"icon\": \"fa fa-tasks\",\n            \"orderNum\": 5,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 27,\n            \"parentId\": 1,\n            \"parentName\": null,\n            \"name\": \"参数管理\",\n            \"url\": \"modules/sys/config.html\",\n            \"perms\": \"sys:config:list,sys:config:info,sys:config:save,sys:config:update,sys:config:delete\",\n            \"type\": 1,\n            \"icon\": \"fa fa-sun-o\",\n            \"orderNum\": 6,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 30,\n            \"parentId\": 1,\n            \"parentName\": null,\n            \"name\": \"文件上传\",\n            \"url\": \"modules/oss/oss.html\",\n            \"perms\": \"sys:oss:all\",\n            \"type\": 1,\n            \"icon\": \"fa fa-file-image-o\",\n            \"orderNum\": 6,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 36,\n            \"parentId\": 1,\n            \"parentName\": null,\n            \"name\": \"字典管理\",\n            \"url\": \"modules/sys/dict.html\",\n            \"perms\": null,\n            \"type\": 1,\n            \"icon\": \"fa fa-bookmark-o\",\n            \"orderNum\": 6,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 29,\n            \"parentId\": 1,\n            \"parentName\": null,\n            \"name\": \"系统日志\",\n            \"url\": \"modules/sys/log.html\",\n            \"perms\": \"sys:log:list\",\n            \"type\": 1,\n            \"icon\": \"fa fa-file-text-o\",\n            \"orderNum\": 7,\n            \"open\": null,\n            \"list\": null\n        },\n        {\n            \"menuId\": 0,\n            \"parentId\": -1,\n            \"parentName\": null,\n            \"name\": \"一级菜单\",\n            \"url\": null,\n            \"perms\": null,\n            \"type\": null,\n            \"icon\": null,\n            \"orderNum\": null,\n            \"open\": true,\n            \"list\": null\n        }\n    ],\n    \"code\": 0\n}\n```\n###### 备注\n> header中传值Authorization用户验"
+							},
+							"response": []
+						},
+						{
+							"name": "菜单信息",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": "{{url}}/sys/menu/info/1",
+								"description": "###### 接口功能\n> 菜单信息\n\n###### 支持格式\n> Restful\n\n###### HTTP请求方式\n> GET\n\n###### 请求消息\n> 请求参数\n  \n  |参数     |必选    |类型  |说明    |\n  |:-----   |:-------|:-----|-----   |\n  |menuId   |true    |int   |菜单ID  |\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n  |menu     |obj     |返回菜单信息   |\n\n> menu字段数据结构说明\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |menuId   |int     | 菜单ID        |\n  |parentId |int     |上级菜单ID    |\n  |parentName     |string  |上级菜单名      |\n  |name   |string  |当前菜单名     |\n  |perms   |string  |菜单操作权限标识，多个，隔开 如：sys:config:list,sys:config:info      |\n  |type   |int  |菜单类型 0：目录   1：菜单   2：按钮|\n  |orderNum   |int  |菜单排序号|\n  \n###### 接口请求示例\n\n``` \n{{url}}/sys/menu/info/{menuId}\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0,\n    \"role\": {\n        \"roleId\": 1,\n        \"roleName\": \"测试\",\n        \"remark\": null,\n        \"deptId\": 1,\n        \"deptName\": null,\n        \"menuIdList\": [\n            1,\n            2,\n            15,\n            16,\n            17,\n            18\n        ],\n        \"deptIdList\": [],\n        \"createTime\": \"2019-10-30 12:17:04\"\n    }\n}\n```\n###### 备注\n> header中传值Authorization用户验证"
+							},
+							"response": []
+						},
+						{
+							"name": "添加菜单",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{TOKEN}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"parentName\": \"一级菜单\",\n\t\"parentId\": 0,\n\t\"type\": 1,\n\t\"orderNum\": 0,\n\t\"name\": \"aaa\",\n\t\"url\": \"aaa\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/sys/menu/save",
+								"description": "###### 接口功能\n> 添加菜单\n\n###### 支持格式\n> JSON\n\n###### HTTP请求方式\n> POST\n\n###### 请求消息\n> 请求参数\n  \n  |参数     |必选    |类型  |说明    |\n  |:-----   |:-------|:-----|-----   |\n  |parentName |true |string     |上级菜单名     |\n  |parentId     |true |int  |上级菜单ID    |\n  |type |true |int  |\t菜单类型 0：目录 1：菜单 2：按钮     |\n  |orderNum |false |int   |排序     |\n  |name |true |string   |菜单名     |\n  |url |false |string   |菜单请求链接     |\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n\n###### 接口请求示例\n\n``` \n{\n\t\"parentName\": \"一级菜单\",\n\t\"parentId\": 0,\n\t\"type\": 1,\n\t\"orderNum\": 0,\n\t\"name\": \"aaa\",\n\t\"url\": \"aaa\"\n}\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0\n}\n```\n###### 备注\n> header中传值Authorization用户验证"
+							},
+							"response": []
+						},
+						{
+							"name": "修改菜单",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{TOKEN}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"menuId\": 1,\n\t\"parentName\": \"一级菜单\",\n\t\"parentId\": 0,\n\t\"type\": 1,\n\t\"orderNum\": 0,\n\t\"name\": \"aaa\",\n\t\"url\": \"aaa\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/sys/menu/update",
+								"description": "###### 接口功能\n> 添加菜单\n\n###### 支持格式\n> JSON\n\n###### HTTP请求方式\n> POST\n\n###### 请求消息\n> 请求参数\n  \n  |参数     |必选    |类型  |说明    |\n  |:-----   |:-------|:-----|-----   |\n  |parentName |true |string     |上级菜单名     |\n  |parentId     |true |int  |上级菜单ID    |\n  |type |true |int  |\t菜单类型 0：目录 1：菜单 2：按钮     |\n  |orderNum |false |int   |排序     |\n  |name |true |string   |菜单名     |\n  |url |false |string   |菜单请求链接     |\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n\n###### 接口请求示例\n\n``` \n{\n\t\"parentName\": \"一级菜单\",\n\t\"parentId\": 0,\n\t\"type\": 1,\n\t\"orderNum\": 0,\n\t\"name\": \"aaa\",\n\t\"url\": \"aaa\"\n}\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0\n}\n```\n###### 备注\n> header中传值Authorization用户验证"
+							},
+							"response": []
+						},
+						{
+							"name": "删除菜单",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/sys/menu/delete?menuId=1",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"sys",
+										"menu",
+										"delete"
+									],
+									"query": [
+										{
+											"key": "menuId",
+											"value": "1"
+										}
+									]
+								},
+								"description": "###### 接口功能\n> 删除菜单\n\n###### 支持格式\n> FROM\n\n###### HTTP请求方式\n> DELETE\n\n###### 请求消息\n> 请求参数\n  \n  |参数     |必选    |类型  |说明    |\n  |:-----   |:-------|:-----|-----   |\n  |menuId   |true |int     | 需要删除菜单ID        |\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n\n###### 接口请求示例\n\n``` \n{{url}}/sys/menu/delete?menuId=1\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0\n}\n```\n###### 备注\n> header中传值Authorization用户验证"
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "分页查询角色列表",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/sys/role/list?limit=10&page=1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"sys",
+								"role",
+								"list"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								}
+							]
+						},
+						"description": "###### 接口功能\n> 角色列表\n\n###### 支持格式\n> FORM\n\n###### HTTP请求方式\n> GET\n\n###### 请求消息\n> 请求参数\n  \n  |参数     |必选    |类型  |说明    |\n  |:-----   |:-------|:-----|-----   |\n  |roleName |false |string     |角色名    |\n  |page     |true |int  |页码       |\n  |limit     |true |int  |每页显示条数       |\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n  |page     |obj     |分页数据详情       |\n   \n> page字段数据结构说明\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |totalCount   |int     | 总条数        |\n  |pageSize |int     |每页条数     |\n  |totalPage     |int  |总页数       |\n  |currPage   |int  |当前页      |\n  |list   |array  |角色信息列表      |\n  \n> list字段数据结构说明\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |roleId   |int     | 用户ID        |\n  |roleName |string     |角色名     |\n  |remark     |string  |描述      |\n  |createTime   |string  |加入时间      |\n  |deptId   |int  |所属组织ID      |\n  |deptName   |string  |所属组织名称     |\n\n###### 接口请求示例\n\n``` \n{{url}}/sys/role/list?limit=10&page=1\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0,\n    \"page\": {\n        \"totalCount\": 1,\n        \"pageSize\": 10,\n        \"totalPage\": 1,\n        \"currPage\": 1,\n        \"list\": [\n            {\n                \"roleId\": 1,\n                \"roleName\": \"测试\",\n                \"remark\": null,\n                \"deptId\": 1,\n                \"deptName\": \"测试集团\",\n                \"menuIdList\": null,\n                \"deptIdList\": null,\n                \"createTime\": \"2019-10-30 12:17:04\"\n            }\n        ]\n    }\n}\n```\n###### 备注\n> header中传值Authorization用户验证"
+					},
+					"response": []
+				},
+				{
+					"name": "添加角色",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"deptId\": 1,\n\t\"roleName\": \"测试\",\n\t\"menuIdList\": [1, 2, 15, 16, 17, 18],\n\t\"deptIdList\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/sys/role/save",
+						"description": "###### 接口功能\n> 添加角色\n\n###### 支持格式\n> JSON\n\n###### HTTP请求方式\n> POST\n\n###### 请求消息\n> 请求参数\n  \n  |参数     |必选    |类型  |说明    |\n  |:-----   |:-------|:-----|-----   |\n  |deptId |true |int     |所属组织ID     |\n  |roleName     |true |string  |角色名称       |\n  |menuIdList |false |int array  |菜单权限列表      |\n  |deptIdList |false |int array  |组织权限列表      |\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n\n###### 接口请求示例\n\n``` \n{\n\t\"deptId\": 1,\n\t\"roleName\": \"测试\",\n\t\"menuIdList\": [1, 2, 15, 16, 17, 18],\n\t\"deptIdList\": []\n}\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0\n}\n```\n###### 备注\n> header中传值Authorization用户验证"
+					},
+					"response": []
+				},
+				{
+					"name": "选择角色列表",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": "{{url}}/sys/role/select",
+						"description": "###### 接口功能\n> 选择角色列表\n\n###### 支持格式\n> FORM\n\n###### HTTP请求方式\n> GET\n\n###### 请求消息\n> 请求参数\n  \n  无\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n  |list     |array   |返回角色列表   |\n\n> list字段数据结构说明\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |roleId   |int     | 用户ID        |\n  |roleName |string     |角色名     |\n  |remark     |string  |描述      |\n  |createTime   |string  |加入时间      |\n  |deptId   |int  |所属组织ID      |\n  |deptName   |string  |所属组织名称     |\n  \n###### 接口请求示例\n\n``` \n{{url}}/sys/role/select\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0,\n    \"list\": [\n        {\n            \"roleId\": 1,\n            \"roleName\": \"测试\",\n            \"remark\": null,\n            \"deptId\": 1,\n            \"deptName\": null,\n            \"menuIdList\": null,\n            \"deptIdList\": null,\n            \"createTime\": \"2019-10-30 12:17:04\"\n        }\n    ]\n}\n```\n###### 备注\n> header中传值Authorization用户验证"
+					},
+					"response": []
+				},
+				{
+					"name": "角色信息",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": "{{url}}/sys/role/info/1",
+						"description": "###### 接口功能\n> 角色信息\n\n###### 支持格式\n> Restful\n\n###### HTTP请求方式\n> GET\n\n###### 请求消息\n> 请求参数\n  \n  |参数     |必选    |类型  |说明    |\n  |:-----   |:-------|:-----|-----   |\n  |roleId   |true    |int   |角色ID  |\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n  |role     |obj     |返回角色列表   |\n\n> role字段数据结构说明\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |roleId   |int     | 用户ID        |\n  |roleName |string     |角色名     |\n  |remark     |string  |描述      |\n  |createTime   |string  |加入时间      |\n  |deptId   |int  |所属组织ID      |\n  |deptName   |string  |所属组织名称     |\n  |menuIdList   |array  |权限菜单ID列表    |\n  |deptIdList   |array  |数据权限组织ID列表    |\n  \n###### 接口请求示例\n\n``` \n{{url}}/sys/role/info/{roleId}\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0,\n    \"role\": {\n        \"roleId\": 1,\n        \"roleName\": \"测试\",\n        \"remark\": null,\n        \"deptId\": 1,\n        \"deptName\": null,\n        \"menuIdList\": [\n            1,\n            2,\n            15,\n            16,\n            17,\n            18\n        ],\n        \"deptIdList\": [],\n        \"createTime\": \"2019-10-30 12:17:04\"\n    }\n}\n```\n###### 备注\n> header中传值Authorization用户验证"
+					},
+					"response": []
+				},
+				{
+					"name": "修改角色",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"roleId\":1,\n\t\"deptId\": 1,\n\t\"roleName\": \"测试\",\n\t\"menuIdList\": [1, 2, 15, 16, 17, 18],\n\t\"deptIdList\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/sys/role/update",
+						"description": "###### 接口功能\n> 修改角色\n\n###### 支持格式\n> JSON\n\n###### HTTP请求方式\n> PUT\n\n###### 请求消息\n> 请求参数\n  \n  |参数     |必选    |类型  |说明    |\n  |:-----   |:-------|:-----|-----   |\n  |roleId |true |int     |角色ID     |\n  |deptId |true |int     |所属组织ID     |\n  |roleName     |true |string  |角色名称       |\n  |menuIdList |false |int array  |菜单权限列表      |\n  |deptIdList |false |int array  |组织权限列表      |\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n\n###### 接口请求示例\n\n``` \n{\n\t\"roleId\":1,\n\t\"deptId\": 1,\n\t\"roleName\": \"测试\",\n\t\"menuIdList\": [1, 2, 15, 16, 17, 18],\n\t\"deptIdList\": []\n}\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0\n}\n```\n###### 备注\n> header中传值Authorization用户验证"
+					},
+					"response": []
+				},
+				{
+					"name": "删除角色",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[1,3]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/sys/role/delete",
+						"description": "###### 接口功能\n> 删除角色\n\n###### 支持格式\n> JSON\n\n###### HTTP请求方式\n> DELETE\n\n###### 请求消息\n> 请求参数\n  \n  |参数     |必选    |类型  |说明    |\n  |:-----   |:-------|:-----|-----   |\n  |roleIds   |true |int  array   | 需要删除角色ID列表        |\n\n###### 响应消息\n> 响应参数\n\n  |    字段 |字段类型|说明           |\n  |:-----   |:------ |:--------------|\n  |code     |int     | 成功状态      |\n  |msg      |string  |返回描述信息   |\n\n###### 接口请求示例\n\n``` \n[5,4,3]\n\n```\n###### 接口返回示例\n\n```\n{\n    \"msg\": \"success\",\n    \"code\": 0\n}\n```\n###### 备注\n> header中传值Authorization用户验证"
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"protocolProfileBehavior": {}
+}

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputInvoiceUnitPushDao">
+    <sql id="invoiceColumns">
+        a.id AS "id",
+        a.basic_unit1 AS "basicUnit1",
+        a.basic_unit2 AS "basicUnit2",
+        a.quantity_unit1 AS "quantityUnit1",
+        a.quantity_unit2 AS "quantityUnit2",
+        a.is_delete AS "isDelete"
+    </sql>
+
+    <update id="updateByDelete">
+        UPDATE input_invoice_unit_push
+        <set>
+            is_delete = #{isDelete},
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="get" resultType="com.pwc.modules.input.entity.InputInvoiceUnitPush">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice_unit_push a
+        WHERE a.id = #{id}
+    </select>
+
+    <insert id="save">
+        INSERT INTO input_invoice_unit_push(
+          basic_unit1,
+          basic_unit2,
+          quantity_unit1,
+          quantity_unit2,
+          is_delete
+        ) VALUES (
+          #{basicUnit1},
+          #{basicUnit2},
+          #{quantityUnit1},
+          #{quantityUnit1},
+          #{isDelete}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE input_invoice_unit_push
+        <set>
+            <if test="basicUnit1 != null and basicUnit1 != ''">
+                basic_unit1 = #{basicUnit1},
+            </if>
+            <if test="basicUnit2 != null and basicUnit2 != ''">
+                basic_unit2 = #{basicUnit2},
+            </if>
+            <if test="quantityUnit1 != null">
+                quantity_unit1 = #{quantityUnit1},
+            </if>
+            <if test="quantityUnit2 != null">
+                quantity_unit2 = #{quantityUnit2},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="getByBasicUnits" resultType="com.pwc.modules.input.entity.InputInvoiceUnitPush">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice_unit_push a
+        WHERE ((a.basic_unit1 = #{basicUnit1}
+        And a.basic_unit2 = #{basicUnit2})
+        OR (a.basic_unit1 = #{basicUnit2}
+        And a.basic_unit2 = #{basicUnit1}))
+        <if test="isDelete != null and isDelete != ''">
+            AND a.is_delete = #{isDelete}
+        </if>
+    </select>
+</mapper>

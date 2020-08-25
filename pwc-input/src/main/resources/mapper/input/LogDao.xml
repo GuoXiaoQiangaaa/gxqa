@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pwc.modules.input.dao.LogDao">
+    <insert id="insertLogHistory" useGeneratedKeys="true" keyProperty="id">
+        insert into input_log_history(
+        interface_name,
+        in_param,
+        out_param,
+        time,
+        request_id
+        )values
+        <foreach collection="list" item="item" separator=",">
+        (
+        #{item.interfaceName},
+        #{item.inParam},
+        #{item.outParam},
+        #{item.time},
+        #{item.requestId}
+        )
+    </foreach>
+    </insert>
+    <delete id="deleteLog">
+        DELETE FROM log
+		WHERE time between date_sub(now(),interval 3 month) and now();
+    </delete>
+
+    <select id="getList" resultType="com.pwc.modules.input.entity.Log">
+        select  time AS "time",
+                in_param AS "inParam",
+                out_param AS "outParam",
+                interface_name AS "interfaceName",
+                request_id AS "requestId"
+        from input_log
+        where time between date_sub(now(),interval 3 month) and now();
+    </select>
+</mapper>

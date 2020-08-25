@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputOAInvoiceInfoDao">
+    <sql id="invoiceColumns">
+        a.id AS "id",
+        a.REQUEST_ID AS "requestId",
+        a.bar_code as "barCode",
+        a.invoice_remark AS "invoiceRemark",
+        a.invoice_image AS "invoiceImage",
+        a.invoice_upload_type AS "invoiceUploadType",
+        a.invoice_number AS "invoiceNumber",
+        a.invoice_printed_code AS "invoicePrintedCode",
+        a.invoice_printed_number AS "invoicePrintedNumber",
+        a.invoice_code AS "invoiceCode",
+        a.invoice_create_date AS "invoiceCreateDate",
+        a.invoice_check_code AS "invoiceCheckCode",
+        a.invoice_free_price AS "invoiceFreePrice",
+        a.invoice_total_price AS "invoiceTotalPrice",
+        a.invoice_tax_price AS "invoiceTaxPrice",
+        a.doc_id AS "docId",
+        a.invoice_purchaser_company AS "invoicePurchaserCompany",
+        a.invoice_purchaser_paragraph AS "invoicePurchaserParagraph",
+        a.invoice_sell_company AS "invoiceSellCompany",
+        a.invoice_sell_paragraph AS "invoiceSellParagraph",
+        a.invoice_description AS "invoiceDescription",
+        a.invoice_status AS "invoiceStatus",
+        a.invoice_upload_date AS "invoiceUploadDate",
+        a.invoice_error_info AS "invoiceErrorInfo",
+        a.invoice_type AS "invoiceType",
+        a.invoice_update_date AS "invoiceUpdateDate",
+        a.invoice_update_person AS "invoiceUpdatePerson",
+        a.post_date as "postDate"
+    </sql>
+
+    <insert id="insertList" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO input_oa_invoice_info (
+        invoice_code,
+        REQUEST_ID,
+        invoice_number,
+        invoice_free_price,
+        invoice_create_date,
+        invoice_upload_date,
+        invoice_delete,
+        invoice_return,
+        invoice_check_code
+        ) VALUES
+        <foreach collection="list" item="item" separator=",">
+            #{item.invoiceCode},
+            #{requestId},
+            #{item.invoiceNumber},
+            #{item.invoiceFreePrice},
+            #{item.invoiceCreateDate},
+            #{item.invoiceUploadDate},
+            #{item.invoiceDelete},
+            #{item.invoiceReturn},
+            #{item.invoiceCheckCode}
+        </foreach>
+    </insert>
+    <update id="deleteRefunds">
+        delete from input_oa_invoice_refund
+        WHERE invoice_id in
+        <foreach collection="array" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="getListById" resultType="com.pwc.modules.input.entity.InputOAInvoiceInfo">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_oa_invoice_info a
+        WHERE a.id IN
+        <foreach collection="ids" index="index" item="item"  open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="getListByShow" resultType="int">
+        SELECT count(1)
+        FROM input_oa_invoice_info a
+       /* WHERE a.invoice_delete = 0*/
+    </select>
+
+    <select id="getByDocId" resultType="com.pwc.modules.input.entity.InputOAInvoiceInfo">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_oa_invoice_info a
+        WHERE a.doc_id = #{docId}
+    </select>
+
+    <select id="getListByNumberAndCode" resultType="com.pwc.modules.input.entity.InputOAInvoiceInfo">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_oa_invoice_info a
+        WHERE a.invoice_number = #{invoiceNumber} and a.invoice_code = #{invoiceCode} and a.invoice_delete != "1" and a.invoice_return !="1"
+    </select>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO input_oa_invoice_info(
+          invoice_update_person,
+          invoice_update_date,
+          invoice_remark,
+          bar_code,
+          invoice_return,
+          invoice_image,
+          invoice_upload_type,
+          invoice_printed_number,
+          invoice_number,
+          invoice_printed_code,
+          invoice_code,
+          invoice_create_date,
+          invoice_check_code,
+          invoice_free_price,
+          invoice_total_price,
+          invoice_tax_price,
+          doc_id,
+          invoice_purchaser_company,
+          invoice_purchaser_paragraph,
+          invoice_sell_company,
+          invoice_sell_paragraph,
+          invoice_description,
+          invoice_status,
+          REQUEST_ID,
+          invoice_upload_date,
+          invoice_type,
+          invoice_purchaser_bank_account,
+          invoice_sell_bank_account,
+          invoice_purchaser_address,
+          invoice_error_info,
+          invoice_sell_address
+        ) VALUES (
+          #{invoiceUpdatePerson},
+          #{invoiceUpdateDate},
+          #{invoiceRemark},
+          #{barCode},
+          #{invoiceReturn},
+          #{invoiceImage},
+          #{invoiceUploadType},
+          #{invoicePrintedNumber},
+          #{invoiceNumber},
+          #{invoicePrintedCode},
+          #{invoiceCode},
+          #{invoiceCreateDate},
+          #{invoiceCheckCode},
+          #{invoiceFreePrice},
+          #{invoiceTotalPrice},
+          #{invoiceTaxPrice},
+          #{docId},
+          #{invoicePurchaserCompany},
+          #{invoicePurchaserParagraph},
+          #{invoiceSellCompany},
+          #{invoiceSellParagraph},
+          #{invoiceDescription},
+          #{invoiceStatus},
+          #{requestId},
+          #{invoiceUploadDate},
+          #{invoiceType},
+          #{invoicePurchaserBankAccount},
+          #{invoiceSellBankAccount},
+          #{invoicePurchaserAddress},
+          #{invoiceErrorInfo},
+          #{invoiceSellAddress}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE input_oa_invoice_info
+        <set>
+            <if test="invoiceUpdateDate != null and invoiceUpdateDate != ''">
+                invoice_update_date = #{invoiceUpdateDate},
+            </if>
+            <if test="invoiceUpdatePerson != null and invoiceUpdatePerson != ''">
+                invoice_update_person = #{invoiceUpdatePerson},
+            </if>
+            <if test="invoiceRemark != null and invoiceRemark != ''">
+                invoice_remark = #{invoiceRemark},
+            </if>
+            <if test="invoiceErrorInfo != null">
+                invoice_error_info = #{invoiceErrorInfo},
+            </if>
+            <if test="invoiceUploadType != null and invoiceUploadType != ''">
+                invoice_upload_type = #{invoiceUploadType},
+            </if>
+            <if test="invoiceNumber != null and invoiceNumber != ''">
+                invoice_number = #{invoiceNumber},
+            </if>
+            <if test="invoicePrintedCode != null and invoicePrintedCode != ''">
+                invoice_printed_code = #{invoicePrintedCode},
+            </if>
+            <if test="invoicePrintedNumber != null and invoicePrintedNumber != ''">
+                invoice_printed_number = #{invoicePrintedNumber},
+            </if>
+            <if test="invoiceCode != null and invoiceCode != ''">
+                invoice_code = #{invoiceCode},
+            </if>
+            <if test="invoiceCreateDate != null and invoiceCreateDate != ''">
+                invoice_create_date = #{invoiceCreateDate},
+            </if>
+            <if test="invoiceFreePrice != null">
+                invoice_free_price = #{invoiceFreePrice},
+            </if>
+            <if test="invoiceTotalPrice != null">
+                invoice_total_price = #{invoiceTotalPrice},
+            </if>
+            <if test="invoiceTaxPrice != null">
+                invoice_tax_price = #{invoiceTaxPrice},
+            </if>
+            <if test="docId != null and docId != ''">
+                doc_id = #{docId},
+            </if>
+            <if test="invoicePurchaserCompany != null and invoicePurchaserCompany != ''">
+                invoice_purchaser_company = #{invoicePurchaserCompany},
+            </if>
+            <if test="invoicePurchaserParagraph != null and invoicePurchaserParagraph != ''">
+                invoice_purchaser_paragraph = #{invoicePurchaserParagraph},
+            </if>
+            <if test="invoiceSellCompany != null and invoiceSellCompany != ''">
+                invoice_sell_company = #{invoiceSellCompany},
+            </if>
+            <if test="invoiceSellParagraph != null and invoiceSellParagraph != ''">
+                invoice_sell_paragraph = #{invoiceSellParagraph},
+            </if>
+            <if test="invoiceDescription != null and invoiceDescription != ''">
+                invoice_description = #{invoiceDescription},
+            </if>
+            <if test="invoiceStatus != null and invoiceStatus != ''">
+                invoice_status = #{invoiceStatus},
+            </if>
+            <if test="requestId != null and requestId != ''">
+                REQUEST_ID = #{requestId},
+            </if>
+            <if test="invoiceUploadDate != null and invoiceUploadDate != ''">
+                invoice_upload_date = #{invoiceUploadDate},
+            </if>
+            <if test="invoiceType != null and invoiceType != ''">
+                invoice_type = #{invoiceType},
+            </if>
+            <if test="invoicePurchaserBankAccount != null and invoicePurchaserBankAccount != ''">
+                invoice_purchaser_bank_account = #{invoicePurchaserBankAccount},
+            </if>
+            <if test="invoiceSellBankAccount != null and invoiceSellBankAccount != ''">
+                invoice_sell_bank_account = #{invoiceSellBankAccount},
+            </if>
+            <if test="invoiceReturn != null and invoiceReturn != ''">
+                invoice_return = #{invoiceReturn},
+            </if>
+            <if test="invoiceDelete != null and invoiceDelete != ''">
+                invoice_delete = #{invoiceDelete},
+            </if>
+            <if test="invoicePurchaserAddress != null and invoicePurchaserAddress != ''">
+                invoice_purchaser_address = #{invoicePurchaserAddress},
+            </if>
+            <if test="invoiceSellAddress != null and invoiceSellAddress != ''">
+                invoice_sell_address = #{invoiceSellAddress},
+            </if>
+            <if test="postDate != null and postDate != ''">
+                post_date = #{postDate},
+            </if>
+            <if test="invoiceImage != null and invoiceImage != ''">
+                invoice_image = #{invoiceImage},
+            </if>
+            <if test="invoiceCheckCode != null and invoiceCheckCode != ''">
+                invoice_check_code = #{invoiceCheckCode},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="get" resultType="com.pwc.modules.input.entity.InputOAInvoiceInfo">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_oa_invoice_info a
+        WHERE a.id = #{id}
+    </select>
+
+    <update id="updateByIds">
+        UPDATE input_oa_invoice_info
+        <set>
+            invoice_delete = 1,
+            invoice_return = 0
+        </set>
+        WHERE id in
+        <foreach collection="array" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+    <update id="updateByIds2">
+        UPDATE input_oa_invoice_info
+        <set>
+            invoice_status = 13,
+            invoice_return = '0',
+            invoice_delete = '0'
+        </set>
+        WHERE id in
+        <foreach collection="array" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <update id="setDescription">
+        UPDATE input_oa_invoice_info
+        <set>
+            invoice_remark = #{invoiceRemark}
+        </set>
+        WHERE id in
+        <foreach collection="array" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="getListByIds" resultType="com.pwc.modules.input.entity.InputOAInvoiceInfo">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_oa_invoice_info a
+        WHERE a.id in
+        <foreach collection="array" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="getListByRequest" resultType="com.pwc.modules.input.entity.InputOAInvoiceInfo">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_oa_invoice_info a
+        WHERE a.REQUEST_ID = #{requestId}
+    </select>
+
+    <update id="updateByRequestId">
+        UPDATE input_oa_invoice_info
+        <set>
+            <if test="invoiceStatus != null and invoiceStatus != ''">
+                invoice_status = #{invoiceStatus},
+            </if>
+            <if test="invoiceReturn != null and invoiceReturn != ''">
+                invoice_return = #{invoiceReturn},
+            </if>
+            <if test="invoiceUpdateDate != null and invoiceUpdateDate != ''">
+                invoice_update_date = #{invoiceUpdateDate},
+            </if>
+            <if test="postDate != null and postDate != ''">
+                post_date = #{postDate},
+            </if>
+        </set>
+        WHERE REQUEST_ID = #{requestId}
+    </update>
+
+
+    <update id="updatePassEntry">
+        UPDATE input_oa_invoice_info
+        <set>
+            <if test="invoiceStatus != null and invoiceStatus != ''">
+                invoice_status = #{invoiceStatus},
+            </if>
+            <if test="invoiceUpdateDate != null and invoiceUpdateDate != ''">
+                invoice_update_date = #{invoiceUpdateDate},
+            </if>
+            <if test="postDate != null and postDate != ''">
+                post_date = #{postDate},
+            </if>
+        </set>
+        WHERE REQUEST_ID = #{requestId} and invoice_status = '5'
+    </update>
+
+
+    <select id="getOaInvoiceInfoByCodeAndNumber" resultType="com.pwc.modules.input.entity.InputOAInvoiceInfo">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_oa_invoice_info a
+        WHERE a.invoice_code = #{invoiceCode}
+        AND a.invoice_number = #{invoiceNumber}
+        <if test="id != null">
+            AND a.id != #{id}
+        </if>
+        AND a.invoice_return != '1'
+        AND a.invoice_delete != '1'
+    </select>
+
+
+    <update id="deleteByRequestId">
+		DELETE FROM input_oa_invoice_info
+		WHERE REQUEST_ID = #{requestId}
+	</update>
+
+    <update id="updateForReFund">
+        UPDATE input_oa_invoice_info
+        <set>
+            <if test="invoiceReturn != null and invoiceReturn != ''">
+                invoice_return = #{invoiceReturn},
+            </if>
+        </set>
+        WHERE REQUEST_ID = #{requestId} and invoice_status != "13"
+    </update>
+
+    <select id="getListByRequestIdAndBarcode" resultType="com.pwc.modules.input.entity.InputOAInvoiceInfo">
+        select <include refid="invoiceColumns"/>
+        from input_oa_invoice_info a
+        where a.REQUEST_ID = #{requestId} and a.bar_code = #{barCode}
+    </select>
+
+    <select id="getMigrationList" resultType="com.pwc.modules.input.entity.InputOAInvoiceInfo">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_oa_invoice_info a
+        WHERE a.invoice_upload_date &gt; '2019-09-16 00:00:00'
+        AND a.invoice_upload_date &lt; '2019-09-18 00:00:00 '
+        AND a.invoice_image IS NOT NULL
+    </select>
+
+</mapper>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputInvoiceCheckActionDao">
+
+    <sql id="InvoiceCheckActionColumns">
+		a.id AS "id",
+		a.co_id AS "coId",
+		a.items AS "items",
+		a.action AS "action",
+		a.description AS "description"
+	</sql>
+
+	<select id="getByItem" resultType="com.pwc.modules.input.entity.InputInvoiceCheckAction">
+		SELECT
+		<include refid="InvoiceCheckActionColumns"/>
+		FROM input_check_action a
+		WHERE a.items LIKE concat('%',#{items},'%')
+	</select>
+	
+	<select id="findList" resultType="com.pwc.modules.input.entity.InputInvoiceCheckAction">
+		SELECT 
+		<include refid="InvoiceCheckActionColumns"/>
+		FROM input_check_action a
+	</select>
+	
+	<update id="updateByAction">
+		UPDATE input_check_action
+		<set>
+			action = #{action}
+		</set>
+		WHERE id = #{id}
+	</update>
+</mapper>

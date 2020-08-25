@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputOaExpenseInfoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.pwc.modules.input.entity.InputOaExpenseInfoEntity" id="oaExpenseInfoMap">
+        <result property="expenseNumber" column="expense_number"/>
+        <result property="id" column="id"/>
+        <result property="applyUser" column="apply_user"/>
+        <result property="endUser" column="end_user"/>
+        <result property="applyTime" column="apply_time"/>
+        <result property="amount" column="amount"/>
+        <result property="expenseStatus" column="expense_status"/>
+        <result property="expenseType" column="expense_type"/>
+        <result property="invoicesAmount" column="invoices_amount"/>
+    </resultMap>
+
+    <sql id="OaExpenseInfoColumns">
+		a.id as "id",
+		a.apply_user as "applyUser",
+		a.end_user as "endUser",
+		a.apply_time as "applyTime",
+		a.amount AS "amount",
+		a.expense_status AS "expenseStatus",
+		a.expense_type AS "expenseType",
+		a.expense_number As "expenseNumber",
+		a.invoices_amount As "invoicesAmount"
+
+	</sql>
+
+    <select id="getById" resultType="com.pwc.modules.input.entity.InputOaExpenseInfoEntity">
+        SELECT
+        <include refid="OaExpenseInfoColumns"/>
+        FROM input_oa_expense_info a
+        WHERE a.id = #{id}
+    </select>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO input_oa_expense_info (
+            apply_user,
+            end_user,
+            apply_time,
+            amount,
+            expense_status,
+            expense_type,
+            expense_number,
+            invoices_amount
+		) VALUES (
+			#{applyUser},
+			#{endUser},
+			#{applyTime},
+			#{amount},
+			#{expenseStatus},
+			#{expenseType},
+			#{expenseNumber},
+			#{invoicesAmount}
+
+		)
+	</insert>
+
+<!--    <select id="getById" resultType="com.pwc.modules.input.entity.InputOaExpenseInfoEntity">-->
+<!--        SELECT-->
+<!--        <include refid="OaExpenseInfoColumns" />-->
+
+<!--        FROM input_oa_expense_info a-->
+<!--        WHERE a.id = #{id}-->
+<!--    </select>-->
+
+    <delete id="removeByIds"  >
+        DELETE FROM input_oa_expense_info
+        WHERE id in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+        #{item}
+        </foreach>
+    </delete>
+
+    <update id="update">
+    UPDATE input_oa_expense_info
+    <set>
+        <if test="applyUser != null and applyUser != ''">
+            apply_user = #{applyUser},
+        </if>
+            <if test="endUser != null and endUser != ''">
+                end_user = #{endUser},
+            </if>
+            <if test="applyTime != null and applyTime != ''">
+                apply_time = #{applyTime},
+            </if>
+            <if test="amount != null and amount != ''">
+                amount = #{amount},
+            </if>
+            <if test="expenseStatus != null and expenseStatus != ''">
+                expense_status = #{expenseStatus},
+            </if>
+
+            <if test="expenseType != null and expenseType != ''">
+                expense_type = #{expenseType},
+            </if>
+            <if test="expenseNumber != null and expenseNumber != ''">
+                expense_number = #{expenseNumber},
+            </if>
+            <if test="invoicesAmount != null and invoicesAmount != ''">
+                invoices_amount = #{invoicesAmount},
+            </if>
+        </set>
+        WHERE id = #{id}
+
+
+
+
+
+
+    </update>
+
+
+
+
+</mapper>

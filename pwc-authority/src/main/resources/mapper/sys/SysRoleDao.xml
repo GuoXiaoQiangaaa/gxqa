@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.sys.dao.SysRoleDao">
+
+    <select id="queryVOList" resultType="com.pwc.modules.sys.entity.SelectVo">
+		select d.role_name label, d.role_id `value` from sys_role d
+		where 1=1
+		<if test="list != null">
+			and d.role_id in
+			<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+
+	<!-- 查询用户id查询企业id -->
+	<select id="findDeptIdByUserId" resultType="com.pwc.modules.sys.entity.SysUserEntity">
+		SELECT dept_id FROM sys_user WHERE user_id=#{userId}
+	</select>
+	<!-- 根据企业id查询权限列表 -->
+	<select id="findMenuListByDeptId" resultType="long">
+		SELECT
+			distinct t2.menu_id
+		FROM
+			sys_dept t1
+				INNER JOIN sys_dept_menu t3 ON t1.dept_id = t3.dept_id
+				LEFT JOIN sys_menu t2 ON t2.menu_id = t3.menu_id
+		WHERE
+			t1.dept_id = #{deptId}
+	</select>
+
+	<select id="findRoleIdByUserId" resultType="com.pwc.modules.sys.entity.SysUserRoleEntity">
+		SELECT role_id from sys_user_role where user_id=#{userId}
+	</select>
+
+
+
+</mapper>

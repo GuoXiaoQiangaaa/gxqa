@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pwc.modules.input.dao.InputWhiteBlackDao">
+    <sql id="WhiteBlackColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.approve AS "approve"
+	</sql>
+
+    <select id="get" resultType="com.pwc.modules.input.entity.InputWhiteBlackEntity">
+        SELECT
+        <include refid="WhiteBlackColumns"/>
+        FROM input_white_black a
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="getUnit" resultType="com.pwc.modules.input.entity.InputWhiteBlackEntity">
+        SELECT
+        <include refid="WhiteBlackColumns"/>,
+        i.order_type AS "whiteBlackListEntity.orderType",
+        i.supplier_name AS "whiteBlackListEntity.supplierName",
+        i.supplier_code AS "whiteBlackListEntity.supplierCode",
+        i.material_number AS "whiteBlackListEntity.materialNumber",
+        i.apprive AS "whiteBlackListEntity.apprive"
+        FROM input_white_black a
+        LEFT join input_white_black_list i on a.id=i.parent_id
+        <where>
+            <if test="id != null">
+                a.id = #{id}
+            </if>
+        </where>
+    </select>
+
+    <select id="findList" resultType="com.pwc.modules.input.entity.InputWhiteBlackEntity">
+        SELECT
+        <include refid="WhiteBlackColumns"/>
+        FROM input_white_black a
+        <where>
+
+        </where>
+    </select>
+
+    <select id="getList" resultType="com.pwc.modules.input.entity.InputWhiteBlackEntity">
+        SELECT
+        <include refid="WhiteBlackColumns"/>
+        FROM input_white_black a
+        <where>
+
+        </where>
+    </select>
+
+    <insert id="save">
+		INSERT INTO input_white_black(
+            a.id,
+            a.name,
+            a.approve
+		) VALUES (
+		    #{id},
+			#{name},
+			#{approve}
+		)
+	</insert>
+
+    <update id="update">
+        UPDATE input_white_black
+        <set>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="approve != null and approve != ''">
+                approve = #{approve},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+</mapper>

@@ -1,0 +1,86 @@
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      #url: jdbc:mysql://49.232.64.133:3306/pwc-filling-dev?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+#      url: jdbc:mysql://localhost:3306/pwc-filing?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+      #      8021
+      #  url: jdbc:mysql://49.232.64.133:3306/pwc-filing-input?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+
+      # 本地库
+      url: jdbc:mysql://localhost:3306/pwc-ericsson-dev?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+      username: root
+      password: root
+      initial-size: 10
+      max-active: 100
+      min-idle: 10
+      max-wait: 60000
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      #Oracle需要打开注释
+      #validation-query: SELECT 1 FROM DUAL
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      stat-view-servlet:
+        enabled: true
+        url-pattern: /druid/*
+        #login-username: admin
+        #login-password: admin
+      filter:
+        stat:
+          log-slow-sql: true
+          slow-sql-millis: 1000
+          merge-sql: false
+        wall:
+          config:
+            multi-statement-allow: true
+
+
+##多数据源的配置，需要引用pwc-dynamic-datasource
+#dynamic:
+#  datasource:
+#    slave1:
+#      driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+#      url: jdbc:sqlserver://localhost:1433;DatabaseName=databasename
+#      username: sa
+#      password: 123456
+#    slave2:
+#      driver-class-name: org.postgresql.Driver
+#      url: jdbc:postgresql://localhost:5432/databasename
+#      username: ##
+#      password: 123456
+
+
+##fdfs配置
+fdfs:
+  so-timeout: 1501
+  content-timeout: 601
+  thumb-image:
+    height: 150
+    width: 150
+  web-server-url: 139.196.149.50:88
+  tracker-list[0]: 139.196.149.50:22122
+
+#恒安测试
+#fdfs:
+#  so-timeout: 1501
+#  content-timeout: 601
+#  thumb-image:
+#    height: 150
+#    width: 150
+#  web-server-url: 192.168.108.110:88
+#  tracker-list[0]: 192.168.108.110:22122
+
+# fastDFS 配置 生产
+#fdfs:
+#  so-timeout: 1501
+#  content-timeout: 601
+#  thumb-image:
+#    height: 150
+#    width: 150
+#  web-server-url: 192.168.211.117:88
+#  tracker-list[0]: 192.168.211.117:22122

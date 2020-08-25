@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pwc.modules.input.dao.InputTransOutCategoryDao">
+    <sql id="InputTransOutCateogryColumns">
+		a.id AS "id",
+		a.category AS "category",
+		a.item AS "item",
+		a.status AS "status"
+	</sql>
+
+    <select id="get" resultType="com.pwc.modules.input.entity.InputTansOutCategoryEntity">
+        SELECT
+        <include refid="InputTransOutCateogryColumns"/>
+        FROM input_trans_out_category a
+        WHERE a.id = #{id}
+    </select>
+
+
+
+
+    <select id="findList" resultType="com.pwc.modules.input.entity.InputTansOutCategoryEntity">
+        SELECT
+        <include refid="InputTransOutCateogryColumns"/>
+        FROM input_trans_out_category a
+        <where>
+
+        </where>
+    </select>
+
+    <select id="getList" resultType="com.pwc.modules.input.entity.InputTansOutCategoryEntity">
+        SELECT
+        <include refid="InputTransOutCateogryColumns"/>
+        FROM input_trans_out_category a where a.status=0
+        <where>
+
+        </where>
+    </select>
+
+    <insert id="save" keyProperty="id"  useGeneratedKeys="true">
+		INSERT INTO input_trans_out_category (
+            category,
+            item,
+            status
+		) VALUES (
+			#{category},
+			#{item},
+			#{status}
+		)
+	</insert>
+
+    <update id="update">
+        UPDATE input_trans_out_category
+        <set>
+            <if test="category != null and category != ''">
+                name = #{category},
+            </if>
+            <if test="item != null and item != ''">
+                item = #{item},
+            </if>
+            <if test="status != null and status != ''">
+                  status = #{status}
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+
+    <update id="inputTransOutCategoryDelete">
+        UPDATE input_trans_out_category
+        <set>
+            status = -1
+        </set>
+        WHERE id in
+        <foreach collection="array" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+</mapper>

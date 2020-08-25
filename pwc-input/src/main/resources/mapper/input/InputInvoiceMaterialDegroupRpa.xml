@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputInvoiceMaterialDegroupRpaDao">
+
+    <sql id="invoiceColumns">
+		a.id AS "id",
+		a.group_id AS "groupId",
+		a.gruop_date AS "gruopDate",
+		a.tax_code AS "taxCode",
+		a.invoice_quantity AS "invoiceQuantity",
+		a.total_tax AS "totalTax",
+		a.tax_inluded_price AS "taxInludedPrice"
+	</sql>
+
+    <sql id="invoiceJoins">
+
+    </sql>
+
+    <!--根据公司Id获取集合-->
+    <select id="getListByCompanyId" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialDegroupRpaEntity">
+        SELECT
+        a.id AS "id",
+		a.group_id AS "groupId",
+		a.gruop_date AS "gruopDate",
+		a.tax_code AS "taxCode",
+		a.invoice_quantity AS "invoiceQuantity",
+		a.total_tax AS "totalTax",
+		a.tax_inluded_price AS "taxInludedPrice",
+		a.payment_term AS "paymentTerm",
+		a.invoice_material_rpa_id AS "invoiceMaterialRpaId"
+		FROM input_invoice_material_degroup_rpa a
+		WHERE a.invoice_material_rpa_id = #{companyId}
+    </select>
+
+    <!--获取发票号（日期最新的那张发票表）下的集合-->
+    <select id="getByDegroupRpaId" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialInvoicegroupRpa">
+        SELECT
+        a.id AS "id",
+        a.invoice_no AS "invoiceNo",
+        a.tax AS "tax",
+        a.degroup_rpa_id AS "degroupRpaId"
+        FROM input_invoice_material_invoicegroup_rpa a
+        WHERE a.degroup_rpa_id = #{degroupRpaId}
+    </select>
+
+    <select id="get" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialDegroupRpaEntity">
+        SELECT
+        a.id AS "id",
+		a.group_id AS "groupId",
+		a.gruop_date AS "gruopDate",
+		a.tax_code AS "taxCode",
+		a.invoice_quantity AS "invoiceQuantity",
+		a.total_tax AS "totalTax",
+		a.tax_inluded_price AS "taxInludedPrice",
+		a.invoice_material_rpa_id AS "invoiceMaterialRpaId",
+		b.invoice_no AS "invoiceMaterialInvoicegroupRpa.invoiceNo",
+		b.tax AS "invoiceMaterialInvoicegroupRpa.tax",
+		b.id AS "invoiceMaterialInvoicegroupRpa.id"
+        FROM input_invoice_material_degroup_rpa a
+        LEFT JOIN input_invoice_material_invoicegroup_rpa b
+        ON a.id = b.degroup_rpa_id
+        WHERE a.id = #{id}
+    </select>
+
+
+    <select id="findList" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialDegroupRpaEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice_material_group_rpa a
+        <include refid="invoiceJoins"/>
+    </select>
+
+    <insert id="saveInvoiceMaterialInvoicegroupRpa" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO input_invoice_material_invoicegroup_rpa(
+            invoice_no,
+            tax,
+            degroup_rpa_id
+		) VALUES (
+			#{invoiceNo},
+			#{tax},
+			#{degroupRpaId}
+		)
+	</insert>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO input_invoice_material_degroup_rpa(
+            group_id,
+            gruop_date,
+            tax_code,
+            invoice_quantity,
+            total_tax,
+            tax_inluded_price,
+            payment_term,
+            invoice_material_rpa_id
+		) VALUES (
+			#{groupId},
+			#{gruopDate},
+			#{taxCode},
+			#{invoiceQuantity},
+			#{totalTax},
+			#{taxInludedPrice},
+			#{paymentTerm},
+			#{invoiceMaterialRpaId}
+		)
+	</insert>
+
+    <update id="update">
+        UPDATE input_invoice_material_degroup_rpa
+        <set>
+            <if test="groupId != null and groupId != ''">
+                group_id = #{groupId},
+            </if>
+            <if test="gruopDate != null and gruopDate != ''">
+                gruop_date = #{gruopDate},
+            </if>
+            <if test="taxCode != null and taxCode != ''">
+                tax_code = #{taxCode},
+            </if>
+            <if test="invoiceQuantity != null and invoiceQuantity != ''">
+                invoice_quantity = #{invoiceQuantity},
+            </if>
+            <if test="totalTax != null and totalTax != ''">
+                total_tax = #{totalTax},
+            </if>
+            <if test="taxInludedPrice != null and taxInludedPrice != ''">
+                tax_inluded_price = #{taxInludedPrice},
+            </if>
+            <if test="invoiceNo != null and invoiceNo != ''">
+                invoice_no = #{invoiceNo},
+            </if>
+            <if test="tax != null and tax != ''">
+                tax = #{tax},
+            </if>
+        </set>
+    </update>
+
+    <update id="delete">
+		DELETE FROM input_invoice_material_degroup_rpa
+		WHERE id = #{id}
+	</update>
+
+
+    <insert id="insertInvoiceGroupRpa" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO input_invoice_material_invoicegroup_rpa(
+        invoice_no,
+        tax,
+        degroup_rpa_id
+        ) VALUES (
+        #{invoiceNo},
+        #{tax},
+        #{degroupRpaId}
+        )
+    </insert>
+</mapper>

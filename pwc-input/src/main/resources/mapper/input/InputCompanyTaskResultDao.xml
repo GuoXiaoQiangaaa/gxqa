@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputCompanyTaskResultDao">
+    <sql id="invoiceColumns">
+        a.id AS "id",
+        a.type AS "type",
+        a.company_id AS "companyId",
+        a.invoice_type AS "invoiceType",
+        a.deductible_num AS "deductibleNum",
+        a.deductible_amount AS "deductibleAmount",
+        a.deductible_tax AS "deductibleTax",
+        a.un_deductible_num AS "unDeductibleNum",
+        a.un_deductible_amount AS "unDeductibleAmount",
+        a.un_deductible_tax AS "unDeductibleTax"
+    </sql>
+
+    <insert id="save">
+        INSERT INTO input_company_task_result(
+          type,
+          company_id,
+          invoice_type,
+          deductible_num,
+          deductible_amount,
+          deductible_tax,
+          un_deductible_num,
+          un_deductible_amount,
+          un_deductible_tax
+        ) values (
+          #{type},
+          #{companyId},
+          #{invoiceType},
+          #{deductibleNum},
+          #{deductibleAmount},
+          #{deductibleTax},
+          #{unDeductibleNum},
+          #{unDeductibleAmount},
+          #{unDeductibleTax}
+        )
+    </insert>
+
+    <delete id="delByCompanyId">
+        DELETE FROM input_company_task_result
+        WHERE company_id = #{companyId}
+    </delete>
+
+    <select id="getListByType" resultType="com.pwc.modules.input.entity.InputCompanyTaskResult">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_company_task_result a
+        WHERE a.company_id = #{companyId}
+        AND a.type = #{type}
+    </select>
+
+    <!--查询companyId-->
+    <select id="findConpanyIdByDeptId" resultType="com.pwc.modules.input.entity.InputCompanyEntity">
+        SELECT id from input_company where dept_id=#{deptId}
+    </select>
+
+
+</mapper>

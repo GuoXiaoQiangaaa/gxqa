@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputInvoiceMaterialRpaDao">
+
+    <sql id="invoiceColumns">
+		a.id AS "id",
+		a.company_code AS "companyCode",
+		a.vendor_code AS "vendorCode",
+		a.vendor_name AS "vendorName",
+		a.payment_term AS "paymentTerm",
+		a.group_id AS "groupId",
+		a.gruop_date AS "gruopDate",
+		a.tax_code AS "taxCode",
+		a.invoice_quantity AS "invoiceQuantity",
+		a.total_tax AS "totalTax",
+		a.tax_inluded_price AS "taxInludedPrice",
+		a.invoice_no AS "invoiceNo",
+		a.tax AS "tax",
+		a.po_no AS "poNo",
+		a.material_documet_no AS "materialDocumetNo",
+		a.po_type AS "poType",
+		a.material_code AS "materialCode",
+		a.material_price AS "materialPrice",
+		a.material_ammount AS "materialAmmount",
+		a.material_documet_no2 AS "materialDocumetNo2",
+		a.po_type2 AS "poType2",
+		a.material_code2 AS "materialCode2",
+		a.material_price2 AS "materialPrice2 ",
+		a.material_ammount2 AS "materialAmmount2"
+	</sql>
+
+    <sql id="invoiceJoins">
+    </sql>
+
+    <select id="getByOne">
+        SELECT *
+        FROM input_invoice_material_rpa
+    </select>
+
+    <!--获取状态为1的公司数据-->
+    <select id="getListByStatus" resultType="com.pwc.modules.input.entity.InputInvoiceMaterial">
+        SELECT
+         a.id AS "id",
+        a.company_code AS "companyCode",
+        a.vendor_code AS "vendorCode",
+        a.vendor_name AS "vendorName",
+        a.status AS "status"
+        /*a.invoice_batch_id as "invoiceBatchId"*/
+        FROM input_invoice_material_rpa a
+        WHERE a.status = 1
+    </select>
+
+    <!--批量更新状态为0-->
+    <update id="updateByStatus" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" separator=";" open="" close="">
+            UPDATE input_invoice_material_rpa
+            <set>
+                status = 0
+            </set>
+            WHERE id = #{item.id}
+        </foreach>
+    </update>
+
+    <select id="get" resultType="com.pwc.modules.input.entity.InputInvoiceMaterial">
+        SELECT
+        a.id AS "id",
+        a.company_code AS "companyCode",
+        a.vendor_code AS "vendorCode",
+        a.vendor_name AS "vendorName",
+        a.payment_term AS "paymentTerm",
+        a.invoice_batch_id as "invoiceBatchId"
+        FROM input_invoice_material_rpa a
+        WHERE a.id = #{id}
+    </select>
+
+
+    <select id="getOneByBatchId" resultType="com.pwc.modules.input.entity.InputInvoiceMaterial">
+        SELECT
+        a.id AS "id",
+        a.company_code AS "companyCode",
+        a.vendor_code AS "vendorCode",
+        a.vendor_name AS "vendorName",
+        a.payment_term AS "paymentTerm",
+        a.invoice_batch_id as "invoiceBatchId"
+        FROM input_invoice_material_rpa a
+        WHERE a.invoice_batch_id = #{invoiceBatchId}
+    </select>
+
+    <select id="findList" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialRpaEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice_material_rpa a
+        <include refid="invoiceJoins"/>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO input_invoice_material_rpa(
+            company_code,
+            vendor_code,
+            vendor_name,
+            status,
+            invoice_batch_id,
+            create_date
+		) VALUES (
+		    #{companyCode},
+			#{vendorCode},
+			#{vendorName},
+			#{status},
+			#{invoiceBatchId},
+			now()
+		)
+	</insert>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO input_invoice_material_rpa(
+            company_code,
+            vendor_code,
+            vendor_name,
+            payment_term,
+            group_id,
+            gruop_date,
+            tax_code,
+            invoice_quantity,
+            total_tax,
+            tax_inluded_price,
+            invoice_no,
+            tax,
+            po_no,
+            material_documet_no,
+            po_type,
+            material_code,
+            material_price,
+            material_ammount,
+            material_documet_no2,
+            po_type2,
+            material_code2,
+            material_price2,
+            material_ammount2
+		) VALUES (
+		    #{companyCode},
+			#{vendorCode},
+			#{vendorName},
+			#{paymentTerm},
+			#{groupId},
+			#{gruopDate},
+			#{taxCode},
+			#{invoiceQuantity},
+			#{totalTax},
+			#{taxInludedPrice},
+			#{invoiceNo},
+			#{tax},
+			#{poNo},
+			#{materialDocumetNo},
+			#{poType},
+			#{materialCode},
+			#{materialPrice},
+			#{materialAmmount},
+			#{materialDocumetNo2},
+			#{poType2},
+			#{materialCode2},
+			#{materialPrice2},
+			#{materialAmmount2}
+		)
+	</insert>
+
+    <update id="update">
+        UPDATE input_invoice_material_rpa
+        <set>
+            <if test="companyCode != null and companyCode != ''">
+                company_code = #{companyCode},
+            </if>
+            <if test="vendorCode != null and vendorCode != ''">
+                vendor_code = #{vendorCode},
+            </if>
+            <if test="vendorName != null and vendorName != ''">
+                vendor_name = #{vendorName},
+            </if>
+            <if test="paymentTerm != null and paymentTerm != ''">
+                payment_term = #{paymentTerm},
+            </if>
+            <if test="groupId != null and groupId != ''">
+                group_id = #{groupId},
+            </if>
+            <if test="gruopDate != null and gruopDate != ''">
+                gruop_date = #{gruopDate},
+            </if>
+            <if test="taxCode != null and taxCode != ''">
+                tax_code = #{taxCode},
+            </if>
+            <if test="invoiceQuantity != null and invoiceQuantity != ''">
+                invoice_quantity = #{invoiceQuantity},
+            </if>
+            <if test="totalTax != null and totalTax != ''">
+                total_tax = #{totalTax},
+            </if>
+            <if test="taxInludedPrice != null and taxInludedPrice != ''">
+                tax_inluded_price = #{taxInludedPrice},
+            </if>
+            <if test="invoiceNo != null and invoiceNo != ''">
+                invoice_no = #{invoiceNo},
+            </if>
+            <if test="tax != null and tax != ''">
+                tax = #{tax},
+            </if>
+            <if test="poNo != null and poNo != ''">
+                po_no = #{poNo},
+            </if>
+            <if test="materialDocumetNo != null and materialDocumetNo != ''">
+                material_documet_no = #{materialDocumetNo},
+            </if>
+            <if test="poType != null and poType != ''">
+                po_type = #{poType},
+            </if>
+            <if test="materialCode != null and materialCode != ''">
+                material_code = #{materialCode},
+            </if>
+            <if test="materialPrice != null and materialPrice!= ''">
+                material_price = #{materialPrice},
+            </if>
+            <if test="materialAmmount != null and materialAmmount != ''">
+                material_ammount = #{materialAmmount},
+            </if>
+            <if test="materialDocumetNo2 != null and materialDocumetNo2!= ''">
+                material_documetNo2 = #{materialDocumetNo2},
+            </if>
+            <if test="poType2 != null and poType2!= ''">
+                po_type2 = #{poType2},
+            </if>
+            <if test="materialCode2 != null and materialCode2!= ''">
+                material_code2 = #{materialCode2},
+            </if>
+            <if test="materialPrice2 != null and materialPrice2!= ''">
+                material_price2 = #{materialPrice2},
+            </if>
+            <if test="materialAmmount2 != null and materialAmmount2!= ''">
+                material_ammount2 = #{materialAmmount2},
+            </if>
+        </set>
+    </update>
+
+    <!--<update id="delete">-->
+		<!--DELETE FROM input_invoice_material_rpa-->
+		<!--WHERE id = #{id}-->
+	<!--</update>-->
+
+    <!--<update id="deleteByBatchId">-->
+        <!--UPDATE input_invoice_material_rpa-->
+        <!--<set>-->
+        <!--<if test="status != null and status != ''">-->
+            <!--status = #{status}-->
+        <!--</if>-->
+        <!--</set>-->
+        <!--where invoice_batch_id =#{invoiceBatchId}-->
+    <!--</update>-->
+
+</mapper>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.output.dao.OutputInvoiceRulesDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.pwc.modules.output.entity.OutputInvoiceRulesEntity" id="outputInvoiceRulesMap">
+        <result property="rulesId" column="rules_id"/>
+        <result property="customerId" column="customer_id"/>
+        <result property="goodsId" column="goods_id"/>
+        <result property="amount" column="amount"/>
+        <result property="autoInvoicing" column="auto_invoicing"/>
+        <result property="preformedInvoice" column="preformed_invoice"/>
+        <result property="needSalesList" column="need_sales_list"/>
+        <result property="expireDate" column="expire_date"/>
+        <result property="invoiceType" column="invoice_type"/>
+        <result property="invoiceEntity" column="invoice_entity"/>
+        <result property="remark" column="remark"/>
+        <result property="invoicingFrequency" column="invoicing_frequency"/>
+        <result property="invoicingTime" column="invoicing_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+    </resultMap>
+
+
+</mapper>

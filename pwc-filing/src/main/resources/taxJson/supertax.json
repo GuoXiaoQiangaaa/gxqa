@@ -1,0 +1,93 @@
+﻿{
+  "taxParam": {
+    "year": 2018,
+    "beginMonth": 8,
+    "endMonth": 8,
+    "period": 8,
+    "skssqq": "2018-07-01",
+    "skssqz": "2018-07-31",
+    "yzpzzlDm": "BDA0610678"
+  },
+  "fjsData": {
+    "xsehj": "0",
+    "xfsxsehj":"0",
+    "fjssbb": {
+      "sbxxGrid": {
+        "sbxxGridlbVO": [
+          {
+            "bqcjrhxqydmje": "0",
+            "bqybtse": "0.0",
+            "bqyjse": "0.0",
+            "bqynsfe": "0.0",
+            "cjrhjmxzDm": "",
+            "cjrhjmxzMc": "",
+            "ewbhxh": "1",
+            "hj": "0.0",
+            "jme": "0",
+            "jmxzDm": "",
+            "jmxzdmMc": "",
+            "sl1": "0.07",
+            "xfs": "0.00",
+            "ybzzs": "0.0",
+            "yjse1": "0.0",
+            "ysbse": "0",
+            "yys": "0.00",
+            "zspmDm": "101090101",
+            "zspmMc": "市区（增值税附征）",
+            "zsxmDm": "10109",
+            "zsxmMc": "城市维护建设税",
+            "zzsmdse": "0.0"
+          },
+          {
+            "bqcjrhxqydmje": "0",
+            "bqybtse": "0.0",
+            "bqyjse": "0.0",
+            "bqynsfe": "0.0",
+            "cjrhjmxzDm": "",
+            "cjrhjmxzMc": "",
+            "ewbhxh": "2",
+            "hj": "0.0",
+            "jme": "0",
+            "jmxzDm": "",
+            "jmxzdmMc": "",
+            "sl1": "0.03",
+            "xfs": "0.00",
+            "ybzzs": "0.0",
+            "yjse1": "0.0",
+            "ysbse": "0",
+            "yys": "0.00",
+            "zspmDm": "302030100",
+            "zspmMc": "增值税教育费附加",
+            "zsxmDm": "30203",
+            "zsxmMc": "教育费附加",
+            "zzsmdse": "0.0"
+          },
+          {
+            "bqcjrhxqydmje": "0",
+            "bqybtse": "0.0",
+            "bqyjse": "0.0",
+            "bqynsfe": "0.0",
+            "cjrhjmxzDm": "",
+            "cjrhjmxzMc": "",
+            "ewbhxh": "3",
+            "hj": "0.0",
+            "jme": "0",
+            "jmxzDm": "",
+            "jmxzdmMc": "",
+            "sl1": "0.02",
+            "xfs": "0.00",
+            "ybzzs": "0.0",
+            "yjse1": "0.0",
+            "ysbse": "0",
+            "yys": "0.00",
+            "zspmDm": "302160100",
+            "zspmMc": "增值税地方教育附加",
+            "zsxmDm": "30216",
+            "zsxmMc": "地方教育附加",
+            "zzsmdse": "0.0"
+          }
+        ]
+      }
+    }
+  }
+}

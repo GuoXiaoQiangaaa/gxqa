@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pwc.modules.input.dao.InputInvoiceUnitDetailsDao">
+    <sql id="InvoiceUnitDetailsColumns">
+		a.id AS "id",
+		a.invoice_unit AS "invoiceUnit",
+		a.details_val AS "detailsVal",
+		a.details_name AS "detailsName",
+		a.details_delete AS "detailsDelete"
+	</sql>
+
+
+    <select id="get" resultType="com.pwc.modules.input.entity.InputInvoiceUnitDetailsEntity">
+        SELECT
+        <include refid="InvoiceUnitDetailsColumns"/>
+        FROM input_invoice_unit_details a
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="getUnitList" resultType="com.pwc.modules.input.entity.InputInvoiceUnitDetailsEntity">
+        SELECT
+        <include refid="InvoiceUnitDetailsColumns"/>
+        FROM input_invoice_unit_details a
+    </select>
+
+    <select id="getFind" resultType="com.pwc.modules.input.entity.InputInvoiceUnitDetailsEntity">
+        SELECT
+        <include refid="InvoiceUnitDetailsColumns"/>
+        FROM input_invoice_unit_details a
+        WHERE a.details_name = #{detailsName}
+        AND a.details_delete = 0
+    </select>
+
+    <select id="getUnit" resultType="com.pwc.modules.input.entity.InputInvoiceUnitDetailsEntity">
+        SELECT
+        <include refid="InvoiceUnitDetailsColumns"/>,
+        i.unit_name AS "unitName"
+        FROM input_invoice_unit_details a
+        LEFT join input_invoice_unit i on a.invoice_unit=i.id
+        <where>
+            <if test="invoiceUnit != null and invoiceUnit != ''">
+                a.invoice_unit = #{invoiceUnit}
+            </if>
+        </where>
+        order by id desc
+    </select>
+    <!--/*  AND a.id != 31-->
+    <!--AND a.id != 32-->
+    <!--AND a.id != 33-->
+    <!--AND a.id != 34*/-->
+    <select id="getByName" resultType="com.pwc.modules.input.entity.InputInvoiceUnitDetailsEntity">
+        SELECT
+        <include refid="InvoiceUnitDetailsColumns"/>
+        FROM input_invoice_unit_details a
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="getOneByNameOrCode" resultType="com.pwc.modules.input.entity.InputInvoiceUnitDetailsEntity">
+        SELECT
+        <include refid="InvoiceUnitDetailsColumns"/>,b.unit_name AS "unitName"
+        FROM input_invoice_unit_details a
+        LEFT JOIN input_invoice_unit b ON a.invoice_unit = b.id
+        WHERE a.details_name =#{detailsName}
+        AND a.details_delete != 1
+    </select>
+
+    <select id="getOneByUnitAndNameOrCode" resultType="com.pwc.modules.input.entity.InputInvoiceUnitDetailsEntity">
+        SELECT
+        <include refid="InvoiceUnitDetailsColumns"/>
+        FROM input_invoice_unit_details a
+        WHERE a.invoice_unit = #{invoiceUnit} and a.details_name =#{detailsName}
+    </select>
+
+    <select id="findList" resultType="com.pwc.modules.input.entity.InputInvoiceUnitDetailsEntity">
+        SELECT
+        <include refid="InvoiceUnitDetailsColumns"/>
+        FROM input_invoice_unit_details a
+        <where>
+
+        </where>
+    </select>
+
+    <insert id="save">
+		INSERT INTO input_invoice_unit_details(
+		    a.id
+            a.invoice_unit,
+            a.details_val,
+            a.details_name
+		) VALUES (
+		    #{id},
+			#{invoiceUnit},
+			#{detailsVal},
+			#{detailsName}
+		)
+	</insert>
+
+    <update id="update">
+        UPDATE input_invoice_unit_details
+        <set>
+            <if test="invoiceUnit != null and invoiceUnit != ''">
+                invoice_unit = #{invoiceUnit},
+            </if>
+            <if test="detailsVal != null and detailsVal != ''">
+                details_val = #{detailsVal},
+            </if>
+            <if test="detailsName != null and detailsName != ''">
+                details_name = #{detailsName},
+            </if>
+
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="delete">
+		DELETE FROM input_invoice_unit_details
+		WHERE id = #{id}
+	</update>
+
+    <update id="detailsDelete">
+        UPDATE input_invoice_unit_details
+        <set>
+            details_delete = #{detailsDelete}
+        </set>
+        WHERE id  = #{id}
+        <!--<foreach collection="array" index="index" item="item"-->
+                 <!--open="(" separator="," close=")">-->
+            <!--#{item}-->
+        <!--</foreach>-->
+    </update>
+
+    <select id="getByUnitName" resultType="com.pwc.modules.input.entity.InputInvoiceUnitDetailsEntity">
+        SELECT
+        <include refid="InvoiceUnitDetailsColumns"/>,b.unit_name AS "unitName"
+        FROM input_invoice_unit_details a
+        LEFT JOIN input_invoice_unit b ON a.invoice_unit = b.id
+        WHERE a.details_name = #{unitName}
+    </select>
+
+
+    <select id="getByDetailsNames" resultType="com.pwc.modules.input.entity.InputInvoiceUnitDetailsEntity">
+        SELECT
+        <include refid="InvoiceUnitDetailsColumns"/>,u.unit_name as unitName
+        FROM input_invoice_unit_details a
+        left join input_invoice_unit u on u.id=a.invoice_unit
+        <where>
+            a.details_name in
+            <foreach collection="detailsNames" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+    </select>
+    <select id="findListByInvoiceUnit"
+            resultType="java.lang.Integer">
+        select id AS "id"
+        from input_invoice_unit_details
+        where invoice_unit=#{invoiceUnit}
+    </select>
+    <update id="deleteList">
+        delete from input_invoice_unit_details
+        WHERE id in
+        <foreach collection="array" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+</mapper>

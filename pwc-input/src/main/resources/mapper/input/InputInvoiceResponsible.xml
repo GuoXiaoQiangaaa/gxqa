@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pwc.modules.input.dao.InputInvoiceResponsibleDao">
+    <sql id="InvoiceResponsibleColumns">
+		a.id AS "id",
+		a.input_invoice_responsible AS "invoiceResponsible",
+		a.goods_category AS "goodsCategory",
+		a.responsible_delete AS "responsibleDelete",
+		a.is_add as "isAdd"
+	</sql>
+
+    <sql id="InvoiceResponsibleJoins">
+    </sql>
+    <delete id="deleteAll">
+        delete from  input_invoice_responsible
+    </delete>
+
+    <select id="get" resultType="com.pwc.modules.input.entity.InputInvoiceResponsibleEntity">
+        SELECT
+        <include refid="InvoiceResponsibleColumns"/>
+        FROM input_invoice_responsible a
+        <include refid="InvoiceResponsibleJoins"/>
+        WHERE a.input_invoice_responsible = #{invoiceResponsible}
+        OR a.goods_category = #{goodsCategory}
+    </select>
+
+    <select id="getOneById" resultType="com.pwc.modules.input.entity.InputInvoiceResponsibleEntity">
+        SELECT
+        <include refid="InvoiceResponsibleColumns"/>
+        FROM input_invoice_responsible a
+        WHERE a.id=#{id}
+    </select>
+
+    <select id="findList" resultType="com.pwc.modules.input.entity.InputInvoiceResponsibleEntity">
+        SELECT
+        <include refid="InvoiceResponsibleColumns"/>
+        FROM input_invoice_responsible a
+        <include refid="InvoiceResponsibleJoins"/>
+        <where>
+
+        </where>
+    </select>
+
+    <select id="getByResponsibleAndCategory" resultType="com.pwc.modules.input.entity.InputInvoiceResponsibleEntity">
+        SELECT
+        <include refid="InvoiceResponsibleColumns"/>
+        FROM input_invoice_responsible a
+        WHERE a.input_invoice_responsible = #{invoiceResponsible}
+        AND a.goods_category = #{goodsCategory}
+    </select>
+
+    <select id="getOneByCondition" resultType="com.pwc.modules.input.entity.InputInvoiceResponsibleEntity">
+        SELECT
+        <include refid="InvoiceResponsibleColumns"/>
+        FROM input_invoice_responsible a
+        where a.input_invoice_responsible =#{invoiceResponsible} and a.goods_category =#{goodsCategory} and a.responsible_delete != '1'
+    </select>
+    <select id="getList" resultType="com.pwc.modules.input.entity.InputInvoiceResponsibleEntity">
+        select * from input_invoice_responsible
+    </select>
+
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO input_invoice_responsible(
+            input_invoice_responsible,
+            goods_category,
+            responsible_delete,
+            is_add
+		) VALUES (
+			#{invoiceResponsible},
+			#{goodsCategory},
+			#{responsibleDelete},
+			#{isAdd}
+		)
+	</insert>
+    <insert id="insertAll">
+        insert into input_invoice_responsible(
+        input_invoice_responsible,
+        goods_category,
+        responsible_delete,
+        is_add
+        )values
+        <foreach collection="list" index="index" item="item" separator=",">
+            (
+            #{item.invoiceResponsible},
+            #{item.goodsCategory},
+            #{item.responsibleDelete},
+            #{item.isAdd}
+            )
+        </foreach>
+    </insert>
+
+    <update id="update">
+        UPDATE input_invoice_responsible
+        <set>
+            <if test="invoiceResponsible != null and invoiceResponsible != ''">
+                input_invoice_responsible = #{invoiceResponsible},
+            </if>
+            <if test="goodsCategory != null and goodsCategory != ''">
+                goods_category = #{goodsCategory},
+            </if>
+            <if test="isAdd != null and isAdd != ''">
+                is_add = #{isAdd}
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="delete">
+		DELETE FROM input_invoice_responsible
+		WHERE id = #{id}
+	</update>
+
+    <update id="responsibleDelete">
+        UPDATE input_invoice_responsible
+        <set>
+            responsible_delete = 1
+        </set>
+        WHERE id in
+        <foreach collection="array" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <update id="updateResponsibleDelete">
+        UPDATE input_invoice_responsible
+        <set>
+            responsible_delete = #{responsibleDelete}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+
+    <update id="updateByResponsibleAndCategory">
+        UPDATE input_invoice_responsible
+        <set>
+            responsible_delete = 1
+        </set>
+        WHERE input_invoice_responsible = #{invoiceResponsible}
+        AND goods_category = #{goodsCategory}
+        AND responsible_delete = 0
+    </update>
+</mapper>

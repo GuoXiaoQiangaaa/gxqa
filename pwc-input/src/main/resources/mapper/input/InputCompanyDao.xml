@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputCompanyDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.pwc.modules.input.entity.InputCompanyEntity" id="companyMap">
+        <result property="id" column="id"/>
+        <result property="companyNumber" column="company_number"/>
+        <result property="companyName" column="company_name"/>
+        <result property="companyDutyParagraph" column="company_duty_paragraph"/>
+        <result property="companyAddressPhone" column="company_address_phone"/>
+        <result property="companyBankAccount" column="company_bank_account"/>
+    </resultMap>
+
+    <sql id="invoiceColumns">
+		a.id AS "id",
+        a.company_number as "companyNumber",
+        a.company_name as "companyName",
+        a.company_duty_paragraph as "companyDutyParagraph",
+        a.company_address_phone as "companyAddressPhone",
+        a.company_bank_account as "deptId",
+        a.dept_id as "companyBankAccount"
+	</sql>
+    <insert id="insertCompanyAll">
+        insert into input_company(
+        company_number,
+        company_name,
+        company_duty_paragraph,
+        company_address_phone,
+        company_bank_account,
+        dept_id
+        )values
+        <foreach collection="list" index="index" item="item" separator=",">
+            (
+            #{item.companyNumber},
+            #{item.companyName},
+            #{item.companyDutyParagraph},
+            #{item.companyAddressPhone},
+            #{item.companyBankAccount},
+            #{item.deptId}
+            )
+        </foreach>
+    </insert>
+    <select id="getCompanyNumberList" resultType="com.pwc.modules.input.entity.InputCompanyEntity">
+        SELECT
+        * FROM input_company
+    </select>
+
+
+    <select id="getListByParagraph" resultType="com.pwc.modules.input.entity.InputCompanyEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_company a
+        where a.company_duty_paragraph =#{companyDutyParagraph}
+    </select>
+
+    <select id="getList" resultType="com.pwc.modules.input.entity.InputCompanyEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_company a
+    </select>
+
+    <select id="get" resultType="com.pwc.modules.input.entity.InputCompanyEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_company a
+        WHERE a.company_number = #{companyNumber}
+        OR a.company_name = #{companyName}
+        OR a.company_duty_paragraph = #{companyDutyParagraph}
+        OR a.company_address_phone = #{companyAddressPhone}
+        OR a.company_bank_account = #{companyBankAccount}
+    </select>
+
+    <select id="getByCompanyNumber" resultType="com.pwc.modules.input.entity.InputCompanyEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_company a
+        WHERE a.company_number = #{companyNumber}
+    </select>
+
+    <select id="getByName" resultType="com.pwc.modules.input.entity.InputCompanyEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_company a
+        WHERE a.company_duty_paragraph = #{companyDutyParagraph}
+    </select>
+
+    <select id="getListByCompanyNumber" resultType="com.pwc.modules.input.entity.InputCompanyEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_company a
+        WHERE a.company_number in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+    <select id="getCount" resultType="java.lang.Integer">
+        select count(*)
+        from input_company
+        where company_name=#{companyName} and company_duty_paragraph=#{companyDutyParagraph}
+    </select>
+
+    <select id="getNumberList" resultType="string">
+        SELECT
+        company_number AS "companyNumber"
+        FROM input_company
+    </select>
+
+
+    <!--根据纳税人识别号获取公司信息-->
+    <select id="getByNsrsbh" resultType="com.pwc.modules.input.entity.InputCompanyEntity">
+        SELECT
+        id,
+        company_number AS "companyNumber",
+        company_name AS "companyName",
+        company_duty_paragraph AS "companyDutyParagraph",
+        company_address AS "companyAddress",
+        company_tel AS "companyTel",
+        company_bank AS "companyBank",
+        company_bank_account AS "companyBankAccount",
+        dept_id AS "deptId"
+        FROM input_company
+        WHERE company_duty_paragraph = #{nsrsbh}
+    </select>
+    <update id="update">
+        update input_company
+        <set>
+            <if test="applyResult != null and applyResult != ''">
+                apply_result = #{applyResult},
+            </if>
+            <if test="status != null and status != ''">
+                status = #{status},
+            </if>
+            <if test="censusResult != null and censusResult != ''">
+                census_result = #{censusResult},
+            </if>
+            <if test="applyTaskno != null and applyTaskno != ''">
+                apply_taskno = #{applyTaskno},
+            </if>
+            <if test="censusTaskno != null and censusTaskno != ''">
+                census_taskno = #{censusTaskno},
+            </if>
+            <if test="statisticsMonth != null">
+                statistics_month = #{statisticsMonth},
+            </if>
+            <if test="statisticsTime != null">
+                statistics_time = #{statisticsTime},
+            </if>
+            <if test="deptId != null and deptId != ''">
+                dept_id = #{deptId},
+            </if>
+            <if test="requestId != null">
+                request_id = #{requestId},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+
+</mapper>

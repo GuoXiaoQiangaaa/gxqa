@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputOaExpenseInvoiceMappingDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.pwc.modules.input.entity.InputOaExpenseInvoiceMappingEntity" id="oaExpenseInvoiceMappingMap">
+        <result property="id" column="id"/>
+        <result property="expenseNo" column="expense_no"/>
+        <result property="invoiceNo" column="invoice_no"/>
+        <result property="money" column="money"/>
+        <result property="invoiceType" column="invoice_type"/>
+        <result property="unformatNo" column="unformat_no"/>
+
+
+    </resultMap>
+
+
+    <resultMap type="com.pwc.modules.input.entity.InputExpenseInvoiceMappingBean" id="expenseInvoiceMappingBean">
+        <result property="countNumber" column="count_number"/>
+        <result property="totalMoney" column="money"/>
+        <result property="invoiceType" column="invoice_type"/>
+    </resultMap>
+
+
+    <sql id="OaExpenseInvoiceMappingColumns">
+		a.id as "id",
+		a.expense_no as "expenseNo",
+		a.invoice_no as "invoiceNo",
+		a.money AS "money",
+		a.invoice_type AS "invoiceType",
+		a.unformat_no AS "unformatNo"
+
+	</sql>
+
+    <sql id="OaExpenseInvoiceMappingBeanColumns">
+      invoice_type as "invoiceType",
+      sum(money) as "totalMoney",
+      count(*) as "countNumber"
+
+    </sql>
+
+
+    <sql id="OaExpenseInvoiceMappingBeanSecondaryColumns">
+      sum(invoice_total_price) as "totalMoney",
+      count(*) as "countNumber"
+    </sql>
+
+
+    <sql id="invoiceColumns">
+		a.id AS "id",
+		a.invoice_code AS "invoiceCode",
+		a.invoice_number AS "invoiceNumber",
+		a.invoice_total_price AS "invoiceTotalPrice",
+		a.invoice_free_price AS "invoiceFreePrice",
+		a.invoice_tax_price AS "invoiceTaxPrice",
+		a.invoice_check_code AS "invoiceCheckCode",
+		a.invoice_create_date AS "invoiceCreateDate",
+		a.company_id AS "companyId",
+		a.belnr AS "belnr",
+		a.entry_message AS "entryMessage",
+		a.invoice_type AS "invoiceType",
+		a.invoice_entity AS "invoiceEntity",
+		a.invoice_fromto AS "invoiceFromto",
+		a.invoice_upload_type AS "invoiceUploadType",
+		a.invoice_image AS "invoiceImage",
+		a.invoice_status AS "invoiceStatus",
+		a.invoice_printed_code AS "invoicePrintedCode",
+		a.invoice_printed_number AS "invoicePrintedNumber",
+		a.invoice_batch_number AS "invoiceBatchNumber",
+		a.invoice_recognition AS "invoiceRecognition",
+		a.invoice_return AS "invoiceReturn",
+		a.invoice_delete AS "invoiceDelete",
+		a.invoice_upload_date AS "invoiceUploadDate",
+		a.invoice_verify_truth AS "invoiceVerifyTruth",
+		a.invoice_purchaser_company AS "invoicePurchaserCompany",
+		a.invoice_purchaser_paragraph AS "invoicePurchaserParagraph",
+		a.invoice_sell_company AS "invoiceSellCompany",
+		a.invoice_sell_paragraph AS "invoiceSellParagraph",
+		a.invoice_description as "invoiceDescription",
+		a.invoice_purchaser_address as "invoicePurchaserAddress",
+		a.invoice_sell_address as "invoiceSellAddress",
+		a.invoice_error_description as "invoiceErrorDescription",
+		a.express_number AS "expressNumber",
+		a.entry_success_code AS "entrySuccessCode",
+		a.entry_date AS "entryDate",
+		a.invoice_group as "invoiceGroup",
+		a.invoice_check_code_details as "invoiceCheckCodeDetails",
+		a.invoice_purchaser_bank_account as "invoicePurchaserBankAccount",
+		a.invoice_sell_bank_account as "invoiceSellBankAccount",
+		a.create_by AS "createBy",
+		a.invoice_sap_type as "invoiceSapType",
+		a.repeat_bill AS "repeatBill",
+		a.verfy AS "verfy",
+		a.invoice_trans_out AS "invoiceTransOut",
+		a.invoice_deductible_period AS "invoiceDeductiblePeriod",
+		a.invoice_exception_date AS "invoiceExceptionDate",
+		a.invoice_auth_date AS "invoiceAuthDate",
+		a.invoice_examine_status AS "invoiceExamineStatus",
+		a.invoice_deductible_result AS "invoiceDeductibleResult",
+		a.invoice_authentication AS "invoiceAuthentication",
+		a.auth_date AS "authDate"
+
+	</sql>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO input_oa_expense_invoice_mapping (
+            expense_no,
+            invoice_no,
+            money,
+            invoice_type,
+            unformat_no
+
+
+		) VALUES (
+			#{expenseNo},
+			#{invoiceNo},
+			#{money},
+			#{invoiceType},
+			#{unformatNo}
+
+		)
+	</insert>
+
+    <select id="getById" resultType="com.pwc.modules.input.entity.InputOaExpenseInfoEntity">
+        SELECT
+        <include refid="OaExpenseInvoiceMappingColumns"/>
+
+        FROM input_oa_expense_invoice_mapping a
+        WHERE a.id = #{id}
+    </select>
+
+    <delete id="removeByIds">
+        DELETE FROM input_oa_expense_invoice_mapping
+        WHERE id in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="getOaExpenseInvoiceMappingEntitiesByExpenseNo"
+            resultType="com.pwc.modules.input.entity.InputOaExpenseInfoEntity">
+        SELECT
+        <include refid="OaExpenseInvoiceMappingColumns"/>
+
+        FROM input_oa_expense_invoice_mapping a
+        WHERE a.expense_no = #{id}
+    </select>
+
+    <select id="getInvoiceExpenseMappingRelationShip"
+            resultType="com.pwc.modules.input.entity.InputExpenseInvoiceMappingBean">
+        SELECT
+        <include refid="OaExpenseInvoiceMappingBeanColumns"/>
+
+        from input_oa_expense_invoice_mapping
+        where 1=1
+        <if test="expenseNo != null">
+            and expense_no=#{expenseNo}
+        </if>
+        <if test="sqlFilter != null">
+            and ${sqlFilter}
+        </if>
+        group by invoice_type
+
+    </select>
+
+
+    <select id="getInvoiceEntitiesByExpenseNoAndType" resultType="java.lang.String">
+    SELECT distinct invoice_no
+      from input_oa_expense_invoice_mapping  WHERE expense_no = #{expenseNo} And invoice_type = #{invoiceType}
+     </select>
+
+    <select id="getInvoiceEntitiesByExpenseNoAndTypeAndStatus" resultType="java.lang.String">
+        SELECT distinct m.invoice_no
+        from input_oa_expense_invoice_mapping m
+        left join input_invoice i on m.invoice_no = i.id
+        WHERE m.expense_no = #{expenseNo} And m.invoice_type in
+        <foreach collection="invoiceType" index="index" item="item" open="(" separator="," close=")">#{item}</foreach>
+        And i.invoice_status in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">#{item}</foreach>
+    </select>
+
+
+    <select id="getSumAmountOfInvoiceByExpenseNo" resultType="java.lang.String">
+        SELECT sum(invoice_total_price) from input_invoice where invoice_delete = "0" And invoice_return = "0" AND
+        id in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="getInformalInvoiceEntitiesByExpenseNoAndType" resultType="java.lang.Integer">
+    SELECT unformat_no
+      from input_oa_expense_invoice_mapping  WHERE expense_no = #{expenseNo} And invoice_type = #{invoiceType}
+     </select>
+
+    <select id="getInformalInvoiceIdsByExpenseNoAndType" resultType="java.lang.String">
+    SELECT unformat_no
+      from input_oa_expense_invoice_mapping  WHERE expense_no = #{expenseNo} And invoice_type = #{invoiceType}
+     </select>
+
+
+    <select id="getInvoicesAmountsAndCountsByIds"
+            resultType="com.pwc.modules.input.entity.InputExpenseInvoiceMappingBean">
+        Select
+        count(*) as countNumber ,sum(invoice_total_price) as totalMoney
+        from
+        input_invoice where id in
+        <foreach collection="invoiceIds" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        <if test="sqlFilter != null and sqlFilter != ''">
+            AND ${sqlFilter}
+        </if>
+
+    </select>
+
+    <select id="getUnformatInvoiceIdsAmountsByIds"
+            resultType="com.pwc.modules.input.entity.InputExpenseInvoiceMappingBean">
+        Select
+        count(*) as countNumber, sum(amount) as totalMoney
+        from
+        input_unformat_invoice where unformat_delete = "0" and id in
+        <foreach collection="unformatIds" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+
+        <if test="sqlFilter != null and sqlFilter != ''">
+            AND ${sqlFilter}
+        </if>
+
+    </select>
+
+
+</mapper>

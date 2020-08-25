@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pwc.modules.input.dao.InputInvoiceRuleDao">
+    <sql id="InvoiceRuleColumns">
+		a.id AS "id",
+		a.erp_material AS "erpMaterial",
+		a.invoice_credit_product AS "invoiceCreditProduct",
+		a.rule_delete AS "ruleDelete"
+	</sql>
+
+    <sql id="InvoiceRuleJoins">
+    </sql>
+
+    <select id="get" resultType="com.pwc.modules.input.entity.InputInvoiceRuleEntity">
+        SELECT
+        <include refid="InvoiceRuleColumns"/>
+        FROM input_invoice_rule a
+        <include refid="InvoiceRuleJoins"/>
+        WHERE a.erp_material = #{erpMaterial}
+        OR a.invoice_credit_product = #{invoiceCreditProduct}
+    </select>
+
+    <select id="getOneByName" resultType="com.pwc.modules.input.entity.InputInvoiceRuleEntity">
+        SELECT
+        <include refid="InvoiceRuleColumns"/>
+        FROM input_invoice_rule a
+        WHERE a.erp_material = #{erpMaterial} and a.invoice_credit_product =#{invoiceCreditProduct}
+    </select>
+
+    <select id="findList" resultType="com.pwc.modules.input.entity.InputInvoiceRuleEntity">
+        SELECT
+        <include refid="InvoiceRuleColumns"/>
+        FROM input_invoice_rule a
+        <include refid="InvoiceRuleJoins"/>
+        <where>
+
+        </where>
+    </select>
+
+    <insert id="save">
+		INSERT INTO input_invoice_rule(
+            a.id,
+            a.erp_material,
+            a.invoice_credit_product,
+            a.rule_delete
+		) VALUES (
+		    #{id},
+			#{erpMaterial},
+			#{invoiceCreditProduct},
+			#{ruleDelete}
+		)
+	</insert>
+
+    <update id="update">
+        UPDATE input_invoice_rule
+        <set>
+            <if test="erpMaterial != null and erpMaterial != ''">
+                erp_material = #{erpMaterial},
+            </if>
+            <if test="invoiceCreditProduct != null and invoiceCreditProduct != ''">
+                invoice_credit_product = #{invoiceCreditProduct},
+            </if>
+            <if test="ruleDelete != null and ruleDelete != ''">
+                rule_delete = #{ruleDelete},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="delete">
+		DELETE FROM input_invoice_rule
+		WHERE id = #{id}
+	</update>
+
+    <update id="ruleDelete">
+        UPDATE input_invoice_rule
+        <set>
+            rule_delete = 1
+        </set>
+        WHERE id in
+        <foreach collection="array" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+</mapper>

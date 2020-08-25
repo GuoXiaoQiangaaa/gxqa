@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pwc.modules.input.dao.InputInvoiceConversionDao">
+    <sql id="InvoiceConversionColumns">
+		a.id AS "id",
+		a.material_unit AS "materialUnit",
+		a.material_quantity AS "materialQuantity"
+		a.invoice_unit AS "invoiceUnit",
+		a.invoice_quantity AS "invoiceQuantity",
+		a.conversion_delete AS "conversionDelete"
+	</sql>
+
+    <sql id="InvoiceConversionJoins">
+    </sql>
+
+    <select id="get" resultType="com.pwc.modules.input.entity.InputInvoiceConversionEntity">
+        SELECT
+        <include refid="InvoiceConversionColumns"/>
+        FROM input_invoice_conversion a
+        <include refid="InvoiceConversionJoins"/>
+        WHERE a.material_unit = #{materialUnit}
+        OR a.material_quantity = #{materialQuantity}
+        OR a.invoice_unit = #{invoiceUnit}
+        OR a.invoice_quantity = #{invoiceQuantity}
+    </select>
+
+    <select id="findList" resultType="com.pwc.modules.input.entity.InputInvoiceConversionEntity">
+        SELECT
+        <include refid="InvoiceConversionColumns"/>
+        FROM input_invoice_conversion a
+        <include refid="InvoiceConversionJoins"/>
+        <where>
+
+        </where>
+    </select>
+
+    <insert id="save">
+		INSERT INTO input_invoice_conversion(
+		    a.id
+            a.material_unit,
+            a.material_quantity,
+            a.invoice_unit,
+            a.invoice_quantity,
+            a.conversion_delete
+		) VALUES (
+		    #{id},
+			#{materialUnit},
+			#{materialQuantity},
+			#{invoiceUnit},
+			#{invoiceQuantity},
+			#{conversionDelete}
+		)
+	</insert>
+
+    <update id="update">
+        UPDATE input_invoice_conversion
+        <set>
+            <if test="materialUnit != null and materialUnit != ''">
+                materialUnit = #{materialUnit},
+            </if>
+            <if test="materialQuantity != null and materialQuantity != ''">
+                materialQuantity = #{materialQuantity},
+            </if>
+            <if test="invoiceUnit != null and erpMaterial != ''">
+                invoiceUnit = #{invoiceUnit},
+            </if>
+            <if test="invoiceQuantity != null and invoiceQuantity != ''">
+                invoiceQuantity = #{invoiceQuantity},
+            </if>
+            <if test="conversionDelete != null and conversionDelete != ''">
+                conversionDelete = #{conversionDelete},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="delete">
+		DELETE FROM input_invoice_conversion
+		WHERE id = #{id}
+	</update>
+
+    <update id="conversionDelete">
+        UPDATE input_invoice_conversion
+        <set>
+            conversion_delete = 1
+        </set>
+        WHERE id in
+        <foreach collection="array" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+</mapper>

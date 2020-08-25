@@ -1,0 +1,1238 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputInvoiceDao">
+
+    <sql id="invoiceColumns">
+		a.id AS "id",
+		a.invoice_code AS "invoiceCode",
+		a.invoice_number AS "invoiceNumber",
+		a.invoice_total_price AS "invoiceTotalPrice",
+		a.invoice_free_price AS "invoiceFreePrice",
+		a.invoice_tax_price AS "invoiceTaxPrice",
+		a.invoice_check_code AS "invoiceCheckCode",
+		a.invoice_create_date AS "invoiceCreateDate",
+		a.company_id AS "companyId",
+		a.belnr AS "belnr",
+		a.entry_message AS "entryMessage",
+		a.invoice_type AS "invoiceType",
+		a.invoice_entity AS "invoiceEntity",
+		a.invoice_fromto AS "invoiceFromto",
+		a.invoice_upload_type AS "invoiceUploadType",
+		a.invoice_image AS "invoiceImage",
+		a.invoice_status AS "invoiceStatus",
+		a.invoice_printed_code AS "invoicePrintedCode",
+		a.invoice_printed_number AS "invoicePrintedNumber",
+		a.invoice_batch_number AS "invoiceBatchNumber",
+		a.invoice_recognition AS "invoiceRecognition",
+		a.invoice_return AS "invoiceReturn",
+		a.invoice_delete AS "invoiceDelete",
+		a.invoice_upload_date AS "invoiceUploadDate",
+		a.invoice_verify_truth AS "invoiceVerifyTruth",
+		a.invoice_purchaser_company AS "invoicePurchaserCompany",
+		a.invoice_purchaser_paragraph AS "invoicePurchaserParagraph",
+		a.invoice_sell_company AS "invoiceSellCompany",
+		a.invoice_sell_paragraph AS "invoiceSellParagraph",
+		a.invoice_description as "invoiceDescription",
+		a.invoice_purchaser_address as "invoicePurchaserAddress",
+		a.invoice_sell_address as "invoiceSellAddress",
+		a.invoice_error_description as "invoiceErrorDescription",
+		a.express_number AS "expressNumber",
+		a.entry_success_code AS "entrySuccessCode",
+		a.entry_date AS "entryDate",
+		a.invoice_group as "invoiceGroup",
+		a.invoice_check_code_details as "invoiceCheckCodeDetails",
+		a.invoice_purchaser_bank_account as "invoicePurchaserBankAccount",
+		a.invoice_sell_bank_account as "invoiceSellBankAccount",
+		a.create_by AS "createBy",
+		a.invoice_sap_type as "invoiceSapType",
+		a.repeat_bill AS "repeatBill",
+		a.verfy AS "verfy",
+		a.invoice_trans_out AS "invoiceTransOut",
+		a.invoice_deductible_period AS "invoiceDeductiblePeriod",
+		a.invoice_exception_date AS "invoiceExceptionDate",
+		a.invoice_auth_date AS "invoiceAuthDate",
+		a.invoice_examine_status AS "invoiceExamineStatus",
+		a.invoice_deductible_result AS "invoiceDeductibleResult",
+		a.invoice_authentication AS "invoiceAuthentication",
+		a.auth_date AS "authDate",
+		a.invoice_expense As "invoiceExpense",
+		a.apply_status As "applyStatus"
+
+	</sql>
+
+
+
+    <sql id="invoiceJoins">
+      LEFT JOIN(SELECT id AS bid,input_invoice_batch_number AS invoiceBatchNumber FROM input_invoice_batch)b
+      ON a.invoice_batch_number = b.bid
+    </sql>
+
+    <select id="get" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+        WHERE a.id = #{id}
+        OR a.invoice_purchaser_paragraph = #{invoicePurchaserParagraph}
+
+
+    </select>
+
+    <select id="findList" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+        <include refid="invoiceJoins"/>
+    </select>
+
+    <select id="getListAndCreateName" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>,b.username AS "createUserName"
+        FROM input_invoice a
+        LEFT JOIN sys_user b on a.create_by = b.user_id
+        WHERE a.id in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{item.id}
+        </foreach>
+        <if test="createUserName != null and createUserName != ''">
+            and b.username =#{createUserName}
+        </if>
+        ORDER BY a.invoice_batch_number DESC
+    </select>
+
+    <select id="invoiceList" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+        <include refid="invoiceJoins"/>
+    </select>
+
+    <select id="invoiceException" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+        <include refid="invoiceJoins"/>
+    </select>
+
+    <select id="getList" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+        <include refid="invoiceJoins"/>
+    </select>
+
+    <select id="getListForThree" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+        where
+        invoice_status='5'
+        <if test="invoiceBatchNumber != null and invoiceBatchNumber != ''">
+            and input_invoice_batch_number = #{invoiceBatchNumber}
+        </if>
+    </select>
+
+    <select id="getListId" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+    </select>
+
+    <select id="getInvoiceInfoGroupByStatus" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+	      a.*
+        FROM
+	      input_invoice a
+        WHERE
+            a.invoice_purchaser_company!=''
+        and a.invoice_purchaser_paragraph!=''
+        and a.invoice_sell_company!=''
+        and a.invoice_sell_paragraph!=''
+        and a.invoice_batch_number=#{invoiceBatchNumber}
+        group by a.invoice_batch_number
+    </select>
+
+    <select id="getTheMaxGroup" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        a.*
+        FROM
+        input_invoice a
+        WHERE
+        a.invoice_batch_number=#{invoiceBatchNumber}
+        ORDER BY invoice_group desc limit 0,1
+    </select>
+
+    <select id="getListByStatus" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+            <include refid="invoiceColumns"/>
+        FROM
+        input_invoice a
+        WHERE
+            a.invoice_status = '5'
+            and a.invoice_batch_number = #{invoiceBatchNumber}
+    </select>
+
+    <select id="getListByShow" resultType="int">
+        SELECT count(1)
+        FROM input_invoice a
+    </select>
+
+    <update id="updateByBatchNumber">
+        UPDATE input_invoice a
+--         LEFT JOIN input_invoice_voucher b ON a.invoice_number = b.invoice_number
+--         AND b.invoice_batch_number = a.invoice_batch_number
+        SET a.invoice_error_description = NULL
+        WHERE a.invoice_batch_number = #{invoiceBatchNumber}
+        AND a.invoice_error_description = '发票号码和清单上号码识别不一致'
+    </update>
+
+    <select id="getListByBatchId" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+            *
+        FROM input_invoice i
+        WHERE i.invoice_batch_number = #{invoiceBatchNumber}
+    </select>
+
+    <select id="getListLikeInvoiceNumber" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+        WHERE
+        a.invoice_batch_number =#{invoiceBatchNumber}
+        <if test="invoiceNumber != null and invoiceNumber != ''">
+          and a.invoice_number like concat('%',#{invoiceNumber},'%')
+        </if>
+        and a.invoice_delete=#{invoiceDelete}
+    </select>
+
+    <select id="getListByBatchIdAndStatus" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+        WHERE a.invoice_batch_number = #{invoiceBatchNumber} and a.invoice_status = #{invoiceStatus} and a.invoice_return !='1' and a.invoice_delete!='1'
+    </select>
+
+    <select id="getListForMatch" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+        WHERE a.invoice_batch_number = #{invoiceBatchNumber} and a.invoice_return !='1' and a.invoice_delete!='1'
+        and a.invoice_status in ('5','8','9','14','12')
+    </select>
+
+    <select id="getListByBatchIdAndInvoiceGroup" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+        WHERE a.invoice_batch_number = #{invoiceBatchNumber} and a.invoice_group =#{invoiceGroup}
+        and a.invoice_delete != 1
+        and a.invoice_return != 1
+        order by a.invoice_create_date desc
+    </select>
+
+    <select id="getListByVoucher" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+        LEFT JOIN input_invoice_voucher b ON a.invoice_number = b.invoice_number
+        WHERE b.voucher_number = #{voucherNumber}
+        AND b.invoice_batch_number = #{invoiceBatchNumber}
+        AND a.invoice_batch_number = #{invoiceBatchNumber}
+    </select>
+
+    <select id="getListByIds" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>,
+        b.invoice_batch_number AS "batchNumber"
+        FROM input_invoice a
+        LEFT JOIN input_invoice_batch b ON a.invoice_batch_number = b.id
+        <where>
+            a.id in
+            <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+        ORDER BY a.invoice_create_date DESC
+    </select>
+
+    <select id="getListByBatchIds" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+        <where>
+            a.invoice_batch_number in
+            <foreach collection="invoices" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            and a.invoice_status in ('5','7','8','9','11')
+        </where>
+        group by a.invoice_batch_number
+    </select>
+
+    <select id="getExport" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+        <where>
+            a.id in
+            <foreach collection="invoices" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+    </select>
+
+    <select id="findAllList" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+        <include refid="invoiceJoins"/>
+        <where>
+
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="getListByInvoiceNumberAndBatchId" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+        <where>
+            a.invoice_batch_number = #{invoiceBatchNumber}
+            and
+            a.invoice_number in
+            <foreach collection="invoices" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+    </select>
+
+
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO input_invoice(
+		    invoice_batch_number,
+			invoice_code,
+			invoice_printed_code,
+			invoice_printed_number,
+			invoice_number,
+			invoice_total_price,
+			invoice_free_price,
+			invoice_tax_price,
+			invoice_check_code,
+			invoice_type,
+			invoice_entity,
+			invoice_fromto,
+			invoice_upload_type,
+			invoice_image,
+			invoice_status,
+			invoice_recognition,
+			invoice_return,
+			invoice_delete,
+			invoice_verify_truth,
+			invoice_create_date,
+			invoice_upload_date,
+			invoice_purchaser_company,
+			invoice_purchaser_paragraph,
+			invoice_sell_company,
+			invoice_sell_paragraph,
+			invoice_purchaser_bank_account,
+			invoice_sell_bank_account,
+			invoice_description,
+			invoice_purchaser_address,
+			invoice_sell_address,
+			invoice_error_description,
+			invoice_check_code_details,
+			invoice_sap_type,
+			create_by,
+			repeat_bill,
+			invoice_trans_out,
+			invoice_deductible_period,
+			invoice_exception_date,
+			invoice_auth_date,
+			invoice_examine_status,
+			invoice_deductible_result,
+			invoice_authentication,
+			auth_date,
+			trans_out_type
+
+
+		) VALUES (
+		    #{invoiceBatchNumber},
+			#{invoiceCode},
+			#{invoicePrintedCode},
+		    #{invoicePrintedNumber},
+			#{invoiceNumber},
+			#{invoiceTotalPrice},
+			#{invoiceFreePrice},
+			#{invoiceTaxPrice},
+			#{invoiceCheckCode},
+			#{invoiceType},
+			#{invoiceEntity},
+			#{invoiceFromto},
+			#{invoiceUploadType},
+			#{invoiceImage},
+			#{invoiceStatus},
+			#{invoiceRecognition},
+			#{invoiceReturn},
+			#{invoiceDelete},
+			#{invoiceVerifyTruth},
+			#{invoiceCreateDate},
+			#{invoiceUploadDate},
+			#{invoicePurchaserCompany},
+			#{invoicePurchaserParagraph},
+			#{invoiceSellCompany},
+			#{invoiceSellParagraph},
+			#{invoicePurchaserBankAccount},
+			#{invoiceSellBankAccount},
+			#{invoiceDescription},
+			#{invoicePurchaserAddress},
+			#{invoiceSellAddress},
+			#{invoiceErrorDescription},
+			#{invoiceCheckCodeDetails},
+			#{invoiceSapType},
+			#{createBy},
+			#{repeatBill},
+			#{invoiceTransOut},
+			#{invoiceDeductiblePeriod},
+			#{invoiceExceptionDate},
+			#{invoiceAuthDate},
+			#{invoiceExamineStatus},
+			#{invoiceDeductibleResult},
+			#{invoiceAuthentication},
+			#{authDate},
+			#{invoiceTransOutType}
+		)
+	</insert>
+
+    <update id="updateFromtoByBatchNumber">
+        UPDATE input_invoice
+        <set>
+            <if test="invoiceFromto != null and invoiceFromto != ''">
+                invoice_fromto = #{invoiceFromto},
+            </if>
+            <if test="expressNumber != null and expressNumber != ''">
+                express_number = #{expressNumber},
+            </if>
+        </set>
+        WHERE
+        1=1
+        <if test="invoiceBatchNumber != null and invoiceBatchNumber != ''">
+        AND invoice_batch_number = #{invoiceBatchNumber}
+        </if>
+    </update>
+
+    <update id="updateInvoiceBatch">
+        UPDATE input_invoice
+        <set>
+            <if test="invoiceStatus != null and invoiceStatus != ''">
+                invoice_status = #{invoiceStatus},
+            </if>
+            <if test="invoiceErrorDescription != null and invoiceErrorDescription != ''">
+                invoice_error_description = #{invoiceErrorDescription}
+            </if>
+        </set>
+        WHERE id in
+        <foreach collection="invoices" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+
+    </update>
+
+    <update id="updateInvoiceGroup">
+        UPDATE input_invoice
+        <set>
+            <if test="invoiceGroup != null and invoiceGroup != ''">
+                invoice_group = #{invoiceGroup},
+            </if>
+        </set>
+        WHERE
+        1=1
+        <if test="invoiceBatchNumber != null and invoiceBatchNumber != ''">
+            AND invoice_batch_number = #{invoiceBatchNumber}
+        </if>
+        <if test="invoiceNumber != null and invoiceNumber != ''">
+            AND invoice_number = #{invoiceNumber}
+        </if>
+    </update>
+
+    <update id="updateGroupByBatchId">
+        UPDATE input_invoice
+        set
+                invoice_group = null
+
+        WHERE
+        1=1
+        <if test="invoiceBatchNumber != null and invoiceBatchNumber != ''">
+            AND invoice_batch_number = #{invoiceBatchNumber}
+        </if>
+    </update>
+
+    <update id="update">
+        UPDATE input_invoice
+        <set>
+            <if test="invoiceBatchNumber != null and invoiceBatchNumber != ''">
+                invoice_batch_number = #{invoiceBatchNumber},
+            </if>
+            <if test="invoiceCode != null and invoiceCode != ''">
+                invoice_code = #{invoiceCode},
+            </if>
+            <if test="invoicePrintedCode != null and invoicePrintedCode != ''">
+                invoice_printed_code = #{invoicePrintedCode},
+            </if>
+            <if test="invoicePrintedNumber != null and invoicePrintedNumber != ''">
+                invoice_printed_number = #{invoicePrintedNumber},
+            </if>
+            <if test="invoiceNumber != null and invoiceNumber != ''">
+                invoice_number = #{invoiceNumber},
+            </if>
+            <if test="invoiceTotalPrice != null and invoiceTotalPrice != ''">
+                invoice_total_price = #{invoiceTotalPrice},
+            </if>
+            <if test="invoiceFreePrice != null and invoiceFreePrice != ''">
+                invoice_free_price = #{invoiceFreePrice},
+            </if>
+            <if test="invoiceTaxPrice != null and invoiceTaxPrice != ''">
+                invoice_tax_price = #{invoiceTaxPrice},
+            </if>
+            <if test="invoiceCheckCode != null and invoiceCheckCode != ''">
+                invoice_check_code = #{invoiceCheckCode},
+            </if>
+            <if test="invoiceType != null and invoiceType != ''">
+                invoice_type = #{invoiceType},
+            </if>
+            <if test="invoiceEntity != null and invoiceEntity != ''">
+                invoice_entity = #{invoiceEntity},
+            </if>
+            <if test="invoiceFromto != null and invoiceFromto != ''">
+                invoice_fromto = #{invoiceFromto},
+            </if>
+            <if test="invoiceUploadType != null and invoiceUploadType != ''">
+                invoice_upload_type = #{invoiceUploadType},
+            </if>
+            <if test="invoiceImage != null and invoiceImage != ''">
+                invoice_image = #{invoiceImage},
+            </if>
+            <if test="invoiceStatus != null and invoiceStatus != ''">
+                invoice_status = #{invoiceStatus},
+            </if>
+            <if test="invoiceRecognition != null">
+                invoice_recognition = #{invoiceRecognition},
+            </if>
+            <if test="companyId != null">
+                company_id = #{companyId},
+            </if>
+            <if test="invoiceReturn != null">
+                invoice_return = #{invoiceReturn},
+            </if>
+            <if test="invoiceDelete != null">
+                invoice_delete = #{invoiceDelete},
+            </if>
+            <if test="invoiceVerifyTruth != null and invoiceVerifyTruth!= ''">
+                invoice_verify_truth= #{invoiceVerifyTruth},
+            </if>
+            <if test="invoiceCreateDate != null">
+                invoice_create_date = #{invoiceCreateDate},
+            </if>
+            <if test="invoiceUploadDate != null and invoiceUploadDate!= ''">
+                invoice_upload_date = #{invoiceUploadDate},
+            </if>
+            <if test="entryDate != null">
+                entry_date = #{entryDate},
+            </if>
+            <if test="invoicePurchaserCompany != null and invoicePurchaserCompany!= ''">
+                invoice_purchaser_company = #{invoicePurchaserCompany},
+            </if>
+            <if test="invoicePurchaserParagraph != null and invoicePurchaserParagraph!= ''">
+                invoice_purchaser_paragraph= #{invoicePurchaserParagraph},
+            </if>
+            <if test="invoiceSellCompany != null and invoiceSellCompany!= ''">
+                invoice_sell_company= #{invoiceSellCompany},
+            </if>
+            <if test="invoiceSellParagraph != null and invoiceSellParagraph!= ''">
+                invoice_sell_paragraph= #{invoiceSellParagraph},
+            </if>
+            <if test="invoicePurchaserBankAccount != null and invoicePurchaserBankAccount!= ''">
+                invoice_purchaser_bank_account= #{invoicePurchaserBankAccount},
+            </if>
+            <if test="invoiceSellBankAccount != null and invoiceSellBankAccount!= ''">
+                invoice_sell_bank_account= #{invoiceSellBankAccount},
+            </if>
+            <if test="invoiceDescription != null and invoiceDescription!= ''">
+                invoice_description= #{invoiceDescription},
+            </if>
+            <if test="invoicePurchaserAddress != null and invoicePurchaserAddress!= ''">
+                invoice_purchaser_address= #{invoicePurchaserAddress},
+            </if>
+            <if test="invoiceSellAddress != null and invoiceSellAddress!= ''">
+                invoice_sell_address= #{invoiceSellAddress},
+            </if>
+            <if test="invoiceErrorDescription != null">
+                invoice_error_description= #{invoiceErrorDescription},
+            </if>
+            <if test="invoiceGroup != null and invoiceGroup!= ''">
+                invoice_group= #{invoiceGroup},
+            </if>
+            <if test="invoiceCheckCodeDetails != null and invoiceCheckCodeDetails!= ''">
+                invoice_check_code_details= #{invoiceCheckCodeDetails},
+            </if>
+            <if test="invoiceSapType != null and invoiceSapType!= ''">
+                invoice_sap_type= #{invoiceSapType},
+            </if>
+            <if test="verfy != null and verfy!= ''">
+                verfy= #{verfy},
+            </if>
+            <if test = "invoiceTransOut !=null and invoiceTransOut!= ''">
+                invoice_trans_out = #{invoiceTransOut},
+            </if>
+            <if test="invoiceDeductiblePeriod !=null and invoiceDeductiblePeriod != ''">
+                invoice_deductible_period = #{invoiceDeductiblePeriod},
+            </if>
+            <if test = " invoiceExceptionDate !=null and invoiceExceptionDate !=''">
+                invoice_exception_date = #{invoiceExceptionDate},
+            </if>
+            <if test = "invoiceAuthDate !=null and invoiceAuthDate!=''">
+                invoice_auth_date = #{invoiceAuthDate},
+            </if>
+            <if test = "invoiceExamineStatus !=null and invoiceExamineStatus!=''">
+                invoice_examine_status = #{invoiceExamineStatus}
+            </if>
+            <if test = "invoiceDeductibleResult !=null and invoiceDeductibleResult!=''">
+                invoice_deductible_result = #{invoiceDeductibleResult},
+            </if>
+            <if test = "invoiceAuthentication !=null and invoiceAuthentication!=''">
+                invoice_authentication = #{invoiceAuthentication},
+            </if>
+            <if test = "authDate!=null and authDate!=''">
+                auth_date = #{authDate}
+            </if>
+
+            <if test = "requestId!=null and requestId!=''">
+                request_id = #{requestId}
+            </if>
+        </set>
+        WHERE
+            id = #{id}
+        <!--<if test="invoiceBatchNumber != null and invoiceBatchNumber != ''">-->
+            <!--AND invoice_batch_number = #{invoiceBatchNumber}-->
+        <!--</if>-->
+
+    </update>
+
+    <update id="updateGroup">
+        UPDATE input_invoice
+        <set>
+            invoice_group = null,
+            invoice_error_description = #{invoiceErrorDescription}
+        </set>
+        where id = #{id}
+    </update>
+
+    <update id="delete">
+		DELETE FROM input_invoice
+		WHERE id = #{id}
+	</update>
+
+    <delete id="deleteInvoiceByInvoiceBatchNumber">
+		DELETE FROM input_invoice
+        WHERE invoice_batch_number = #{invoiceBatchNumber}
+	</delete>
+
+    <update id="updateByIdArray">
+        UPDATE input_invoice
+        <set>
+            invoice_status = -3
+        </set>
+        WHERE id in
+        <foreach collection="array" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="getGroupSizeByBatchId" resultType="int">
+        SELECT count(DISTINCT(invoice_group))
+        From input_invoice
+        WHERE invoice_batch_number = #{invoiceBatchNumber}
+    </select>
+
+    <delete id="deleteByRepeat">
+        delete FROM input_invoice
+        WHERE id in
+        <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <update id="setCreateBy">
+        UPDATE input_invoice
+        <set>
+            create_by = #{userId}
+        </set>
+        WHERE id in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{item.id}
+        </foreach>
+    </update>
+
+    <update id="updateByIdRefund">
+        UPDATE input_invoice
+        <set>
+            invoice_return = 2
+        </set>
+        WHERE id in
+        <foreach collection="array" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+
+    <update id="updateByIdPendingRefund">
+        UPDATE input_invoice
+        <set>
+            invoice_return = 1, invoice_status = -2
+        </set>
+        WHERE id in
+        <foreach collection="list" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+
+    <update id="updateByIdPass">
+        UPDATE input_invoice
+        <set>
+            invoice_recognition = 1
+        </set>
+        WHERE id in
+        <foreach collection="array" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="getInvoice" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>,i.upload_account AS uploadAccount,b.update_time AS updateTime
+        FROM input_invoice a
+        LEFT join input_invoice_batch i on  a.invoice_batch_number = i.id
+        <where>
+            a.invoice_batch_number in
+            <foreach collection="invoiceEntity" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+    </select>
+
+    <select id="getByInvoiceId" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialEntity">
+        SELECT
+        <include refid="invoiceColumns"/>,i.id
+        FROM input_invoice a
+        LEFT join input_invoice_material i on a.id=i.invoice_id
+        <where>
+            a.id in
+            <foreach collection="invoices" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+    </select>
+
+    <select id="getList2" resultType="com.pwc.modules.input.entity.InputInvoiceEntity2">
+        SELECT
+        <include refid="invoiceColumns"/>
+        ,a.invoice_remarks AS "invoiceRemarks"
+        ,c.username AS "createUserName"
+        from input_invoice a
+        LEFT JOIN sys_user c ON a.create_by = c.user_id
+        WHERE a.id IN
+        <foreach collection="list" index="index" item="item"  open="(" separator="," close=")">
+            #{item.id}
+        </foreach>
+    </select>
+
+    <select id="getListByItems" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        ,b.invoice_batch_number AS "batchNumber"
+        ,c.username AS "createUserName"
+        FROM input_invoice a
+        LEFT JOIN input_invoice_batch b ON a.invoice_batch_number = b.id
+        LEFT JOIN sys_user c ON a.create_by = c.user_id
+        WHERE a.id IN
+        <foreach collection="list" index="index" item="item"  open="(" separator="," close=")">
+            #{item.id}
+        </foreach>
+        ORDER BY a.invoice_batch_number DESC 
+    </select>
+
+    <select id="getListById" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+    SELECT
+    <include refid="invoiceColumns"/>
+    ,b.invoice_batch_number AS "batchNumber"
+    ,c.username AS "createUserName"
+    FROM input_invoice a
+    LEFT JOIN input_invoice_batch b ON a.invoice_batch_number = b.id
+    LEFT JOIN sys_user c ON a.create_by = c.user_id
+    WHERE a.id IN
+    <foreach collection="array" index="index" item="item"  open="(" separator="," close=")">
+        #{item}
+    </foreach>
+    </select>
+
+    <select id="getByIds" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+        <where>
+            a.id in
+            <foreach collection="invoices" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+    </select>
+
+    <update id="updateByResult">
+        <foreach collection="list" index="index" item="item" open="" close="" separator=";">
+            UPDATE input_invoice
+            <set>
+                <if test="item.invoiceStatus != null and item.invoiceStatus != ''">
+                    invoice_status = #{item.invoiceStatus},
+                </if>
+                <if test="item.invoiceEntryMessage != null and item.invoiceEntryMessage != ''">
+                    invoice_entry_message = #{item.invoiceEntryMessage},
+                </if>
+            </set>
+            <where>
+                id = #{item.id}
+            </where>
+        </foreach>
+    </update>
+
+    <update id="updateByCompany">
+        <foreach collection="list" index="index" item="item" open="" separator=";" close="">
+            UPDATE input_invoice
+            <set>
+                invoice_status = #{item.invoiceStatus},
+                invoice_error_description = #{item.invoiceErrorDescription},
+            </set>
+            <where>
+                id = #{item.id}
+            </where>
+        </foreach>
+
+    </update>
+
+
+    <select id="getListByinvoiceNumber" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a,invoice b
+        WHERE b.invoice_number = #{invoiceNumber}
+        AND a.invoice_batch_number = b.invoice_batch_number
+        AND a.invoice_group=b.invoice_group
+        AND a.invoice_delete = 0
+    </select>
+
+    <select id="getBatchNumber" resultType="String">
+        SELECT
+        b.invoice_batch_number
+        FROM
+        input_invoice a
+        LEFT JOIN invoice_batch b ON a.invoice_batch_number = b.id
+        WHERE
+        a.invoice_batch_number IN
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ORDER BY a.id DESC
+    </select>
+
+    <update id="updateList">
+        <foreach collection="list" index="index" item="item" open="" close="" separator=";">
+            UPDATE input_invoice
+            <set>
+                invoice_status = #{item.invoiceStatus},
+            </set>
+            <where>
+                id = #{item.id}
+            </where>
+        </foreach>
+    </update>
+
+    <select id="getListByBatchAndStatus" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+        WHERE a.invoice_batch_number = #{invoiceBatchNumber} and (a.invoice_status = 2 OR a.invoice_status = 5
+        OR a.invoice_status = 6 OR a.invoice_status = 7 OR a.invoice_status = 8 OR a.invoice_status = 9 OR a.invoice_status = 11 OR a.invoice_status = 12)
+        <if test="id != null and id != ''">
+            AND id != #{id}
+        </if>
+    </select>
+
+    <select id="getInvoiceByBatchNumber" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+        WHERE a.invoice_batch_number = #{invoiceBatchNumber}
+        AND a.invoice_status != 3
+        AND a.invoice_status != 4
+        AND a.invoice_delete != 1
+        AND a.invoice_return != 1
+    </select>
+
+    <update id="setNull">
+        UPDATE input_invoice
+        <set>
+            invoice_group = null
+        </set>
+        WHERE invoice_batch_number = #{invoiceBatchNumber}
+    </update>
+
+    <select id="getGroupListByInvoiceId" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        Select
+        <include refid="invoiceColumns"/>
+        From input_invoice a
+        WHERE a.invoice_batch_number = (SELECT invoice_batch_number FROM invoice b WHERE b.id = #{id})
+        AND a.invoice_group = (SELECT invoice_group FROM invoice b WHERE b.id = #{id})
+    </select>
+
+    <!--更新入账结果-->
+    <update id="updateByEnter">
+        UPDATE input_invoice
+        <set>
+            <if test="invoiceStatus != null and invoiceStatus != ''">
+                invoice_status = #{invoiceStatus},
+            </if>
+            <if test="invoiceErrorDescription != null">
+                invoice_error_description = #{invoiceErrorDescription},
+            </if>
+            <if test="entrySuccessCode != null">
+                Entry_success_code = #{entrySuccessCode},
+            </if>
+            <if test="entryDate != null">
+                entry_date = #{entryDate},
+            </if>
+            <if test="belnr != null">
+                belnr = #{belnr},
+            </if>
+        </set>
+        WHERE invoice_batch_number = #{invoiceBatchNumber}
+        AND invoice_group = #{invoiceGroup}
+    </update>
+    <!-- AND invoice_group = #{invoiceGroup}-->
+    <select id="getOAInvoiceList" resultType="Integer">
+        select count(*)
+        from input_invoice
+    where invoice_number=#{invoiceNumber} and invoice_code=#{invoiceCode} and (invoice_return ="0" or invoice_delete = "0")
+    </select>
+    <update id="updateRepeat">
+        update input_invoice
+        set repeat_bill=#{repeatBill}
+        where invoice_number=#{invoiceNumber} and invoice_code=#{invoiceCode} and (invoice_return !="1" or invoice_delete != "1")
+    </update>
+    <update id="setWorn">
+        update input_oa_invoice_info
+        set worning =#{worning}
+        where
+            invoice_purchaser_company=#{invoicePurchaserCompany} and invoice_purchaser_paragraph=#{invoicePurchaserParagraph}
+    </update>
+
+    <update id="setWorn2">
+        update input_oa_invoice_info
+        set worning =#{worning}
+        where
+            invoice_purchaser_company=#{invoicePurchaserCompany} and invoice_purchaser_paragraph is null
+    </update>
+
+    <select id="getListByGroup"  resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+        WHERE a.invoice_batch_number = #{id}
+        GROUP BY a.invoice_group
+    </select>
+
+    <update id="setDescription">
+        UPDATE input_invoice
+        <set>
+            invoice_remarks = #{invoiceRemarks}
+        </set>
+        WHERE id in
+        <foreach collection="list" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="getMigrationList" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+        LEFT JOIN invoice_batch b on a.invoice_batch_number = b.id
+        WHERE b.invoice_batch_status = '7'
+    </select>
+
+
+    <select id="getListByInvoicePurchaserParagraph" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+        WHERE a.invoice_purchaser_paragraph= #{invoicePurchaserParagraph}
+    </select>
+
+    <update id="updateApply">
+        update input_invoice
+        set apply_status = #{applyStatus}
+        WHERE company_id = #{companyId}
+    </update>
+    <update id="updateByIdCheckPending">
+        update input_invoice
+        <set>
+            invoice_status = 15
+        </set>
+        where id in
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+    <select id="selectFromAuth" resultType="com.pwc.modules.input.entity.vo.InputInvoiceAuthEntity">
+        SELECT
+        <include refid="invoiceColumns"/>,
+        (case a.apply_status
+        WHEN '1' THEN '已撤销'
+        WHEN '2' THEN '已确认'
+        ELSE '未确认' END) AS applyStatus
+        FROM input_invoice a
+        WHERE a.id IN
+        <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+            #{item.id}
+        </foreach>
+        ORDER BY a.invoice_upload_date desc
+    </select>
+<!--    <select id="getListByShow" resultType="int">-->
+<!--        SELECT count(a.id)-->
+<!--        FROM input_invoice a-->
+<!--    </select>-->
+
+    <update id="authPass">
+        UPDATE input_invoice
+        <set>
+            invoice_status = 16
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateListByCodeAndNumber" parameterType="java.util.List">
+        <foreach collection="list" item="item" separator=";" index="index" open="" close="">
+            UPDATE input_invoice
+            <set>
+                <if test="item.authDate != null">
+                    auth_date = #{item.authDate},
+                </if>
+                <if test="item.invoiceStatus != null and item.invoiceStatus != ''">
+                    invoice_status = #{item.invoiceStatus},
+                </if>
+                <if test="item.invoiceDelete != null and item.invoiceDelete != ''">
+                    invoice_delete = #{item.invoiceDelete},
+                </if>
+                <if test="item.invoiceDeleteReason != null and item.invoiceDeleteReason != ''">
+                    invoice_delete_reason = #{item.invoiceDeleteReason},
+                </if>
+                <if test="item.invoiceCreateDate != null and item.invoiceCreateDate != ''">
+                    invoice_create_date = #{item.invoiceCreateDate},
+                </if>
+                <if test="item.invoiceTotalPrice != null">
+                    invoice_total_price = #{item.invoiceTotalPrice},
+                </if>
+                <if test="item.invoiceTaxPrice != null">
+                    invoice_tax_price = #{item.invoiceTaxPrice},
+                </if>
+                <if test="item.invoiceAuthType != null and item.invoiceAuthType != ''">
+                    invoice_auth_type = #{item.invoiceAuthType},
+                </if>
+                <if test="item.invoiceAuthPattern != null and item.invoiceAuthPattern != ''">
+                    invoice_auth_pattern = #{item.invoiceAuthPattern},
+                </if>
+                <if test="item.invoiceAuthDate != null and item.invoiceAuthDate != ''">
+                    invoice_auth_date = #{item.invoiceAuthDate},
+                </if>
+                <if test="item.invoiceDeductibleResult != null and item.invoiceDeductibleResult != ''">
+                    invoice_deductible_result = #{item.invoiceDeductibleResult},
+                </if>
+                <if test="item.invoicePurchaserCompany != null and item.invoicePurchaserCompany != ''">
+                    invoice_purchaser_company = #{item.invoicePurchaserCompany},
+                </if>
+                <if test="item.invoicePurchaserParagraph != null and item.invoicePurchaserParagraph != ''">
+                    invoice_purchaser_paragraph = #{item.invoicePurchaserParagraph},
+                </if>
+                <if test="item.companyId != null and item.companyId != ''">
+                    company_id = #{item.companyId},
+                </if>
+                <if test="item.invoiceFreePrice != null and item.invoiceFreePrice != ''">
+                    invoice_free_price = #{item.invoiceFreePrice},
+                </if>
+                <if test="item.invoiceType != null and item.invoiceType != ''">
+                    invoice_type = #{item.invoiceType},
+                </if>
+                <if test="item.invoiceSellCompany != null and item.invoiceSellCompany != ''">
+                    invoice_sell_company = #{item.invoiceSellCompany},
+                </if>
+                <if test="item.invoiceSellParagraph != null and item.invoiceSellParagraph != ''">
+                    invoice_sell_paragraph = #{item.invoiceSellParagraph},
+                </if>
+                <if test="item.invoiceReturn != null and item.invoiceReturn != ''">
+                    invoice_return = #{item.invoiceReturn},
+                </if>
+                <if test="item.invoiceDeductiblePeriod != null and item.invoiceDeductiblePeriod  != ''">
+                    invoice_deductible_period = #{item.invoiceDeductiblePeriod},
+                </if>
+            </set>
+            WHERE invoice_code = #{item.invoiceCode}
+            AND invoice_number = #{item.invoiceNumber}
+            AND (invoice_status = 19 OR invoice_status = 16 OR invoice_status = 17)
+            AND invoice_delete = 0
+            AND invoice_type = '专用发票'
+        </foreach>
+    </update>
+    <select id="selectByFour" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+        WHERE a.invoice_code = #{invoiceCode}
+        AND a.invoice_number = #{invoiceNumber}
+        AND a.invoice_create_date = #{invoiceCreateDate}
+        AND a.invoice_free_price = #{invoiceFreePrice}
+        AND a.invoice_delete = 0
+        AND a.invoice_type = '专用发票'
+        AND a.invoice_status = '5'
+    </select>
+    <select id="getListBeforeThirty" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+        LEFT JOIN company b ON a.company_id = b.id
+        WHERE a.invoice_delete = 0
+        AND a.invoice_return = 0
+        AND a.invoice_purchaser_paragraph IS NOT NULL
+        AND ((a.invoice_type = '电子发票' and a.invoice_electronic_type = '1')
+        OR (a.invoice_type = '专用发票'))
+        AND a.invoice_status = '19'
+        AND a.invoice_upload_date &gt; #{beginDate}
+        AND a.invoice_upload_date &lt; #{endDate}
+        AND b.authentication = '1'
+    </select>
+    <select id="getListBeforeTwenty" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+        LEFT JOIN company b ON a.company_id = b.id
+        WHERE a.invoice_delete = 0
+        AND a.invoice_return = 0
+        AND a.invoice_purchaser_paragraph IS NOT NULL
+        AND ((a.invoice_type = '电子发票' and a.invoice_electronic_type = '1')
+        OR (a.invoice_type = '专用发票'))
+        AND a.invoice_status = '19'
+        AND a.invoice_upload_date &lt; #{date}
+        AND b.authentication = '1'
+    </select>
+
+    <select id="selectByFourItems" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice a
+        WHERE a.invoice_code = #{invoiceCode}
+        AND a.invoice_number = #{invoiceNumber}
+        AND a.invoice_status != 11
+        AND a.invoice_status != 8
+        AND a.invoice_bar_code IS NOT NULL
+        AND a.invoice_delete = 0
+    </select>
+
+
+    <update id="updateInvoiceTransOutType">
+        UPDATE input_invoice
+        <set>
+            <if test="invoiceTransOut != null and invoiceTransOut != ''">
+                invoice_trans_out = #{invoiceTransOut},
+            </if>
+        </set>
+        where id in
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+
+    <select id="getVoListById" resultType="com.pwc.modules.input.entity.InputInvoiceVo">
+        (SELECT
+        0 AS "materId",
+        a.id AS "sapId",
+        a.mblnr AS "mblnr",
+        a.zeile AS "zeile",
+        null AS "sphXh",
+        concat('*',a.matkl,'*',a.maktx) AS "maktx",
+        a.wgbez AS "matkl",
+        null AS "sphGgxh",
+        a.meins AS "sphJldw",
+        /*(a.zzkkbhs / a.menge_qm) AS "sphDj",*/
+        cast(a.zzkkbhs/a.menge_qm as decimal(18,8)) AS "sphDj",
+        a.menge_qm AS "sphSl",
+        a.wmwst AS "sphSe",
+        a.zzkkbhs AS "sphJe",
+        a.wrbtr AS "sphHsje",
+        a.ebeln AS "ebeln",
+        concat(SUBSTRING(a.kbetr,3),'%') AS "sphSlv",
+        a.mate AS "status",
+        a.cmzterm AS "cmzterm",
+        a.irzterm AS "irzterm",
+        a.matnr AS "matnr"
+        FROM invoice_material_sap a
+        WHERE a.id in
+        <foreach collection="sapIds" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>)
+        UNION
+        (SELECT
+        b.id AS "materId",
+        0 AS "sapId",
+        null AS "mblnr",
+        b.sph_xh AS "zeile",
+        concat(d.invoice_number,'_',b.sph_xh) AS "sphXh",
+        b.sph_spmc AS "maktx",
+        null AS "matkl",
+        b.sph_ggxh AS "sphGgxh",
+        b.sph_jldw AS "sphJldw",
+        b.sph_dj AS "sphDj",
+        b.sph_sl AS "sphSl",
+        b.sph_se AS "sphSe",
+        b.sph_je AS "sphJe",
+        (b.sph_je + b.sph_se) AS "sphHsje",
+        null AS "ebeln",
+        b.sph_slv AS sphSlv,
+        b.status AS "status",
+        null AS "cmzterm",
+        null AS "irzterm",
+        null AS "matnr"
+        FROM invoice_material b
+        LEFT JOIN invoice d on d.id = b.invoice_id
+        WHERE b.id in
+        <foreach collection="materialIds" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>)
+    </select>
+
+
+    <select id="getLastSeq"  parameterType="java.lang.String" resultType="java.lang.String" >
+        select max(invoice_seq) as seq FROM input_invoice  where invoice_seq like concat('%',#{invoiceSeq},'%')
+    </select>
+
+</mapper>

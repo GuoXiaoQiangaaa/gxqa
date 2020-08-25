@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.sys.dao.FilingThirdCityCodeDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.pwc.modules.sys.entity.FilingThirdCityCodeEntity" id="filingThirdCityCodeMap">
+        <result property="id" column="id"/>
+        <result property="cityCode" column="city_code"/>
+        <result property="thirdCityCode" column="third_city_code"/>
+    </resultMap>
+
+
+</mapper>

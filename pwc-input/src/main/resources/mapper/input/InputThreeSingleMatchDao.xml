@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pwc.modules.input.dao.InputThreeSingleMatchDao">
+    <sql id="threeSingleMatchColumns">
+      a.id,
+      a.from_company AS fromCompany,
+      a.from_duty_paragraph AS fromDutyParagraph,
+      a.to_company AS toCompany,
+      a.to_duty_paragraph AS toDutyParagraph,
+      batch,
+      a.batch_serial_number AS batchSerialNumber,
+      a.create_time AS createTime,
+      a.match_status AS matchStatus,
+      a.material_document_id AS materialDocumentId,
+      a.from_company_bank_account AS fromCompanyBankAccount,
+      a.to_company_bank_account AS toCompanyBankAccount,
+      materialNumber,
+      materialDocumentNumber,
+      materialDescription,
+      invoiceNumber,
+      invoiceBatchNumber
+    </sql>
+
+    <sql id="threeSingleMatchJoins">
+      LEFT JOIN input_invoice_batch b ON t.batch = b.id
+    </sql>
+
+    <select id="get" resultType="com.pwc.modules.input.entity.InputThreeSingleMatchEntity">
+        SELECT
+        <include refid="threeSingleMatchColumns"/>, b.invoice_batch_number
+        FROM input_three_single_match a
+        <include refid="threeSingleMatchJoins"/>
+        WHERE id = #{id}
+    </select>
+
+    <select id="findList" resultType="com.pwc.modules.input.entity.InputThreeSingleMatchEntity">
+        SELECT
+        <include refid="threeSingleMatchColumns"/>
+        from input_three_single_match a
+        <include refid="threeSingleMatchJoins"/>
+    </select>
+
+    <insert id="save">
+        INSERT INTO input_three_single_match(
+          id,
+          from_company,
+          from_duty_paragraph,
+          to_company,
+          to_duty_paragraph,
+          batch,
+          batch_serial_number,
+          create_time,
+          match_status
+        ) VALUES(
+          #{id},
+          #{fromCompany},
+          #{fromDutyParagraph},
+          #{toCompany},
+          #{toDutyParagraph},
+          #{batch},
+          #{batchSerialNumber},
+          #{createTime},
+          #{matchStatus}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE input_three_single_match
+        <set>
+            <if test="fromCompany != null and  fromCompany != ''">
+                from_company = #{fromCompany},
+            </if>
+            <if test="fromDutyParagraph != null and  fromDutyParagraph != ''">
+                from_duty_paragraph = #{fromDutyParagraph},
+            </if>
+            <if test="toCompany != null and  toCompany != ''">
+                to_company = #{toCompany},
+            </if>
+            <if test="toDutyParagraph != null and  toDutyParagraph != ''">
+                to_duty_paragraph = #{toDutyParagraph},
+            </if>
+            <if test="batch != null and  batch != ''">
+                batch = #{batch},
+            </if>
+            <if test="batchSerialNumber != null and  batchSerialNumber != ''">
+                batch_serial_number = #{batchSerialNumber},
+            </if>
+            <if test="createTime != null and  createTime != ''">
+                create_time = #{createTime},
+            </if>
+            <if test="matchStatus != null and  matchStatus != ''">
+                match_status = #{matchStatus},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="delete">
+        DELETE FROM input_three_single_match
+        WHERE id = #{id}
+    </update>
+</mapper>

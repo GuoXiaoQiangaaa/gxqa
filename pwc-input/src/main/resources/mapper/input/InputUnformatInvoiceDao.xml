@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputUnformatInvoiceDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.pwc.modules.input.entity.InputUnformatInvoiceEntity" id="unformatInvoiceMap">
+        <result property="id" column="id"/>
+        <result property="fields" column="fields"/>
+        <result property="content" column="content"/>
+        <result property="amount" column="amount"/>
+        <result property="issueDate" column="issue_date"/>
+        <result property="createTime" column="create_time"/>
+        <result property="imageUrl" column="image_url"/>
+        <result property="createBy" column="create_by"/>
+    </resultMap>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO input_unformat_invoice (
+            fields,
+            amount,
+            issue_date,
+            create_time,
+            image_url,
+            create_by,
+            company_id
+
+		) VALUES (
+			#{fields},
+			#{amount},
+			#{issueDate},
+			#{createTime},
+			#{imageUrl},
+			#{createBy},
+			#{companyId}
+
+		)
+	</insert>
+
+    <sql id="UnformatInvoiceColumns">
+		a.id as "id",
+		a.fields as "fields",
+		a.amount as "amount",
+		a.issue_date as "issueDate",
+		a.create_time AS "createTime",
+		a.image_url AS "imageUrl",
+		a.create_by AS "createBy"
+
+	</sql>
+    <select id="getById" resultType="com.pwc.modules.input.entity.InputUnformatInvoiceEntity">
+        SELECT
+        <include refid="UnformatInvoiceColumns"/>
+        FROM input_unformat_invoice a
+        WHERE a.id = #{id}
+    </select>
+
+    <delete id="removeByIds"  >
+        DELETE FROM input_unformat_invoice
+        WHERE id in
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+</mapper>

@@ -1,0 +1,856 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputInvoiceMaterialSapDao">
+
+    <sql id="invoiceMaterialSapColumns">
+		a.id AS "id",
+		a.bukrs AS "bukrs",
+		a.lifnr AS "lifnr",
+		a.name1 AS "name1",
+		a.sortl AS "sortl",
+		a.ebeln AS "ebeln",
+		a.bsart AS "bsart",
+		a.ebelp AS "ebelp",
+		a.ekgrp AS "ekgrp",
+		a.mblnr AS "mblnr",
+		a.zeile AS "zeile",
+		a.werks AS "werks",
+		a.matnr AS "matnr",
+		a.maktx AS "maktx",
+		a.meins AS "meins",
+		a.menge AS "menge",
+		a.menge1 AS "menge1",
+		a.cmzterm AS "cmzterm",
+		a.irzterm AS "irzterm",
+		a.zzresult AS "zzresult",
+		a.menge_qm AS "mengeQm",
+		a.menge_re AS "mengeRe",
+		a.zkkje AS "zkkje",
+		a.zzkkbl AS "zzkkbl",
+		a.mwskz AS "mwskz",
+		a.kbetr AS "kbetr",
+		a.wmwst AS "wmwst",
+		a.zzkkbhs as "zzkkbhs",
+		a.wrbtr as "wrbtr",
+		a.zzcontract as "zzcontract",
+		a.budat_mkpf as "budatMkpf",
+		a.qmdate as "qmdate",
+		a.matkl as "matkl",
+		a.mate as "mate",
+		a.batch_id as "batchId",
+		a.material_ids as "materialIds",
+		a.matkl as "matkl",
+		a.description as "description",
+		a.create_time as createTime,
+		a.rcode as "rcode",
+		a.material_line_id as "materialLineId",
+		a.match_status as "matchStatus",
+		a.wgbez as "wgbez",
+		a.item_amount AS "itemAmount",
+		a.message AS "message",
+		a.prdat AS "prdat",
+		a.entry_year AS "entryYear"
+	</sql>
+
+    <sql id="invoiceMaterialSapJoins">
+    </sql>
+
+    <select id="get" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialSapEntity">
+        SELECT
+        <include refid="invoiceMaterialSapColumns"/>
+        FROM input_invoice_material_sap a
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="getListByMatkl" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialSapEntity">
+        SELECT
+        <include refid="invoiceMaterialSapColumns"/>
+        FROM input_invoice_material_sap a
+        WHERE a.matkl = #{matkl} and a.mate='1'
+    </select>
+
+
+    <select id="getListByMaktx" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialSapEntity">
+        SELECT
+        <include refid="invoiceMaterialSapColumns"/>
+        FROM input_invoice_material_sap a
+        WHERE a.maktx = #{maktx} and a.mate='1'
+    </select>
+
+    <select id="getListByLineIdAndMate" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialSapEntity">
+        SELECT
+        <include refid="invoiceMaterialSapColumns"/>
+        FROM input_invoice_material_sap a
+        <where>
+            <if test="materialLineId != null and materialLineId != ''">
+                a.material_line_id = #{materialLineId}
+            </if>
+            <if test="batchId != null and batchId != ''">
+                a.batch_id = #{batchId}
+            </if>
+            <if test="mate != null and mate != ''">
+                a.mate = #{mate}
+            </if>
+        </where>
+    </select>
+
+    <select id="getById" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialSapEntity">
+        SELECT
+        <include refid="invoiceMaterialSapColumns"/>
+        FROM input_invoice_material_sap a,input_invoice_material_sap b
+        WHERE b.id = #{id}
+        AND b.batch_id = #{batchId}
+        AND a.material_line_id = b.material_line_id
+    </select>
+
+    <update id="mateLose">
+        UPDATE input_invoice_material_sap
+        <set>
+            mate = "0",
+            material_line_id = null
+        </set>
+        WHERE id in
+        <foreach collection="ids" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="getListByBatchIds" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialSapEntity">
+        SELECT
+        <include refid="invoiceMaterialSapColumns"/>
+        FROM input_invoice_material_sap a
+        WHERE a.batch_id in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="getListByMate" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialSapEntity">
+        SELECT
+            a.*,
+            group_concat(
+                a.mblnr
+            ) as mblnrArray
+        FROM
+	        input_invoice_material_sap a
+        WHERE
+	        a.mate = "0"
+        GROUP BY
+	        a.batch_id
+    </select>
+
+    <select id="getListByMated" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialSapEntity">
+        SELECT
+        <include refid="invoiceMaterialSapColumns"/>
+        FROM input_invoice_material_sap a
+        WHERE a.batch_id = #{batchId} and a.mate='1'
+    </select>
+
+
+    <select id="getListByMatnr" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialSapEntity">
+        SELECT
+        <include refid="invoiceMaterialSapColumns"/>
+        FROM input_invoice_material_sap a
+        WHERE a.matnr = #{matnr} and a.mate='1'
+    </select>
+
+    <select id="findList" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialSapEntity">
+        SELECT
+        <include refid="invoiceMaterialSapColumns"/>
+        FROM input_invoice_material_sap a
+        <include refid="invoiceMaterialSapJoins"/>
+    </select>
+
+    <select id="findAllList" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialSapEntity">
+        SELECT
+        <include refid="invoiceMaterialSapColumns"/>
+        FROM input_invoice_material_sap a
+        <include refid="invoiceMaterialSapJoins"/>
+        <where>
+
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+    </select>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO input_invoice_material_sap(
+            id,
+            cmzterm,
+            irzterm,
+            bukrs,
+            lifnr,
+            name1,
+            sortl,
+            ebeln,
+            bsart,
+            ebelp,
+            ekgrp,
+            mblnr,
+            zeile,
+            werks,
+            matnr,
+            maktx,
+            meins,
+            menge,
+            menge1,
+            zzresult,
+            menge_qm,
+            menge_re,
+            zkkje,
+            zzkkbl,
+            mwskz,
+            kbetr,
+            wmwst,
+            zzkkbhs,
+            wrbtr,
+            zzcontract,
+            budat_mkpf,
+            qmdate,
+            mate,
+            batch_id,
+            material_ids,
+            description,
+            create_time,
+            rcode,
+            material_line_id,
+            match_status,
+            wgbez,
+            matkl,
+            prdat
+		) VALUES (
+		    #{id},
+		    #{cmzterm},
+		    #{irzterm},
+		    #{bukrs},
+			#{lifnr},
+			#{name1},
+			#{sortl},
+			#{ebeln},
+			#{bsart},
+			#{ebelp},
+			#{ekgrp},
+			#{mblnr},
+			#{zeile},
+			#{werks},
+			#{matnr},
+			#{maktx},
+			#{meins},
+			#{menge},
+			#{menge1},
+			#{zzresult},
+			#{mengeQm},
+			#{mengeRe},
+			#{zkkje},
+			#{zzkkbl},
+			#{mwskz},
+			#{kbetr},
+			#{wmwst},
+			#{zzkkbhs},
+			#{wrbtr},
+			#{zzcontract},
+			#{budatMkpf},
+			#{qmdate},
+			#{mate},
+			#{batchId},
+			#{materialIds},
+			#{description},
+			#{createTime},
+			#{rcode},
+			#{materialLineId},
+			#{matchStatus},
+			#{wgbez},
+			#{matkl},
+			#{prdat}
+			)
+	</insert>
+
+    <update id="update">
+        UPDATE input_invoice_material_sap
+        <set>
+            <if test="cmzterm != null and cmzterm != ''">
+                cmzterm = #{cmzterm},
+            </if>
+            <if test="irzterm != null and irzterm != ''">
+                irzterm = #{irzterm},
+            </if>
+            <if test="qmdate != null and qmdate != ''">
+                qmdate = #{qmdate},
+            </if>
+            <if test="bukrs != null and bukrs != ''">
+                bukrs = #{bukrs},
+            </if>
+            <if test="lifnr != null and lifnr != ''">
+                lifnr = #{lifnr},
+            </if>
+            <if test="name1 != null and name1 != ''">
+                name1 = #{name1},
+            </if>
+            <if test="sortl != null and sortl != ''">
+                sortl = #{sortl},
+            </if>
+            <if test="ebeln != null and ebeln != ''">
+                ebeln = #{ebeln},
+            </if>
+            <if test="bsart != null and bsart != ''">
+                bsart = #{bsart},
+            </if>
+            <if test="ebelp != null and ebelp != ''">
+                ebelp = #{ebelp},
+            </if>
+            <if test="ekgrp != null and ekgrp != ''">
+                ekgrp = #{ekgrp},
+            </if>
+            <if test="mblnr != null and mblnr != ''">
+                mblnr = #{mblnr},
+            </if>
+            <if test="zeile != null and zeile != ''">
+                zeile = #{zeile},
+            </if>
+            <if test="werks != null and werks != ''">
+                werks = #{werks},
+            </if>
+            <if test="matnr != null and matnr != ''">
+                matnr = #{matnr},
+            </if>
+            <if test="maktx != null and maktx != ''">
+                maktx = #{maktx},
+            </if>
+            <if test="meins != null and maktx != ''">
+                meins = #{meins},
+            </if>
+            <if test="menge != null and menge != ''">
+                menge = #{menge},
+            </if>
+            <if test="menge1 != null and menge1 != ''">
+                menge1 = #{menge1},
+            </if>
+            <if test="zzresult != null and zzresult!= ''">
+                zzresult= #{zzresult},
+            </if>
+            <if test="mengeQm != null and mengeQm != ''">
+                menge_qm = #{mengeQm},
+            </if>
+            <if test="mengeRe != null and mengeRe!= ''">
+                menge_re = #{mengeRe},
+            </if>
+            <if test="zkkje != null and zkkje!= ''">
+                zkkje = #{zkkje},
+            </if>
+            <if test="zzkkbl != null and zzkkbl!= ''">
+                zzkkbl = #{zzkkbl},
+            </if>
+            <if test="mwskz != null and mwskz!= ''">
+                mwskz = #{mwskz},
+            </if>
+            <if test="kbetr != null and kbetr!= ''">
+                kbetr= #{kbetr},
+            </if>
+            <if test="wmwst != null and wmwst!= ''">
+                wmwst= #{wmwst},
+            </if>
+            <if test="zzkkbhs != null and zzkkbhs!= ''">
+                zzkkbhs= #{zzkkbhs},
+            </if>
+            <if test="wrbtr != null and wrbtr!= ''">
+                wrbtr= #{wrbtr},
+            </if>
+            <if test="zzcontract != null and zzcontract!= ''">
+                zzcontract= #{zzcontract},
+            </if>
+            <if test="budatMkpf != null">
+                budat_mkpf= #{budatMkpf},
+            </if>
+            <if test="mate != null and mate!= ''">
+                mate= #{mate},
+            </if>
+            <if test="batchId != null and batchId!= ''">
+                batch_id= #{batchId},
+            </if>
+            <if test="materialIds != null and materialIds!= ''">
+                material_ids= #{materialIds},
+            </if>
+            <if test="description != null and description!= ''">
+                description= #{description},
+            </if>
+            <if test="materialLineId != null and materialLineId!= ''">
+                material_line_id= #{materialLineId},
+            </if>
+            <if test="matchStatus != null and matchStatus!= ''">
+                match_status= #{matchStatus},
+            </if>
+            <if test="wgbez != null and wgbez!= ''">
+                wgbez= #{wgbez},
+            </if>
+            <if test="prdat != null and prdat!= ''">
+                prdat= #{prdat}
+            </if>
+        </set>
+        WHERE
+        <if test="id != null and id != ''">
+            id = #{id}
+        </if>
+        <!--<if test="invoiceBatchNumber != null and invoiceBatchNumber != ''">-->
+            <!--AND invoice_batch_number = #{invoiceBatchNumber}-->
+        <!--</if>-->
+
+    </update>
+
+    <update id="deleteById">
+		DELETE FROM input_invoice_material_sap
+		WHERE id = #{id}
+	</update>
+
+    <update id="deleteByBatchIdAndMblnr">
+		DELETE FROM input_invoice_material_sap
+		WHERE batch_id=#{batchId}
+        <if test="mblnrs != null">
+            and mblnr in
+            <foreach collection="mblnrs" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+	</update>
+
+
+    <select id="findListForSap" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialSapEntity">
+        SELECT
+        <include refid="invoiceMaterialSapColumns"/>
+        FROM input_invoice_material_sap a
+        <where>
+            <if test="mblnr != null and mblnr != ''">
+                a.mblnr = #{mblnr}
+            </if>
+        </where>
+        order by a.create_time desc
+        limit #{offset},#{limit}
+    </select>
+
+    <select id="selectCount" resultType="java.lang.Integer">
+        select count(*)
+        from input_invoice_material_sap
+        <where>
+            <if test="mblnr != null and mblnr != ''">
+            mblnr=#{mblnr}
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteSapByInvoiceBatchId">
+		DELETE FROM input_invoice_material_sap
+		WHERE batch_id = #{batchId}
+	</delete>
+
+    <update id="updateMate">
+		update input_invoice_material_sap
+		<set>
+            <if test="mate != null and mate!= ''">
+                mate= #{mate},
+            </if>
+            <if test="materialIds != null and materialIds!= ''">
+                material_ids= #{materialIds},
+            </if>
+            <if test="materialLineId != null and materialLineId!= ''">
+                material_line_id= #{materialLineId},
+            </if>
+            <if test="matchStatus != null and matchStatus != ''">
+                match_status = #{matchStatus},
+            </if>
+        </set>
+        WHERE id=#{id}
+	</update>
+
+    <update id="updateDeleteTax">
+        update input_invoice_material_sap
+        <set>
+                mate= #{mate},
+                material_line_id= #{materialLineId},
+                match_status = #{matchStatus}
+        </set>
+        WHERE id=#{id}
+    </update>
+
+    <update id="updateByBatchIdAndMaterialLineId">
+        update input_invoice_material_sap
+        <set>
+            <if test="mate != null and mate!= ''">
+                mate= #{mate},
+            </if>
+            <if test="description != null and description!= ''">
+                description= #{description}
+            </if>
+        </set>
+        WHERE batch_id=#{batchId} and material_line_id =#{materialLineId}
+    </update>
+
+    <update id="updateByIsAccount">
+        UPDATE input_invoice_material_sap
+        <set>
+            is_account = "1",
+        </set>
+        WHERE id in
+        <foreach collection="list" item="item" index="" open="(" separator="," close=")">
+          #{item}
+        </foreach>
+    </update>
+
+    <update id="updateMatchStatusByMatnrAndBatchId">
+        update input_invoice_material_sap
+        <set>
+            <if test="matchStatus != null and matchStatus!= ''">
+                match_status= #{matchStatus},
+            </if>
+            <if test="description != null">
+                description= #{description}
+            </if>
+            <!--<if test="description != null and description!= ''">-->
+                <!--description= #{description}-->
+            <!--</if>-->
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateMatchStatusByMatnrAndBatchId2">
+        update input_invoice_material_sap
+        <set>
+            <if test="matchStatus != null and matchStatus!= ''">
+                match_status= #{matchStatus}
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="getListByMBLNR" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialSapEntity">
+        SELECT
+        <include refid="invoiceMaterialSapColumns"/>
+        FROM
+        input_invoice_material_sap a
+        <where>
+        a.batch_id = #{batchId}
+        and
+        a.mblnr in
+        <foreach collection="mblnrs" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        </where>
+    </select>
+
+    <select id="getListByMBLNRids" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialSapEntity">
+        SELECT
+        <include refid="invoiceMaterialSapColumns"/>
+        FROM
+        input_invoice_material_sap a
+        <where>
+        a.mblnr in
+        <foreach collection="mblnrs" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+        </foreach>
+        </where>
+    </select>
+
+
+    <select id="getListForUpdateData" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialSapEntity">
+        SELECT
+        <include refid="invoiceMaterialSapColumns"/>
+        FROM
+        input_invoice_material_sap a
+        where ma.mate='0'
+    </select>
+
+    <select id="getListByMATNR" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialSapEntity">
+        SELECT
+        <include refid="invoiceMaterialSapColumns"/>
+        FROM
+        input_invoice_material_sap a
+        where
+        a.batch_id = #{batchId}
+        <if test="matnr != null and matnr != ''">
+           and a.matnr like concat('%',#{matnr},'%')
+        </if>
+        <if test="mate != null and mate != ''">
+            and a.mate = #{mate}
+        </if>
+    </select>
+
+    <select id="getListByMBLNRAndBatchId" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialSapEntity">
+        SELECT
+        ma.*
+        FROM
+        input_invoice_material_sap ma
+        <where>
+            ma.batch_id=#{batchId}
+            and
+            ma.mblnr in
+            <foreach collection="mblnrs" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+    </select>
+
+    <select id="getListByBatchId" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialSapEntity">
+        SELECT
+        ma.*,
+        (ma.zzkkbhs / ma.menge_qm) AS "bhsdj"
+        FROM
+        input_invoice_material_sap ma
+        <where>
+            1=1
+            <if test="batchId != null and batchId != ''">
+                and ma.batch_id=#{batchId}
+            </if>
+            <if test="mate != null and mate != ''">
+                and ma.mate=#{mate}
+            </if>
+            <if test="mblnrs != null">
+                and
+                ma.mblnr in
+                <foreach collection="mblnrs" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="pitch != null and pitch != ''">
+                and ma.maktx in
+                <foreach collection="pitch" item="item" index="index" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="getListByBatchId2" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialSapEntity">
+        SELECT
+        ma.*,
+        (ma.zzkkbhs / ma.menge_qm) AS "bhsdj"
+        FROM
+        input_invoice_material_sap ma
+        <where>
+                ma.batch_id=#{batchId}
+                and
+                ma.mblnr in
+                <foreach collection="mblnrs" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+        </where>
+    </select>
+
+    <select id="getListByIds" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialSapEntity">
+        SELECT
+        <include refid="invoiceMaterialSapColumns"/>
+        FROM input_invoice_material_sap a
+        WHERE a.id IN
+        <foreach collection="array" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <update id="updateByEnter">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            UPDATE input_invoice_material_sap
+            <set>
+              <if test="item.message != null">
+                  message = #{item.message},
+              </if>
+              <if test="item.matchStatus != null and item.matchStatus != ''">
+                  match_status = #{item.matchStatus},
+              </if>
+              <if test="item.description != null and item.description != ''">
+                  description = #{item.description},
+              </if>
+              <if test="item.entryYear != null and item.entryYear != ''">
+                  entry_year = #{item.entryYear},
+              </if>
+            </set>
+            WHERE id = #{item.id}
+        </foreach>
+    </update>
+
+    <select id="getListByMblnrAndZeile" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialSapEntity">
+        SELECT
+        <include refid="invoiceMaterialSapColumns"/>
+        FROM input_invoice_material_sap a
+        WHERE a.mblnr = #{mblnr}
+        AND a.batch_id = #{batchId}
+        AND a.zeile = #{zeile}
+    </select>
+
+    <update id="updateByPostUnitprice">
+        <foreach collection="list" item="item" index="index" separator=";">
+            UPDATE input_invoice_material_sap
+            <set>
+                item_amount = #{item.itemAmount}
+            </set>
+            <where>
+                id = #{item.id}
+            </where>
+        </foreach>
+    </update>
+
+    <update id="updateLineId">
+        <foreach collection="list" item="item" index="index" separator=";">
+            UPDATE input_invoice_material_sap
+            <set>
+                material_line_id = #{item.materialLineId}
+            </set>
+            <where>
+                id = #{item.id}
+            </where>
+        </foreach>
+    </update>
+
+    <update id="updateByPostQm">
+        <foreach collection="list" item="item" index="index" separator=";">
+            UPDATE input_invoice_material_sap
+            <set>
+            <if test="item.postQm != null and item.postQm != ''">
+                post_qm = #{item.postQm}
+            </if>
+            <if test="item.postUnitprice != null and item.postUnitprice != ''">
+                post_unitprice = #{item.postUnitprice}
+            </if>
+            <if test="item.itemAmount != null and item.itemAmount != ''">
+                item_amount = #{item.itemAmount}
+            </if>
+            </set>
+            <where>
+                id = #{item.id}
+            </where>
+        </foreach>
+    </update>
+
+    <select id="getListBySapId"  resultType="com.pwc.modules.input.entity.InputInvoiceMaterialSapEntity">
+        SELECT
+        <include refid="invoiceMaterialSapColumns"/>
+        FROM input_invoice_material_sap a
+        WHERE a.id in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{item.id}
+        </foreach>
+    </select>
+
+    <insert id="insertList" parameterType="list">
+        INSERT INTO sap_test(
+        id,
+        cmzterm,
+        irzterm,
+        bukrs,
+        lifnr,
+        name1,
+        sortl,
+        ebeln,
+        bsart,
+        ebelp,
+        ekgrp,
+        mblnr,
+        zeile,
+        werks,
+        matnr,
+        maktx,
+        meins,
+        menge,
+        menge1,
+        zzresult,
+        menge_qm,
+        menge_re,
+        zkkje,
+        zzkkbl,
+        mwskz,
+        kbetr,
+        wmwst,
+        zzkkbhs,
+        wrbtr,
+        zzcontract,
+        budat_mkpf,
+        mate,
+        batch_id,
+        material_ids,
+        description,
+        create_time,
+        rcode,
+        material_line_id,
+        match_status,
+        wgbez,
+        matkl,
+        prdat
+        ) VALUES
+        <foreach collection="list" separator="," item="item">
+            (
+            #{item.id},
+            #{item.cmzterm},
+            #{item.irzterm},
+            #{item.bukrs},
+            #{item.lifnr},
+            #{item.name1},
+            #{item.sortl},
+            #{item.ebeln},
+            #{item.bsart},
+            #{item.ebelp},
+            #{item.ekgrp},
+            #{item.mblnr},
+            #{item.zeile},
+            #{item.werks},
+            #{item.matnr},
+            #{item.maktx},
+            #{item.meins},
+            #{item.menge},
+            #{item.menge1},
+            #{item.zzresult},
+            #{item.mengeQm},
+            #{item.mengeRe},
+            #{item.zkkje},
+            #{item.zzkkbl},
+            #{item.mwskz},
+            #{item.kbetr},
+            #{item.wmwst},
+            #{item.zzkkbhs},
+            #{item.wrbtr},
+            #{item.zzcontract},
+            #{item.budatMkpf},
+            #{item.mate},
+            #{item.batchId},
+            #{item.materialIds},
+            #{item.description},
+            #{item.createTime},
+            #{item.rcode},
+            #{item.materialLineId},
+            #{item.matchStatus},
+            #{item.wgbez},
+            #{item.matkl},
+            #{item.prdat}
+            )
+        </foreach>
+
+    </insert>
+
+    <select id="getMaxQmdateByBatchId" resultType="String">
+        SELECT
+        a.qmdate
+        FROM  input_invoice_material_sap a
+        WHERE a.batch_id = #{batchId}
+        AND a.material_ids = #{materialIds}
+        ORDER BY a.qmdate DESC
+        limit 0,1
+    </select>
+
+
+    <select id="getMaxBudatMkpfByBatchId" resultType="String">
+        SELECT
+        a.budat_mkpf
+        FROM  input_invoice_material_sap a
+        WHERE a.batch_id = #{batchId}
+        AND a.material_ids = #{materialIds}
+        ORDER BY a.budat_mkpf DESC
+        limit 0,1
+    </select>
+
+
+
+
+
+</mapper>

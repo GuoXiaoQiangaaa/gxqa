@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputInvoiceConditionMapDao">
+
+    <sql id="invoiceColumns">
+        a.id AS "id",
+        a.condition_date AS "conditionDate",
+        a.condition_code AS "conditionCode",
+        a.is_delete AS "isDelete"
+    </sql>
+
+    <update id="updateByDelete">
+        UPDATE input_invoice_condition_map
+        <set>
+            is_delete = #{isDelete},
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <insert id="save">
+        INSERT INTO input_invoice_condition_map (
+          condition_date,
+          condition_code,
+          is_delete
+        ) VALUES (
+          #{conditionDate},
+          #{conditionCode},
+          #{isDelete}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE input_invoice_condition_map
+        <set>
+            <if test="conditionDate != null">
+                condition_date = #{conditionDate},
+            </if>
+            <if test="conditionCode != null and conditionCode != ''">
+                condition_code = #{conditionCode},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="get" resultType="com.pwc.modules.input.entity.InputInvoiceConditionMap">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice_condition_map a
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="getByCondition" resultType="com.pwc.modules.input.entity.InputInvoiceConditionMap">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice_condition_map a
+        WHERE a.condition_code = #{conditionCode}
+    </select>
+
+    <select id="getAllList" resultType="com.pwc.modules.input.entity.InputInvoiceConditionMap">
+        SELECT
+        a.id AS "id",
+        concat(a.condition_date,'天') AS "conditionDate2",
+        a.condition_code AS "conditionCode",
+        a.is_delete AS "isDelete"
+        FROM input_invoice_condition_map a
+        ORDER BY condition_date DESC
+    </select>
+
+    <select id="getMaxByList" resultType="com.pwc.modules.input.entity.InputInvoiceConditionMap">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice_condition_map a
+        WHERE a.condition_code in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ORDER BY a.condition_date DESC LIMIT 0,1
+    </select>
+
+    <select id="getMaxConditionCode" resultType="com.pwc.modules.input.entity.InputInvoiceConditionMap">
+        SELECT
+        b.id AS "id",
+        b.condition_date AS "conditionDate",
+        b.condition_code AS "conditionCode",
+        b.is_delete AS "isDelete"
+        FROM input_invoice_condition_map b
+        WHERE b.is_delete = 0
+        AND b.condition_code in(
+        SELECT a.cmzterm FROM invoice_material_sap a
+        WHERE a.batch_id = #{batchId}
+        AND a.material_ids = #{materialIds}
+        AND a.cmzterm IS NOT NULL
+        AND a.cmzterm != ''
+        GROUP BY a.cmzterm
+        UNION (
+        SELECT c.irzterm FROM invoice_material_sap c
+        WHERE c.batch_id = #{batchId}
+        AND c.material_ids = #{materialIds}
+        AND c.irzterm IS NOT NULL
+        AND c.irzterm != ''
+        GROUP BY c.irzterm
+        )
+        )ORDER BY b.condition_date DESC
+        LIMIT 0,1
+    </select>
+</mapper>

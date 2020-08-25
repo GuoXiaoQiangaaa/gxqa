@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pwc.modules.input.dao.InputInvoiceFaultTolerantDao">
+    <sql id="FaultTolerantColumns">
+		a.id AS "id",
+		a.fault AS "fault",
+		a.unit AS "unit"
+	</sql>
+
+    <sql id="FaultTolerantJoins">
+    </sql>
+
+    <select id="get" resultType="com.pwc.modules.input.entity.InputInvoiceFaultTolerantEntity">
+        SELECT
+        <include refid="FaultTolerantColumns"/>
+        FROM input_fault_tolerant a
+        <include refid="FaultTolerantJoins"/>
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="getByName" resultType="com.pwc.modules.input.entity.InputInvoiceFaultTolerantEntity">
+        SELECT
+        <include refid="FaultTolerantColumns"/>
+        FROM input_fault_tolerant a
+        WHERE a.unit = #{unit}
+    </select>
+
+    <select id="findList" resultType="com.pwc.modules.input.entity.InputInvoiceFaultTolerantEntity">
+        SELECT
+        <include refid="FaultTolerantColumns"/>
+        FROM input_fault_tolerant a
+        <include refid="FaultTolerantJoins"/>
+    </select>
+
+    <insert id="save">
+		INSERT INTO input_fault_tolerant(
+            a.id,
+            a.fault,
+            a.unit
+		) VALUES (
+		    #{id},
+			#{fault},
+			#{unit}
+		)
+	</insert>
+
+    <select id="getOne" resultType="com.pwc.modules.input.entity.InputInvoiceFaultTolerantEntity">
+        SELECT
+        <include refid="FaultTolerantColumns"/>
+        FROM input_fault_tolerant a
+    </select>
+
+    <update id="update">
+        UPDATE input_fault_tolerant
+        <set>
+            <if test="fault != null and fault != ''">
+                fault = #{fault}
+            </if>
+            <if test="unit != null and unit != ''">
+                unit = #{unit}
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="delete">
+		DELETE FROM input_fault_tolerant
+		WHERE id = #{id}
+	</update>
+
+</mapper>

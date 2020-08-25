@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pwc.modules.input.dao.InputInvoiceUnitDao">
+    <sql id="InvoiceUnitColumns">
+		a.id AS "id",
+		a.unit_type as "unitType",
+		a.unit_name as "unitName",
+		a.unit_code as "unitCode",
+		a.begin_time as "beginTime",
+		a.end_time as "endTime",
+		a.unit_delete as "unitDelete"
+	</sql>
+
+
+    <select id="get" resultType="com.pwc.modules.input.entity.InputInvoiceUnitEntity">
+        SELECT
+        <include refid="InvoiceUnitColumns"/>
+        FROM input_invoice_unit a
+        WHERE a.unit_type = #{unitType}
+        OR a.unit_name = #{unitName}
+        OR a.unit_code = #{unitCode}
+    </select>
+
+    <select id="getList" resultType="com.pwc.modules.input.entity.InputInvoiceUnitEntity">
+        SELECT
+        <include refid="InvoiceUnitColumns"/>
+        FROM input_invoice_unit a
+        WHERE a.unit_delete != 1
+        order by id desc
+    </select>
+
+    <select id="getByName" resultType="com.pwc.modules.input.entity.InputInvoiceUnitEntity">
+        SELECT
+        <include refid="InvoiceUnitColumns"/>
+        FROM input_invoice_unit a
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="findList" resultType="com.pwc.modules.input.entity.InputInvoiceUnitEntity">
+        SELECT
+        <include refid="InvoiceUnitColumns"/>
+        FROM input_invoice_unit a
+        <where>
+
+        </where>
+    </select>
+
+    <insert id="save">
+		INSERT INTO input_invoice_unit(
+            a.unit_type,
+            a.unit_name,
+            a.unit_code,
+            a.begin_time,
+            a.end_time
+		) VALUES (
+			#{unitType},
+			#{unitName},
+			#{unitCode},
+			#{beginTime},
+			#{endTime}
+		)
+	</insert>
+
+    <update id="update">
+        UPDATE input_invoice_unit
+        <set>
+            <if test="unitType != null and unitType != ''">
+                unit_type = #{unitType},
+            </if>
+            <if test="unitName != null and unitName != ''">
+                unit_name = #{unitName},
+            </if>
+            <if test="unitCode != null and unitCode != ''">
+                unit_code = #{unitCode},
+            </if>
+            <if test="beginTime != null and beginTime != ''">
+                begin_time = #{beginTime},
+            </if>
+            <if test="endTime != null and endTime != ''">
+                end_time = #{endTime},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="delete">
+		DELETE FROM input_invoice_unit
+		WHERE id = #{id}
+	</update>
+
+    <update id="unitDelete">
+        delete from input_invoice_unit
+        WHERE id in
+        <foreach collection="array" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+</mapper>

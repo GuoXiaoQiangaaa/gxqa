@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputInvoiceMaterialPonoRpaDao">
+    <sql id="invoiceColumns">
+        a.id AS "id",
+        a.po_no AS "poNo",
+        a.invoicegroup_rpa_id AS "invoicegroupRpaId"
+    </sql>
+
+    <select id="getListByInvoicegroupRpaId" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialPonoRpa">
+        SELECT
+        <include refid="invoiceColumns"/>
+        FROM input_invoice_material_pono_rpa a
+        WHERE a.invoicegroup_rpa_id = #{invoicegroupRpaId}
+    </select>
+
+    <select id="getListByPonoDocumentId" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialDocumentRpa">
+        SELECT
+        a.id AS "id",
+        a.material_documet_no AS "materialDocumetNo",
+        a.po_type_zac AS "poType",
+        a.pono_document_id AS "ponoDocumentId"
+        FROM input_invoice_material_document_rpa a
+        WHERE a.pono_document_id = #{ponoDocumentId}
+    </select>
+
+    <select id="getListByPonoCostId" resultType="com.pwc.modules.input.entity.InputInvoiceMaterialDocumentRpa">
+        SELECT
+        a.id AS "id",
+        a.material_documet_no2 AS "materialDocumetNo",
+        a.po_type_zpc AS "poType",
+        a.pono_cost_id AS "ponoDocumentId"
+        FROM input_invoice_material_cost_rpa a
+        WHERE a.pono_cost_id = #{ponoCostId}
+    </select>
+
+    <select id="getListByDocumentRpaId" resultType="com.pwc.modules.input.entity.InputInvoiceDetailsDocumentRpa">
+        SELECT
+        a.id AS "id",
+        a.material_code AS "materialCode",
+        a.material_price AS "materialPrice",
+        a.material_ammount AS "materialAmmount",
+        a.document_rpa_id AS "documentRpaId"
+        FROM input_invoice_details_document_rpa a
+        WHERE a.document_rpa_id = #{documentRpaId}
+    </select>
+
+    <select id="getListByCostRpaId" resultType="com.pwc.modules.input.entity.InputInvoiceDetailsDocumentRpa">
+        SELECT
+        a.id AS "id",
+        a.material_code2 AS "materialCode",
+        a.material_price2 AS "materialPrice",
+        a.material_ammount2 AS "materialAmmount",
+        a.cost_rpa_id AS "documentRpaId"
+        FROM input_invoice_details_cost_rpa a
+        WHERE a.cost_rpa_id = #{costRpaId}
+    </select>
+
+
+    <insert id="saveInvoiceMaterialPonoRpa" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO input_invoice_material_pono_rpa(
+            po_no,
+            invoicegroup_rpa_id
+		) VALUES (
+		    #{poNo},
+			#{invoicegroupRpaId}
+		)
+	</insert>
+
+    <insert id="saveInvoiceMaterialDocumentRpa" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO input_invoice_material_document_rpa(
+            material_documet_no,
+            po_type_zac,
+            pono_document_id
+		) VALUES (
+		    #{materialDocumetNo},
+			#{poType},
+			#{ponoDocumentId}
+		)
+	</insert>
+
+    <insert id="saveInvoiceMaterialCostRpa" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO input_invoice_material_cost_rpa(
+            material_documet_no2,
+            po_type_zpc,
+            pono_cost_id
+		) VALUES (
+		    #{materialDocumetNo},
+			#{poType},
+			#{ponoDocumentId}
+		)
+    </insert>
+
+    <insert id="saveInvoiceDetailsDocument" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO input_invoice_details_document_rpa(
+          material_code,
+          material_price,
+          material_ammount,
+          document_rpa_id
+        ) VALUES (
+          #{materialCode},
+          #{materialPrice},
+          #{materialAmmount},
+          #{documentRpaId}
+        )
+    </insert>
+
+    <insert id="saveInvoiceDetailsCost" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO input_invoice_details_cost_rpa(
+          material_code2,
+          material_price2,
+          material_ammount2,
+          cost_rpa_id
+        )  VALUES (
+          #{materialCode},
+          #{materialPrice},
+          #{materialAmmount},
+          #{documentRpaId}
+        )
+    </insert>
+</mapper>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InvoiceTransOutTypeDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.pwc.modules.input.entity.InputInvoiceTransOutTypeEntity" id="invoiceTransOutTypeMap">
+        <result property="invoiceTransOutType" column="invoice_trans_out_type"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createPerson" column="create_person"/>
+        <result property="invoiceId" column="invoice_id"/>
+        <result property="id" column="id"/>
+    </resultMap>
+
+    <sql id="invoiceTransOutTypeColumns">
+		a.id AS "id",
+		a.invoice_trans_out_type as "invoiceTransOutType",
+		a.create_time as "createTime",
+		a.create_person as "createPerson",
+		a.invoice_id as "invoiceId"
+	</sql>
+
+
+    <select id="get" resultType="com.pwc.modules.input.entity.InputInvoiceTransOutTypeEntity">
+        SELECT
+        <include refid="invoiceTransOutTypeColumns"/>
+        FROM input_invoice_trans_out_type a
+        WHERE a.invoice_trans_out_type = #{invoiceTransOutType}
+        OR a.create_time = #{createTime}
+        OR a.invoice_id = #{invoiceId}
+
+
+    </select>
+
+    <insert id="save" >
+		INSERT INTO input_invoice_trans_out_type  (
+            invoice_trans_out_type,
+            create_time,
+            create_person,
+            invoice_id
+		) VALUES (
+			#{invoiceTransOutType},
+			#{createTime},
+			#{createPerson},
+			#{invoiceId}
+		)
+	</insert>
+
+
+
+</mapper>
