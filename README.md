@@ -1,2 +1,2 @@
-# Sunday_backend
+# Ericsson_Backend
 For Filing Platform First - Backend
