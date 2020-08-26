@@ -31,4 +31,11 @@ public class OutputGoodsServiceImpl extends ServiceImpl<OutputGoodsDao, OutputGo
         return new PageUtils(page);
     }
 
+    /**
+     * 禁用/启用
+     */
+    @Override
+    public void disableOrEnable(OutputGoodsEntity reqVo) {
+        super.updateById(reqVo);
+    }
 }

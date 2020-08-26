@@ -15,5 +15,10 @@ import java.util.Map;
 public interface OutputGoodsService extends IService<OutputGoodsEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    /**
+     * 禁用/启用
+     */
+    void disableOrEnable(OutputGoodsEntity reqVo);
 }
 

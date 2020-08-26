@@ -31,4 +31,12 @@ public class OutputSupplierServiceImpl extends ServiceImpl<OutputSupplierDao, Ou
         return new PageUtils(page);
     }
 
+    /**
+     * 禁用/启用
+     */
+    @Override
+    public void disableOrEnable(OutputSupplierEntity reqVo) {
+        super.updateById(reqVo);
+    }
+
 }

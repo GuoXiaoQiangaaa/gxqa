@@ -85,7 +85,7 @@ public class InputRedInvoiceController {
     }
 
     /**
-     * 条件查询
+     * 红字通知单条件查询
      */
     @GetMapping("/conditionList")
     public R conditionList(@RequestParam Map<String, Object> params, InputRedInvoiceEntity redInvoiceEntity){
@@ -106,12 +106,23 @@ public class InputRedInvoiceController {
     }
 
     /**
-     * 导入红字发票并更新红字通知单状态
+     * 接收红字发票并更新红字通知单状态
      */
-    @PostMapping("/importRedInvoice")
-    public R importRedInvoice(@RequestParam("file") MultipartFile file){
+    @PostMapping("/receiveRedInvoice")
+    public R receiveRedInvoice(@RequestParam("file") MultipartFile file){
         R r = new R();
-        inputRedInvoiceService.importRedInvoice(file);
+        inputRedInvoiceService.receiveRedInvoice(file);
+        return r;
+    }
+
+    /**
+     * 红字发票监控条件查询
+     */
+    @GetMapping("/redList")
+    public R redList(@RequestParam Map<String, Object> params, InputRedInvoiceEntity redInvoiceEntity){
+        R r = new R();
+        PageUtils page = inputRedInvoiceService.redList(params, redInvoiceEntity);
+        r.put("page", page);
         return r;
     }
 }

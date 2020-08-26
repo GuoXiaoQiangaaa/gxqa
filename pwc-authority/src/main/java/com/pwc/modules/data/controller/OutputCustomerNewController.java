@@ -74,7 +74,7 @@ public class OutputCustomerNewController {
     }
 
     /**
-     * 停用
+     * 删除
      */
     @DeleteMapping("/delete")
     @RequiresPermissions("data:outputcustomernew:delete")
@@ -85,7 +85,27 @@ public class OutputCustomerNewController {
     }
 
     /**
-     * 上传模板
+     * 禁用/启用
+     */
+    @PostMapping("/disableOrEnable")
+    public R disableOrEnable(@RequestBody OutputCustomerNewEntity reqVo){
+        outputCustomerNewService.disableOrEnable(reqVo);
+
+        return R.ok();
+    }
+
+    /**
+     * 关键字查询
+     */
+    @GetMapping("/search")
+    public R search(@RequestParam Map<String, Object> params){
+        PageUtils page = outputCustomerNewService.search(params);
+
+        return R.ok().put("page", page);
+    }
+
+    /**
+     * 数据导入
      */
 
 

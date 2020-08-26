@@ -74,12 +74,22 @@ public class OutputSupplierController {
     }
 
     /**
-     * 停用
+     * 删除
      */
     @DeleteMapping("/delete")
     @RequiresPermissions("data:outputsupplier:delete")
     public R delete(@RequestBody Long[] supplierIds){
         outputSupplierService.removeByIds(Arrays.asList(supplierIds));
+
+        return R.ok();
+    }
+
+    /**
+     * 禁用/启用
+     */
+    @PostMapping("/disableOrEnable")
+    public R disableOrEnable(@RequestBody OutputSupplierEntity reqVo){
+        outputSupplierService.disableOrEnable(reqVo);
 
         return R.ok();
     }

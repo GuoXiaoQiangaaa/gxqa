@@ -74,12 +74,22 @@ public class OutputGoodsController {
     }
 
     /**
-     * 停用
+     * 删除
      */
     @DeleteMapping("/delete")
     @RequiresPermissions("data:outputgoods:delete")
     public R delete(@RequestBody Long[] goodsIds){
         outputGoodsService.removeByIds(Arrays.asList(goodsIds));
+
+        return R.ok();
+    }
+
+    /**
+     * 禁用/启用
+     */
+    @PostMapping("/disableOrEnable")
+    public R disableOrEnable(@RequestBody OutputGoodsEntity reqVo){
+        outputGoodsService.disableOrEnable(reqVo);
 
         return R.ok();
     }

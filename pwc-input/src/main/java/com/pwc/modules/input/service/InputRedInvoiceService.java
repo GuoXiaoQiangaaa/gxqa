@@ -18,7 +18,7 @@ public interface InputRedInvoiceService extends IService<InputRedInvoiceEntity> 
     PageUtils queryPage(Map<String, Object> params);
 
     /**
-     * 条件查询
+     * 红字通知单条件查询
      */
     PageUtils conditionList(Map<String, Object> params, InputRedInvoiceEntity redInvoiceEntity);
 
@@ -28,8 +28,13 @@ public interface InputRedInvoiceService extends IService<InputRedInvoiceEntity> 
     void importRedNotice(MultipartFile file);
 
     /**
-     * 导入红字发票并更新红字通知单状态
+     * 接收红字发票并更新红字通知单状态
      */
-    void importRedInvoice(MultipartFile file);
+    void receiveRedInvoice(MultipartFile file);
+
+    /**
+     * 红字发票监控条件查询
+     */
+    PageUtils redList(Map<String, Object> params, InputRedInvoiceEntity redInvoiceEntity);
 }
 

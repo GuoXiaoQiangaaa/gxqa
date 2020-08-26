@@ -31,4 +31,24 @@ public class OutputCustomerNewServiceImpl extends ServiceImpl<OutputCustomerNewD
         return new PageUtils(page);
     }
 
+    /**
+     * 禁用/启用
+     */
+    @Override
+    public void disableOrEnable(OutputCustomerNewEntity reqVo) {
+        super.updateById(reqVo);
+    }
+
+    /**
+     * 关键字查询
+     */
+    @Override
+    public PageUtils search(Map<String, Object> params) {
+        String keyWords = (String) params.get("keyWords");
+        IPage<OutputCustomerNewEntity> page = this.page(
+                new Query<OutputCustomerNewEntity>().getPage(params),
+                new QueryWrapper<OutputCustomerNewEntity>()
+        );
+        return null;
+    }
 }

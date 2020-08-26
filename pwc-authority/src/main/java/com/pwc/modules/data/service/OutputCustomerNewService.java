@@ -15,5 +15,15 @@ import java.util.Map;
 public interface OutputCustomerNewService extends IService<OutputCustomerNewEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    /**
+     * 禁用/启用
+     */
+    void disableOrEnable(OutputCustomerNewEntity reqVo);
+
+    /**
+     * 关键字查询
+     */
+    PageUtils search(Map<String, Object> params);
 }
 
