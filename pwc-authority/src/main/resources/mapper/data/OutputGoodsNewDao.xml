@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.pwc.modules.data.dao.OutputGoodsDao">
+<mapper namespace="com.pwc.modules.data.dao.OutputGoodsNewDao">
 
 	<!-- 可根据自己的需求，是否要使用 -->
-    <resultMap type="com.pwc.modules.data.entity.OutputGoodsEntity" id="outputGoodsMap">
+    <resultMap type="com.pwc.modules.data.entity.OutputGoodsNewEntity" id="outputGoodsNewMap">
         <result property="goodsId" column="goods_id"/>
         <result property="goodsNumber" column="goods_number"/>
         <result property="goodsName" column="goods_name"/>
         <result property="deptId" column="dept_id"/>
+        <result property="deptName" column="name"/>
         <result property="taxRate" column="tax_rate"/>
         <result property="price" column="price"/>
         <result property="preferential" column="preferential"/>
         <result property="skuCode" column="sku_code"/>
         <result property="taxCategory" column="tax_category"/>
+        <result property="taxCategoryCode" column="tax_category_code"/>
+        <result property="taxCategoryName" column="tax_category_name"/>
         <result property="goodsSubject" column="goods_subject"/>
         <result property="goodsCode" column="goods_code"/>
         <result property="specifications" column="specifications"/>
@@ -27,5 +30,22 @@
         <result property="updateTime" column="update_time"/>
     </resultMap>
 
+    <!--获取列表-->
+    <select id="list" resultMap="outputGoodsNewMap">
+        SELECT t1.*, t2.name FROM output_goods t1 LEFT JOIN sys_dept t2 ON t1.dept_id = t2.dept_id
+    </select>
 
+    <!--关键字查询-->
+    <select id="keyWordsList" resultMap="outputGoodsNewMap">
+        SELECT t1.*, t2.name FROM output_goods t1 LEFT JOIN sys_dept t2 ON t1.dept_id = t2.dept_id
+        where t1.goods_number like #{keyWords}
+           or t1.goods_name like #{keyWords}
+           or t1.specifications like #{keyWords}
+           or t1.unit like #{keyWords}
+           or t1.price like #{keyWords}
+           or t1.tax_category_code like #{keyWords}
+           or t1.tax_category_name like #{keyWords}
+           or t1.tax_rate like #{keyWords}
+           or t1.preferential_type like #{keyWords}
+    </select>
 </mapper>

@@ -1,5 +1,6 @@
 package com.pwc.modules.data.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -17,7 +18,7 @@ import java.util.Date;
  */
 @Data
 @TableName("output_goods")
-public class OutputGoodsEntity implements Serializable {
+public class OutputGoodsNewEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -38,6 +39,11 @@ public class OutputGoodsEntity implements Serializable {
 	 */
 	private Long deptId;
 	/**
+	 * 所属企业名称
+	 */
+	@TableField(exist = false)
+	private String deptName;
+	/**
 	 * 商品税率
 	 */
 	private String taxRate;
@@ -57,6 +63,14 @@ public class OutputGoodsEntity implements Serializable {
 	 * 税收分类id
 	 */
 	private Long taxCategory;
+	/**
+	 * 税收分类编码
+	 */
+	private String taxCategoryCode;
+	/**
+	 * 税收分类名称
+	 */
+	private String taxCategoryName;
 	/**
 	 * 商品科目
 	 */
@@ -84,7 +98,6 @@ public class OutputGoodsEntity implements Serializable {
 	/**
 	 * 是否停用(0:停用;1:正常)
 	 */
-	@TableLogic(value = "1", delval = "0")
 	private String delFlag;
 	/**
 	 * 创建人

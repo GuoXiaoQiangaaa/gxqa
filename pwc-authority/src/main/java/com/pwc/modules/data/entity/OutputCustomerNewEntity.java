@@ -31,7 +31,7 @@ public class OutputCustomerNewEntity implements Serializable {
 	/**
 	 * 公司代码
 	 */
-	private Long deptCode;
+	private String deptCode;
 	/**
 	 * 英文客户名称
 	 */
@@ -67,7 +67,6 @@ public class OutputCustomerNewEntity implements Serializable {
 	/**
 	 * 是否停用(0:停用;1:正常)
 	 */
-	@TableLogic(value = "1", delval = "0")
 	private String delFlag;
 	/**
 	 * 创建人

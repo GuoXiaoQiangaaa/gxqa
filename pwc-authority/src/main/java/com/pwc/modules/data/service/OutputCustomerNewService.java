@@ -17,6 +17,16 @@ public interface OutputCustomerNewService extends IService<OutputCustomerNewEnti
     PageUtils queryPage(Map<String, Object> params);
 
     /**
+     * 新增
+     */
+    boolean save(OutputCustomerNewEntity outputCustomerNew);
+
+    /**
+     * 编辑
+     */
+    boolean updateById(OutputCustomerNewEntity outputCustomerNew);
+
+    /**
      * 禁用/启用
      */
     void disableOrEnable(OutputCustomerNewEntity reqVo);

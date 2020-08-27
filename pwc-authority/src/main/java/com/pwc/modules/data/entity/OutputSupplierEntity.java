@@ -61,9 +61,12 @@ public class OutputSupplierEntity implements Serializable {
 	 */
 	private String email;
 	/**
+	 * 发票分类(0:NonPo Related; 1:MKRO; 2:DFU; 3:EDI; 4:R&D_外部; 5:IC_R&D; 6:IC_RRB; 7:IC_非R&D; 8:Red-letter VAT; 9:General)
+	 */
+	private String invoiceType;
+	/**
 	 * 是否停用(0:停用;1:正常)
 	 */
-	@TableLogic(value = "1", delval = "0")
 	private String delFlag;
 	/**
 	 * 创建人
