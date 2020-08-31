@@ -31,7 +31,7 @@ public class InputRedInvoiceController {
      * 列表
      */
     @GetMapping("/list")
-    @RequiresPermissions("input:inputredinvoice:list")
+//    @RequiresPermissions("input:inputredinvoice:list")
     public R list(@RequestParam Map<String, Object> params){
         PageUtils page = inputRedInvoiceService.queryPage(params);
 
@@ -43,7 +43,7 @@ public class InputRedInvoiceController {
      * 信息
      */
     @GetMapping("/info/{redId}")
-    @RequiresPermissions("input:inputredinvoice:info")
+//    @RequiresPermissions("input:inputredinvoice:info")
     public R info(@PathVariable("redId") Long redId){
         InputRedInvoiceEntity inputRedInvoice = inputRedInvoiceService.getById(redId);
 
@@ -54,7 +54,7 @@ public class InputRedInvoiceController {
      * 保存
      */
     @PutMapping("/save")
-    @RequiresPermissions("input:inputredinvoice:save")
+//    @RequiresPermissions("input:inputredinvoice:save")
     public R save(@RequestBody InputRedInvoiceEntity inputRedInvoice){
         inputRedInvoiceService.save(inputRedInvoice);
 
@@ -65,7 +65,7 @@ public class InputRedInvoiceController {
      * 修改
      */
     @PostMapping("/update")
-    @RequiresPermissions("input:inputredinvoice:update")
+//    @RequiresPermissions("input:inputredinvoice:update")
     public R update(@RequestBody InputRedInvoiceEntity inputRedInvoice){
         ValidatorUtils.validateEntity(inputRedInvoice);
         inputRedInvoiceService.updateById(inputRedInvoice);
@@ -77,7 +77,7 @@ public class InputRedInvoiceController {
      * 删除
      */
     @DeleteMapping("/delete")
-    @RequiresPermissions("input:inputredinvoice:delete")
+//    @RequiresPermissions("input:inputredinvoice:delete")
     public R delete(@RequestBody Long[] redIds){
         inputRedInvoiceService.removeByIds(Arrays.asList(redIds));
 
@@ -100,9 +100,8 @@ public class InputRedInvoiceController {
      */
     @PostMapping("/importRedNotice")
     public R importRedNotice(@RequestParam("file") MultipartFile file){
-        R r = new R();
         inputRedInvoiceService.importRedNotice(file);
-        return r;
+        return R.ok();
     }
 
     /**
@@ -110,9 +109,8 @@ public class InputRedInvoiceController {
      */
     @PostMapping("/receiveRedInvoice")
     public R receiveRedInvoice(@RequestParam("file") MultipartFile file){
-        R r = new R();
         inputRedInvoiceService.receiveRedInvoice(file);
-        return r;
+        return R.ok();
     }
 
     /**

@@ -2,6 +2,7 @@ package com.pwc.modules.data.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.pwc.common.excel.annotation.ExcelField;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -26,14 +27,17 @@ public class OutputItemListEntity implements Serializable {
 	/**
 	 * 科目编码
 	 */
+	@ExcelField(title = "科目编码", align = 1, sort = 1)
 	private String itemCode;
 	/**
 	 * 科目类型
 	 */
+	@ExcelField(title = "科目类型", align = 1, sort = 1)
 	private String itemType;
 	/**
 	 * 科目描述
 	 */
+	@ExcelField(title = "科目描述", align = 1, sort = 1)
 	private String description;
 	/**
 	 * 是否停用(0:停用;1:正常)

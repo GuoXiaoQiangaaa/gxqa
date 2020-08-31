@@ -4,8 +4,12 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
+import com.pwc.common.excel.ExportExcel;
+import com.pwc.common.exception.RRException;
+import com.pwc.common.utils.DateUtils;
 import com.pwc.common.validator.ValidatorUtils;
 import com.pwc.modules.sys.shiro.ShiroUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +18,9 @@ import com.pwc.modules.data.entity.OutputCustomerNewEntity;
 import com.pwc.modules.data.service.OutputCustomerNewService;
 import com.pwc.common.utils.PageUtils;
 import com.pwc.common.utils.R;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 
 
 /**
@@ -25,6 +31,7 @@ import com.pwc.common.utils.R;
  */
 @RestController
 @RequestMapping("data/outputcustomernew")
+@Slf4j
 public class OutputCustomerNewController {
     @Autowired
     private OutputCustomerNewService outputCustomerNewService;
@@ -33,7 +40,7 @@ public class OutputCustomerNewController {
      * 列表
      */
     @GetMapping("/list")
-    @RequiresPermissions("data:outputcustomernew:list")
+//    @RequiresPermissions("data:outputcustomernew:list")
     public R list(@RequestParam Map<String, Object> params){
         PageUtils page = outputCustomerNewService.queryPage(params);
 
@@ -45,7 +52,7 @@ public class OutputCustomerNewController {
      * 详情
      */
     @GetMapping("/info/{customerId}")
-    @RequiresPermissions("data:outputcustomernew:info")
+//    @RequiresPermissions("data:outputcustomernew:info")
     public R info(@PathVariable("customerId") Long customerId){
         OutputCustomerNewEntity outputCustomerNew = outputCustomerNewService.getById(customerId);
 
@@ -56,7 +63,7 @@ public class OutputCustomerNewController {
      * 新增
      */
     @PutMapping("/save")
-    @RequiresPermissions("data:outputcustomernew:save")
+//    @RequiresPermissions("data:outputcustomernew:save")
     public R save(@RequestBody OutputCustomerNewEntity outputCustomerNew){
         outputCustomerNewService.save(outputCustomerNew);
 
@@ -67,7 +74,7 @@ public class OutputCustomerNewController {
      * 编辑
      */
     @PostMapping("/update")
-    @RequiresPermissions("data:outputcustomernew:update")
+//    @RequiresPermissions("data:outputcustomernew:update")
     public R update(@RequestBody OutputCustomerNewEntity outputCustomerNew){
         ValidatorUtils.validateEntity(outputCustomerNew);
         outputCustomerNewService.updateById(outputCustomerNew);
@@ -79,7 +86,7 @@ public class OutputCustomerNewController {
      * 删除
      */
     @DeleteMapping("/delete")
-    @RequiresPermissions("data:outputcustomernew:delete")
+//    @RequiresPermissions("data:outputcustomernew:delete")
     public R delete(@RequestBody Long[] customerIds){
         outputCustomerNewService.removeByIds(Arrays.asList(customerIds));
 
@@ -109,9 +116,26 @@ public class OutputCustomerNewController {
     /**
      * 数据导入
      */
+    @PostMapping("/importCustomer")
+    public R importCustomer(@RequestParam("file") MultipartFile file){
+        Map<String, Object> resMap = outputCustomerNewService.importCustomer(file);
+
+        return R.ok().put("res", resMap);
+    }
 
 
     /**
      * 下载模板
      */
+    @GetMapping("/exportTemplate")
+    public R exportTemplate(HttpServletResponse response){
+        try {
+            String fileName = "CustomerInfo" + DateUtils.format(new Date(), "yyyyMMddHHmmss") + ".xlsx";
+            new ExportExcel("", OutputCustomerNewEntity.class).write(response, fileName).dispose();
+        }catch (Exception e){
+            log.error("下载客户Excel模板出错: {}", e);
+            throw new RRException("下载客户Excel模板发生异常");
+        }
+        return null;
+    }
 }

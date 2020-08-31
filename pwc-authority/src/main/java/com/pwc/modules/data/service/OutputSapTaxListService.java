@@ -3,6 +3,7 @@ package com.pwc.modules.data.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pwc.common.utils.PageUtils;
 import com.pwc.modules.data.entity.OutputSapTaxListEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
@@ -25,5 +26,10 @@ public interface OutputSapTaxListService extends IService<OutputSapTaxListEntity
      * 关键字查询
      */
     PageUtils search(Map<String, Object> params);
+
+    /**
+     * 数据导入
+     */
+    Map<String, Object> importSapTax(MultipartFile file);
 }
 

@@ -1,9 +1,15 @@
 package com.pwc.modules.data.controller;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Map;
 
+import com.pwc.common.excel.ExportExcel;
+import com.pwc.common.exception.RRException;
+import com.pwc.common.utils.DateUtils;
 import com.pwc.common.validator.ValidatorUtils;
+import com.pwc.modules.sys.shiro.ShiroUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +18,9 @@ import com.pwc.modules.data.entity.OutputSapTaxListEntity;
 import com.pwc.modules.data.service.OutputSapTaxListService;
 import com.pwc.common.utils.PageUtils;
 import com.pwc.common.utils.R;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 
 
 /**
@@ -23,6 +31,7 @@ import com.pwc.common.utils.R;
  */
 @RestController
 @RequestMapping("data/outputsaptaxlist")
+@Slf4j
 public class OutputSapTaxListController {
     @Autowired
     private OutputSapTaxListService outputSapTaxListService;
@@ -31,7 +40,7 @@ public class OutputSapTaxListController {
      * 列表
      */
     @GetMapping("/list")
-    @RequiresPermissions("data:outputsaptaxlist:list")
+//    @RequiresPermissions("data:outputsaptaxlist:list")
     public R list(@RequestParam Map<String, Object> params){
         PageUtils page = outputSapTaxListService.queryPage(params);
 
@@ -43,7 +52,7 @@ public class OutputSapTaxListController {
      * 信息
      */
     @GetMapping("/info/{taxId}")
-    @RequiresPermissions("data:outputsaptaxlist:info")
+//    @RequiresPermissions("data:outputsaptaxlist:info")
     public R info(@PathVariable("taxId") Long taxId){
         OutputSapTaxListEntity outputSapTaxList = outputSapTaxListService.getById(taxId);
 
@@ -54,8 +63,10 @@ public class OutputSapTaxListController {
      * 保存
      */
     @PutMapping("/save")
-    @RequiresPermissions("data:outputsaptaxlist:save")
+//    @RequiresPermissions("data:outputsaptaxlist:save")
     public R save(@RequestBody OutputSapTaxListEntity outputSapTaxList){
+        outputSapTaxList.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
+        outputSapTaxList.setCreateTime(new Date());
         outputSapTaxListService.save(outputSapTaxList);
 
         return R.ok();
@@ -65,9 +76,11 @@ public class OutputSapTaxListController {
      * 修改
      */
     @PostMapping("/update")
-    @RequiresPermissions("data:outputsaptaxlist:update")
+//    @RequiresPermissions("data:outputsaptaxlist:update")
     public R update(@RequestBody OutputSapTaxListEntity outputSapTaxList){
         ValidatorUtils.validateEntity(outputSapTaxList);
+        outputSapTaxList.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
+        outputSapTaxList.setUpdateTime(new Date());
         outputSapTaxListService.updateById(outputSapTaxList);
         
         return R.ok();
@@ -77,7 +90,7 @@ public class OutputSapTaxListController {
      * 删除
      */
     @DeleteMapping("/delete")
-    @RequiresPermissions("data:outputsaptaxlist:delete")
+//    @RequiresPermissions("data:outputsaptaxlist:delete")
     public R delete(@RequestBody Long[] taxIds){
         outputSapTaxListService.removeByIds(Arrays.asList(taxIds));
 
@@ -103,6 +116,32 @@ public class OutputSapTaxListController {
         PageUtils page = outputSapTaxListService.search(params);
 
         return R.ok().put("page", page);
+    }
+
+    /**
+     * 数据导入
+     */
+    @PostMapping("/importSapTax")
+    public R importSapTax(@RequestParam("file") MultipartFile file){
+        Map<String, Object> resMap = outputSapTaxListService.importSapTax(file);
+
+        return R.ok().put("res", resMap);
+    }
+
+
+    /**
+     * 下载模板
+     */
+    @GetMapping("/exportTemplate")
+    public R exportTemplate(HttpServletResponse response){
+        try {
+            String fileName = "SAPTaxInfo" + DateUtils.format(new Date(), "yyyyMMddHHmmss") + ".xlsx";
+            new ExportExcel("", OutputSapTaxListEntity.class).write(response, fileName).dispose();
+        }catch (Exception e){
+            log.error("下载SAP税码清单Excel模板出错: {}", e);
+            throw new RRException("下载SAP税码清单Excel模板发生异常");
+        }
+        return null;
     }
 
 }

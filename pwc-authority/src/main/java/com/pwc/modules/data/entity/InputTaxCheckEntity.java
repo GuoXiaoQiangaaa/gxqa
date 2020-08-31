@@ -9,40 +9,35 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * SAP税码清单表
+ * 进项税率校验表
  *
  * @author fanpf
- * @date 2020/8/27
+ * @date 2020/8/29
  */
 @Data
-@TableName("output_sap_tax_list")
-public class OutputSapTaxListEntity implements Serializable {
+@TableName("input_tax_check")
+public class InputTaxCheckEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * sap税码清单主键
+	 * 税率校验主键
 	 */
 	@TableId
-	private Long taxId;
+	private Long checkId;
 	/**
-	 * 税码
+	 * 货品名称
 	 */
-	@ExcelField(title = "税码", align = 1, sort = 1)
-	private String taxCode;
+	@ExcelField(title = "货品名称", align = 1, sort = 1)
+	private String goodsName;
 	/**
-	 * 税种
+	 * 税收分类编码
 	 */
-	@ExcelField(title = "税种", align = 1, sort = 1)
-	private String taxType;
+	@ExcelField(title = "税收分类编码", align = 1, sort = 1)
+	private String taxTypeCode;
 	/**
-	 * 描述
+	 * 非法税率
 	 */
-	@ExcelField(title = "描述", align = 1, sort = 1)
-	private String description;
-	/**
-	 * 税率
-	 */
-	@ExcelField(title = "税率", align = 1, sort = 1)
+	@ExcelField(title = "非法税率", align = 1, sort = 1)
 	private String taxRate;
 	/**
 	 * 是否停用(0:停用;1:正常)

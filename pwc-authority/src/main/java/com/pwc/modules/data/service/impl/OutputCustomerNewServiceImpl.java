@@ -1,12 +1,13 @@
 package com.pwc.modules.data.service.impl;
 
+import com.pwc.common.excel.ImportExcel;
 import com.pwc.common.exception.RRException;
 import com.pwc.modules.sys.shiro.ShiroUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -16,6 +17,9 @@ import com.pwc.common.utils.Query;
 import com.pwc.modules.data.dao.OutputCustomerNewDao;
 import com.pwc.modules.data.entity.OutputCustomerNewEntity;
 import com.pwc.modules.data.service.OutputCustomerNewService;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 客户信息服务实现
@@ -107,6 +111,49 @@ public class OutputCustomerNewServiceImpl extends ServiceImpl<OutputCustomerNewD
     }
 
     /**
+     * 数据导入
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Map<String, Object> importCustomer(MultipartFile file) {
+        Map<String, Object> resMap = new HashMap<>();
+        // 数据校验正确的集合
+        List<OutputCustomerNewEntity> entityList = new ArrayList<>();
+        // 数据总量
+        int total = 0;
+        // 数据有误条数
+        int fail = 0;
+        try {
+            ImportExcel excel = new ImportExcel(file, 1, 0);
+            List<OutputCustomerNewEntity> dataList = excel.getDataList(OutputCustomerNewEntity.class);
+            if(CollectionUtils.isEmpty(dataList)){
+                log.error("上传的Excel为空,请重新上传");
+                throw new RRException("上传的Excel为空,请重新上传");
+            }
+            total = dataList.size();
+            for (OutputCustomerNewEntity customerEntity : dataList) {
+                // 参数校验
+                if(1 == checkExcel(customerEntity)){
+                    // 参数有误
+                    fail += 1;
+                }else {
+                    // 添加校验正确的实体
+                    entityList.add(customerEntity);
+                }
+            }
+            resMap.put("total", total);
+            resMap.put("success", entityList.size());
+            resMap.put("fail", fail);
+            super.saveBatch(entityList);
+
+            return resMap;
+        } catch (Exception e) {
+            log.error("客户信息导入出错: {}", e);
+            throw new RRException("客户信息导入出现异常");
+        }
+    }
+
+    /**
      * 参数校验
      */
     private void checkParams(OutputCustomerNewEntity outputCustomerNew){
@@ -125,5 +172,17 @@ public class OutputCustomerNewServiceImpl extends ServiceImpl<OutputCustomerNewD
         if(StringUtils.isBlank(outputCustomerNew.getContact())){
             throw new RRException("客户电话不能为空");
         }
+    }
+
+    /**
+     * 校验Excel中参数
+     */
+    private int checkExcel(OutputCustomerNewEntity entity){
+        if(StringUtils.isBlank(entity.getSapCode()) || StringUtils.isBlank(entity.getNameCn()) ||
+                StringUtils.isBlank(entity.getTaxCode()) || StringUtils.isBlank(entity.getAddress()) ||
+                StringUtils.isBlank(entity.getContact())){
+            return 1;
+        }
+        return 0;
     }
 }

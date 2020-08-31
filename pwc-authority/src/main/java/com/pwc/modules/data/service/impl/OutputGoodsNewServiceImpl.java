@@ -1,15 +1,15 @@
 package com.pwc.modules.data.service.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.pwc.common.excel.ImportExcel;
 import com.pwc.common.exception.RRException;
 import com.pwc.common.utils.Constant;
 import com.pwc.modules.sys.shiro.ShiroUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -19,6 +19,9 @@ import com.pwc.common.utils.Query;
 import com.pwc.modules.data.dao.OutputGoodsNewDao;
 import com.pwc.modules.data.entity.OutputGoodsNewEntity;
 import com.pwc.modules.data.service.OutputGoodsNewService;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 
@@ -103,6 +106,49 @@ public class OutputGoodsNewServiceImpl extends ServiceImpl<OutputGoodsNewDao, Ou
     }
 
     /**
+     * 数据导入
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Map<String, Object> importGoods(MultipartFile file) {
+        Map<String, Object> resMap = new HashMap<>();
+        // 数据校验正确的集合
+        List<OutputGoodsNewEntity> entityList = new ArrayList<>();
+        // 数据总量
+        int total = 0;
+        // 数据有误条数
+        int fail = 0;
+        try {
+            ImportExcel excel = new ImportExcel(file, 1, 0);
+            List<OutputGoodsNewEntity> dataList = excel.getDataList(OutputGoodsNewEntity.class);
+            if(CollectionUtils.isEmpty(dataList)){
+                log.error("上传的Excel为空,请重新上传");
+                throw new RRException("上传的Excel为空,请重新上传");
+            }
+            total = dataList.size();
+            for (OutputGoodsNewEntity goodsEntity : dataList) {
+                // 参数校验
+                if(1 == checkExcel(goodsEntity)){
+                    // 参数有误
+                    fail += 1;
+                }else {
+                    // 添加转义后的实体
+                    entityList.add(paraphraseParams(goodsEntity));
+                }
+            }
+            resMap.put("total", total);
+            resMap.put("success", entityList.size());
+            resMap.put("fail", fail);
+            super.saveBatch(entityList);
+
+            return resMap;
+        } catch (Exception e) {
+            log.error("商品信息导入出错: {}", e);
+            throw new RRException("商品信息导入出现异常");
+        }
+    }
+
+    /**
      * 参数校验
      */
     private void checkParams(OutputGoodsNewEntity outputGoods){
@@ -121,5 +167,45 @@ public class OutputGoodsNewServiceImpl extends ServiceImpl<OutputGoodsNewDao, Ou
         if(StringUtils.isBlank(outputGoods.getTaxRate())){
             throw new RRException("商品税率不能为空");
         }
+    }
+
+    /**
+     * 校验Excel中参数
+     */
+    private int checkExcel(OutputGoodsNewEntity entity){
+        // 非空校验
+        if(StringUtils.isBlank(entity.getGoodsNumber()) || StringUtils.isBlank(entity.getGoodsName()) ||
+                StringUtils.isBlank(entity.getTaxCategoryName()) || StringUtils.isBlank(entity.getTaxCategoryCode()) ||
+                StringUtils.isBlank(entity.getTaxRate())){
+            return 1;
+        }
+        return 0;
+    }
+
+    /**
+     * 枚举值转义
+     * preferential 是否享受优惠政策0：否 1:是
+     * preferential_type 优惠政策类型(0:免税; 1:部分免税; 2:收税)
+     */
+    private OutputGoodsNewEntity paraphraseParams(OutputGoodsNewEntity entity){
+        // 对preferential转义
+        if(StringUtils.isNotBlank(entity.getPreferentialStr())){
+            if("否".equals(entity.getPreferentialStr().trim())){
+                entity.setPreferential(0);
+            }else if("是".equals(entity.getPreferentialStr().trim())){
+                entity.setPreferential(1);
+            }
+        }
+        // 对preferential_type转义
+        if(StringUtils.isNotBlank(entity.getPreferentialType())){
+            if("免税".equals(entity.getPreferentialType().trim())){
+                entity.setPreferentialType("0");
+            }else if("部分免税".equals(entity.getPreferentialType().trim())){
+                entity.setPreferentialType("1");
+            }else if("收税".equals(entity.getPreferentialType().trim())){
+                entity.setPreferentialType("2");
+            }
+        }
+        return entity;
     }
 }
