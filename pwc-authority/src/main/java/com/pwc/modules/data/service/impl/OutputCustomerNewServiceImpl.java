@@ -1,5 +1,7 @@
 package com.pwc.modules.data.service.impl;
 
+import cn.hutool.poi.excel.ExcelReader;
+import cn.hutool.poi.excel.ExcelUtil;
 import com.pwc.common.excel.ImportExcel;
 import com.pwc.common.exception.RRException;
 import com.pwc.modules.sys.shiro.ShiroUtils;
@@ -48,6 +50,7 @@ public class OutputCustomerNewServiceImpl extends ServiceImpl<OutputCustomerNewD
         // 参数校验
         this.checkParams(outputCustomerNew);
 
+        outputCustomerNew.setDelFlag("1");
         outputCustomerNew.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
         outputCustomerNew.setCreateTime(new Date());
         return super.save(outputCustomerNew);
@@ -124,8 +127,16 @@ public class OutputCustomerNewServiceImpl extends ServiceImpl<OutputCustomerNewD
         // 数据有误条数
         int fail = 0;
         try {
-            ImportExcel excel = new ImportExcel(file, 1, 0);
-            List<OutputCustomerNewEntity> dataList = excel.getDataList(OutputCustomerNewEntity.class);
+            ExcelReader reader = ExcelUtil.getReader(file.getInputStream());
+            String[] excelHead = {"客户SAP代码（必填）", "公司代码", "英文客户名称", "中文客户名称（必填）",
+                    "纳税人识别号（必填）", "地址（必填）", "电话号码（必填）", "开户行", "银行账号", "客户邮箱"};
+            String [] excelHeadAlias = {"sapCode", "deptCode", "name", "nameCn", "taxCode", "address", "contact",
+                    "bank", "bankAccount", "email"};
+            for (int i = 0; i < excelHead.length; i++) {
+                reader.addHeaderAlias(excelHead[i], excelHeadAlias[i]);
+            }
+            List<OutputCustomerNewEntity> dataList = reader.read(0, 1, OutputCustomerNewEntity.class);
+
             if(CollectionUtils.isEmpty(dataList)){
                 log.error("上传的Excel为空,请重新上传");
                 throw new RRException("上传的Excel为空,请重新上传");
@@ -138,6 +149,9 @@ public class OutputCustomerNewServiceImpl extends ServiceImpl<OutputCustomerNewD
                     fail += 1;
                 }else {
                     // 添加校验正确的实体
+                    customerEntity.setDelFlag("1");
+                    customerEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
+                    customerEntity.setCreateTime(new Date());
                     entityList.add(customerEntity);
                 }
             }

@@ -1,5 +1,7 @@
 package com.pwc.modules.data.service.impl;
 
+import cn.hutool.poi.excel.ExcelReader;
+import cn.hutool.poi.excel.ExcelUtil;
 import com.pwc.common.excel.ImportExcel;
 import com.pwc.common.exception.RRException;
 import com.pwc.modules.sys.shiro.ShiroUtils;
@@ -91,8 +93,14 @@ public class OutputItemListServiceImpl extends ServiceImpl<OutputItemListDao, Ou
         // 数据有误条数
         int fail = 0;
         try {
-            ImportExcel excel = new ImportExcel(file, 1, 0);
-            List<OutputItemListEntity> dataList = excel.getDataList(OutputItemListEntity.class);
+            ExcelReader reader = ExcelUtil.getReader(file.getInputStream());
+            String[] excelHead = {"科目编码", "科目类型", "科目描述"};
+            String [] excelHeadAlias = {"itemCode", "itemType", "description"};
+            for (int i = 0; i < excelHead.length; i++) {
+                reader.addHeaderAlias(excelHead[i], excelHeadAlias[i]);
+            }
+            List<OutputItemListEntity> dataList = reader.read(0, 1, OutputItemListEntity.class);
+
             if(CollectionUtils.isEmpty(dataList)){
                 log.error("上传的Excel为空,请重新上传");
                 throw new RRException("上传的Excel为空,请重新上传");
@@ -105,6 +113,9 @@ public class OutputItemListServiceImpl extends ServiceImpl<OutputItemListDao, Ou
                     fail += 1;
                 }else {
                     // 添加校验正确的实体
+                    itemEntity.setDelFlag("1");
+                    itemEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
+                    itemEntity.setCreateTime(new Date());
                     entityList.add(itemEntity);
                 }
             }

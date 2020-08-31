@@ -65,6 +65,7 @@ public class InputTaxCheckController {
     @PutMapping("/save")
 //    @RequiresPermissions("data:inputtaxcheck:save")
     public R save(@RequestBody InputTaxCheckEntity inputTaxCheck){
+        inputTaxCheck.setDelFlag("1");
         inputTaxCheck.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
         inputTaxCheck.setCreateTime(new Date());
         inputTaxCheckService.save(inputTaxCheck);

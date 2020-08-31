@@ -1,5 +1,7 @@
 package com.pwc.modules.data.service.impl;
 
+import cn.hutool.poi.excel.ExcelReader;
+import cn.hutool.poi.excel.ExcelUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pwc.common.excel.ImportExcel;
 import com.pwc.common.exception.RRException;
@@ -57,6 +59,7 @@ public class OutputGoodsNewServiceImpl extends ServiceImpl<OutputGoodsNewDao, Ou
         // 参数校验
         this.checkParams(outputGoods);
 
+        outputGoods.setDelFlag("1");
         outputGoods.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
         outputGoods.setCreateTime(new Date());
         return super.save(outputGoods);
@@ -119,8 +122,16 @@ public class OutputGoodsNewServiceImpl extends ServiceImpl<OutputGoodsNewDao, Ou
         // 数据有误条数
         int fail = 0;
         try {
-            ImportExcel excel = new ImportExcel(file, 1, 0);
-            List<OutputGoodsNewEntity> dataList = excel.getDataList(OutputGoodsNewEntity.class);
+            ExcelReader reader = ExcelUtil.getReader(file.getInputStream());
+            String[] excelHead = {"商品编码（必填）", "商品名称（必填）", "商品规格型号", "计量单位", "商品价格",
+                    "所属机构", "税收分类名称（必填）", "税收分类编码（必填）", "税率（必填）", "是否享受优惠政策", "优惠政策类型"};
+            String [] excelHeadAlias = {"goodsNumber", "goodsName", "specifications", "unit", "price", "deptName",
+                    "taxCategoryName", "taxCategoryCode", "taxRate", "preferentialStr", "preferentialType"};
+            for (int i = 0; i < excelHead.length; i++) {
+                reader.addHeaderAlias(excelHead[i], excelHeadAlias[i]);
+            }
+            List<OutputGoodsNewEntity> dataList = reader.read(0, 1, OutputGoodsNewEntity.class);
+
             if(CollectionUtils.isEmpty(dataList)){
                 log.error("上传的Excel为空,请重新上传");
                 throw new RRException("上传的Excel为空,请重新上传");
@@ -206,6 +217,9 @@ public class OutputGoodsNewServiceImpl extends ServiceImpl<OutputGoodsNewDao, Ou
                 entity.setPreferentialType("2");
             }
         }
+        entity.setDelFlag("1");
+        entity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
+        entity.setCreateTime(new Date());
         return entity;
     }
 }

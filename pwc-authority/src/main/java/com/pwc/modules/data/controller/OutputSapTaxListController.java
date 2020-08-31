@@ -65,6 +65,7 @@ public class OutputSapTaxListController {
     @PutMapping("/save")
 //    @RequiresPermissions("data:outputsaptaxlist:save")
     public R save(@RequestBody OutputSapTaxListEntity outputSapTaxList){
+        outputSapTaxList.setDelFlag("1");
         outputSapTaxList.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
         outputSapTaxList.setCreateTime(new Date());
         outputSapTaxListService.save(outputSapTaxList);

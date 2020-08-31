@@ -38,9 +38,20 @@ public class OutputGoodsNewEntity implements Serializable {
 	@ExcelField(title = "商品名称（必填）", align = 1, sort = 1)
 	private String goodsName;
 	/**
-	 * 所属企业id
+	 * 规格型号
 	 */
-	private Long deptId;
+	@ExcelField(title = "商品规格型号", align = 1, sort = 1)
+	private String specifications;
+	/**
+	 * 计算单位
+	 */
+	@ExcelField(title = "计量单位", align = 1, sort = 1)
+	private String unit;
+	/**
+	 * 商品单价
+	 */
+	@ExcelField(title = "商品价格", align = 1, sort = 1)
+	private BigDecimal price;
 	/**
 	 * 所属企业名称
 	 */
@@ -48,15 +59,24 @@ public class OutputGoodsNewEntity implements Serializable {
 	@ExcelField(title = "所属机构", align = 1, sort = 1)
 	private String deptName;
 	/**
+	 * 税收分类名称
+	 */
+	@ExcelField(title = "税收分类名称（必填）", align = 1, sort = 1)
+	private String taxCategoryName;
+	/**
+	 * 税收分类编码
+	 */
+	@ExcelField(title = "税收分类编码（必填）", align = 1, sort = 1)
+	private String taxCategoryCode;
+	/**
+	 * 所属企业id
+	 */
+	private Long deptId;
+	/**
 	 * 商品税率
 	 */
 	@ExcelField(title = "税率（必填）", align = 1, sort = 1)
 	private String taxRate;
-	/**
-	 * 商品单价
-	 */
-	@ExcelField(title = "商品价格", align = 1, sort = 1)
-	private BigDecimal price;
 	/**
 	 * 是否享受优惠政策0：否 1:是
 	 */
@@ -76,16 +96,6 @@ public class OutputGoodsNewEntity implements Serializable {
 	 */
 	private Long taxCategory;
 	/**
-	 * 税收分类编码
-	 */
-	@ExcelField(title = "税收分类编码（必填）", align = 1, sort = 1)
-	private String taxCategoryCode;
-	/**
-	 * 税收分类名称
-	 */
-	@ExcelField(title = "税收分类名称（必填）", align = 1, sort = 1)
-	private String taxCategoryName;
-	/**
 	 * 商品科目
 	 */
 	private String goodsSubject;
@@ -93,16 +103,6 @@ public class OutputGoodsNewEntity implements Serializable {
 	 * 商品简码
 	 */
 	private String goodsCode;
-	/**
-	 * 规格型号
-	 */
-	@ExcelField(title = "商品规格型号", align = 1, sort = 1)
-	private String specifications;
-	/**
-	 * 计算单位
-	 */
-	@ExcelField(title = "计量单位", align = 1, sort = 1)
-	private String unit;
 	/**
 	 * 优惠政策类型(0:免税; 1:部分免税; 2:收税)
 	 */

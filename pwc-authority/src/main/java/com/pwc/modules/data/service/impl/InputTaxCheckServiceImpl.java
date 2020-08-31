@@ -1,5 +1,7 @@
 package com.pwc.modules.data.service.impl;
 
+import cn.hutool.poi.excel.ExcelReader;
+import cn.hutool.poi.excel.ExcelUtil;
 import com.pwc.common.excel.ImportExcel;
 import com.pwc.common.exception.RRException;
 import com.pwc.modules.sys.shiro.ShiroUtils;
@@ -93,8 +95,14 @@ public class InputTaxCheckServiceImpl extends ServiceImpl<InputTaxCheckDao, Inpu
         // 数据有误条数
         int fail = 0;
         try {
-            ImportExcel excel = new ImportExcel(file, 1, 0);
-            List<InputTaxCheckEntity> dataList = excel.getDataList(InputTaxCheckEntity.class);
+            ExcelReader reader = ExcelUtil.getReader(file.getInputStream());
+            String[] excelHead = {"货品名称", "税收分类编码", "非法税率"};
+            String [] excelHeadAlias = {"goodsName", "taxTypeCode", "taxRate"};
+            for (int i = 0; i < excelHead.length; i++) {
+                reader.addHeaderAlias(excelHead[i], excelHeadAlias[i]);
+            }
+            List<InputTaxCheckEntity> dataList = reader.read(0, 1, InputTaxCheckEntity.class);
+
             if(CollectionUtils.isEmpty(dataList)){
                 log.error("上传的Excel为空,请重新上传");
                 throw new RRException("上传的Excel为空,请重新上传");
@@ -107,6 +115,9 @@ public class InputTaxCheckServiceImpl extends ServiceImpl<InputTaxCheckDao, Inpu
                     fail += 1;
                 }else {
                     // 添加校验正确的实体
+                    taxCheckEntity.setDelFlag("1");
+                    taxCheckEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
+                    taxCheckEntity.setCreateTime(new Date());
                     entityList.add(taxCheckEntity);
                 }
             }

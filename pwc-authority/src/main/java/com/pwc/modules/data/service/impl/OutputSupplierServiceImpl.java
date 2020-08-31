@@ -1,5 +1,7 @@
 package com.pwc.modules.data.service.impl;
 
+import cn.hutool.poi.excel.ExcelReader;
+import cn.hutool.poi.excel.ExcelUtil;
 import com.pwc.common.excel.ExportExcel;
 import com.pwc.common.excel.ImportExcel;
 import com.pwc.common.exception.RRException;
@@ -51,6 +53,7 @@ public class OutputSupplierServiceImpl extends ServiceImpl<OutputSupplierDao, Ou
         // 校验参数
         this.checkParams(outputSupplier);
 
+        outputSupplier.setDelFlag("1");
         outputSupplier.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
         outputSupplier.setCreateTime(new Date());
         return super.save(outputSupplier);
@@ -126,8 +129,16 @@ public class OutputSupplierServiceImpl extends ServiceImpl<OutputSupplierDao, Ou
         // 数据有误条数
         int fail = 0;
         try {
-            ImportExcel excel = new ImportExcel(file, 1, 0);
-            List<OutputSupplierEntity> dataList = excel.getDataList(OutputSupplierEntity.class);
+            ExcelReader reader = ExcelUtil.getReader(file.getInputStream());
+            String[] excelHead = {"SAP代码（必填）", "公司代码", "供应商名称（必填）", "纳税人识别号（必填）",
+                    "地址", "电话号码", "开户行", "银行账号", "供应商邮箱", "分类"};
+            String [] excelHeadAlias = {"sapCode", "deptCode", "name", "taxCode", "address", "contact",
+                    "bank", "bankAccount", "email", "invoiceType"};
+            for (int i = 0; i < excelHead.length; i++) {
+                reader.addHeaderAlias(excelHead[i], excelHeadAlias[i]);
+            }
+            List<OutputSupplierEntity> dataList = reader.read(0, 1, OutputSupplierEntity.class);
+
             if(CollectionUtils.isEmpty(dataList)){
                 log.error("上传的Excel为空,请重新上传");
                 throw new RRException("上传的Excel为空,请重新上传");
@@ -224,6 +235,7 @@ public class OutputSupplierServiceImpl extends ServiceImpl<OutputSupplierDao, Ou
             // General类型
             entity.setInvoiceType("9");
         }
+        entity.setDelFlag("1");
         entity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
         entity.setCreateTime(new Date());
         return entity;
