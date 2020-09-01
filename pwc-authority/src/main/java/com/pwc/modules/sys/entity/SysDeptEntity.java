@@ -35,6 +35,7 @@ public class SysDeptEntity implements Serializable {
 	/**
 	 * 部门名称
 	 */
+	@NotNull(message = "组织名称不能为空")
 	private String name;
 	/**
 	 * 上级部门名称
@@ -42,6 +43,9 @@ public class SysDeptEntity implements Serializable {
 	@TableField(exist=false)
 	private String parentName;
 	private Integer orderNum;
+	/**
+	 * 是否删除  -1：已删除  0：正常
+	 */
 	@TableLogic
 	private Integer delFlag;
 	/**
@@ -52,6 +56,7 @@ public class SysDeptEntity implements Serializable {
 	/**
 	 * 税号
 	 */
+	@NotNull(message = "纳税人识别号不能为空")
 	private String taxCode;
 
 	/**
@@ -95,7 +100,7 @@ public class SysDeptEntity implements Serializable {
 	private String districtCode;
 
 	/**
-	 * 启用状态
+	 * 启用状态(0: 禁用; 1:正常)
 	 */
 	private Integer status;
 
@@ -130,33 +135,33 @@ public class SysDeptEntity implements Serializable {
 	/**
 	 * 会计准则
 	 */
-	@NotNull(message = "会计准则不能为空")
+//	@NotNull(message = "会计准则不能为空")
 	private String thirdAccountingStandards;
 	/**
 	 * 纳税人身份
 	 */
-	@NotNull(message = "纳税人身份不能为空")
+//	@NotNull(message = "纳税人身份不能为空")
 	private String thirdVatTaxpayer;
 	/**
 	 * 启用年
 	 */
-	@NotNull(message = "纳税启用年不能为空")
+//	@NotNull(message = "纳税启用年不能为空")
 	private String thirdEnabledYear;
 	/**
 	 * 启用月份
 	 */
-	@NotNull(message = "纳税启用月不能为空")
+//	@NotNull(message = "纳税启用月不能为空")
 	private String thirdEnabledMonth;
 	/**
 	 * 企业类型 1. 总集团 2.分公司
 	 */
-	@NotNull(message = "企业类型不能为空")
+//	@NotNull(message = "企业类型不能为空")
 	private Integer type;
 
 	/**
 	 * 纳税期限代码 06按期 11按次
 	 */
-	@NotNull(message = "纳税期限代码不能为空")
+//	@NotNull(message = "纳税期限代码不能为空")
 	private String thirdTaxPeriodCode;
 	/**
 	 * 小规模纳税人 申报期 1 月 2 季
@@ -192,5 +197,35 @@ public class SysDeptEntity implements Serializable {
 	@TableField(exist=false)
 	private List<SysMenuEntity> menus;
 
+	/** 公司编码 */
+	@NotNull(message = "公司编码不能为空")
+	private String deptCode;
+
+	/** SAP公司代码 */
+	@NotNull(message = "SAP公司代码不能为空")
+	private String sapDeptCode;
+	
+	/** 生产经营地址 */
+	private String manageAddress;
+	
+	/** 注册地址 */
+	private String registAddress;
+
+	/** 开户行 */
+	private String bank;
+	
+	/** 银行账号 */
+	private String bankAccount;
+	
+	/** 登记注册类型(0:一般纳税人; 1:小规模) */
+	private String registType;
+
+	/** 查看全部数据的权限人员 */
+	@TableField(exist = false)
+	private List<String> allData;
+
+	/** 查看个人数据的权限人员 */
+	@TableField(exist = false)
+	private List<String> singleData;
 
 }

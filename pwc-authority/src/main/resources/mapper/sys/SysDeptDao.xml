@@ -33,4 +33,11 @@
 			and ${sql_filter}
 		</if>
 	</select>
+
+	<!-- 根据部门id查询拥有全部或个人数据权限的用户名 -->
+	<select id="queryUsernameByDeptId" resultType="java.lang.String">
+		SELECT t1.username FROM sys_user t1 WHERE EXISTS (
+				SELECT t2.user_id FROM sys_user_menu t2 WHERE t1.user_id = t2.user_id AND t2.dept_id = #{deptId} AND t2.just_own = #{justOwn}
+			)
+	</select>
 </mapper>

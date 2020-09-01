@@ -1,9 +1,14 @@
 package com.pwc.modules.input.controller;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Map;
 
+import com.pwc.common.excel.ExportExcel;
+import com.pwc.common.exception.RRException;
+import com.pwc.common.utils.DateUtils;
 import com.pwc.common.validator.ValidatorUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +19,8 @@ import com.pwc.common.utils.PageUtils;
 import com.pwc.common.utils.R;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+
 
 /**
  * 红字发票管理
@@ -23,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @RestController
 @RequestMapping("input/inputredinvoice")
+@Slf4j
 public class InputRedInvoiceController {
     @Autowired
     private InputRedInvoiceService inputRedInvoiceService;
@@ -100,8 +108,23 @@ public class InputRedInvoiceController {
      */
     @PostMapping("/importRedNotice")
     public R importRedNotice(@RequestParam("file") MultipartFile file){
-        inputRedInvoiceService.importRedNotice(file);
-        return R.ok();
+        Map<String, Object> resMap = inputRedInvoiceService.importRedNotice(file);
+        return R.ok().put("res", resMap);
+    }
+
+    /**
+     * 下载Excel模板
+     */
+    @GetMapping("/exportTemplate")
+    public R exportTemplate(HttpServletResponse response){
+        try {
+            String fileName = "RedNoticeTemplate" + DateUtils.format(new Date(), "yyyyMMddHHmmss") + ".xlsx";
+            new ExportExcel("", InputRedInvoiceEntity.class).write(response, fileName).dispose();
+        } catch (Exception e) {
+            log.error("下载红字通知单Excel模板出错: {}", e);
+            throw new RRException("下载红字通知单Excel模板发生异常");
+        }
+        return null;
     }
 
     /**

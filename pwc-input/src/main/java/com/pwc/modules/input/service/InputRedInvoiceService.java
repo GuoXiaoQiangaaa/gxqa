@@ -25,7 +25,7 @@ public interface InputRedInvoiceService extends IService<InputRedInvoiceEntity> 
     /**
      * 导入红字通知单
      */
-    void importRedNotice(MultipartFile file);
+    Map<String, Object> importRedNotice(MultipartFile file);
 
     /**
      * 接收红字发票并更新红字通知单状态

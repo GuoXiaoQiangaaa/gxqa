@@ -96,7 +96,7 @@ public class OutputSupplierServiceImpl extends ServiceImpl<OutputSupplierDao, Ou
                     new Query<OutputSupplierEntity>().getPage(params),
                     new QueryWrapper<OutputSupplierEntity>()
                             .like("sap_code", keyWords).or()
-                            .like("dept_code", Long.valueOf(keyWords)).or()
+                            .like("dept_code", keyWords).or()
                             .like("name", keyWords).or()
                             .like("tax_code", keyWords).or()
                             .like("address", keyWords).or()
