@@ -191,6 +191,10 @@ public class SysDeptEntity implements Serializable {
 	private int customers;
 	@TableField(exist=false)
 	private List<SysMenuEntity> menus;
-
+	/**
+	 * 是否只看自己
+	 */
+	@TableField(exist = false)
+	private Integer justOwn;
 
 }

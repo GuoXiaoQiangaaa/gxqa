@@ -55,8 +55,8 @@ public class SysUserEntity implements Serializable {
 	/**
 	 * 邮箱
 	 */
-//	@NotBlank(message="邮箱不能为空", groups = {AddGroup.class, UpdateGroup.class})
-//	@Email(message="邮箱格式不正确", groups = {AddGroup.class, UpdateGroup.class})
+	@NotBlank(message="邮箱不能为空", groups = {AddGroup.class, UpdateGroup.class})
+	@Email(message="邮箱格式不正确", groups = {AddGroup.class, UpdateGroup.class})
 	private String email;
 
 	/**
@@ -83,7 +83,7 @@ public class SysUserEntity implements Serializable {
 	/**
 	 * 部门ID
 	 */
-	@NotNull(message="部门不能为空", groups = {AddGroup.class, UpdateGroup.class})
+	@NotNull(message="所属公司不能为空", groups = {AddGroup.class, UpdateGroup.class})
 	private Long deptId;
 
 	/**
@@ -104,6 +104,10 @@ public class SysUserEntity implements Serializable {
 
 	@TableLogic
 	private Integer delFlag;
+	/**
+	 * 有效期
+	 */
+	private Date expireDate;
 
 	/**
 	 * 所能浏览的公司,逗号分隔  input test
@@ -121,4 +125,5 @@ public class SysUserEntity implements Serializable {
 	 */
 	@TableField(exist=false)
 	private Integer companyId;
+
 }

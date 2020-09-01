@@ -3,6 +3,7 @@
 package com.pwc.modules.sys.controller;
 
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.map.MapUtil;
 import com.google.code.kaptcha.Constants;
 import com.google.code.kaptcha.Producer;
@@ -10,6 +11,7 @@ import com.pwc.common.utils.R;
 import com.pwc.common.utils.RedisUtils;
 import com.pwc.common.utils.StatusDefine;
 import com.pwc.modules.sys.entity.SysDeptEntity;
+import com.pwc.modules.sys.entity.SysUserEntity;
 import com.pwc.modules.sys.service.SysDeptService;
 import com.pwc.modules.sys.shiro.ShiroUtils;
 import org.apache.shiro.authc.*;
@@ -81,7 +83,13 @@ public class SysLoginController {
 			redisUtils.set(authorization, ShiroUtils.getUserEntity());
 			perms = (Set<String>)ShiroUtils.getSession().getAttribute("perms");
 			map.put("perms", perms);
-			SysDeptEntity sysDeptEntity = sysDeptService.getById(ShiroUtils.getUserEntity().getDeptId());
+			SysUserEntity userEntity = ShiroUtils.getUserEntity();
+			if (null != userEntity.getExpireDate()) {
+				if (DateUtil.compare(userEntity.getExpireDate(), DateUtil.date()) > 0) {
+					return R.error("用户已过期");
+				}
+			}
+			SysDeptEntity sysDeptEntity = sysDeptService.getById(userEntity.getDeptId());
 			if (null != sysDeptEntity) {
 				if (sysDeptEntity.getStatus() == StatusDefine.DeptStatus.DISABLE.getValue()) {
 					return R.error("当前组织已被禁用");
