@@ -60,6 +60,26 @@ public class SysDeptController extends AbstractController {
 	}
 
 	/**
+	 * 关键字查询
+	 */
+	@GetMapping("/search")
+	public R search(@RequestParam Map<String, Object> params){
+		// 检查用户是否是超级管理员,如果不是则传parentId
+		List<Long> roleIds = sysUserRoleService.queryRoleIdList(getUserId());
+		Long roleId = roleIds.get(0);
+		if (roleId != Constant.SUPER_ADMIN) {
+			String parentId = (String) params.get("parentId");
+			if (StrUtil.isBlank(parentId)) {
+				params.put("parentId", getDeptId().toString());
+			}
+		}
+
+		PageUtils page = sysDeptService.search(params);
+
+		return R.ok().put("page", page);
+	}
+
+	/**
 	 * 列表
 	 */
 	@GetMapping("/treeList")
@@ -153,7 +173,7 @@ public class SysDeptController extends AbstractController {
 	@RequiresPermissions("sys:dept:info")
 	public R info(@PathVariable("deptId") Long deptId){
 
-		SysDeptEntity dept = sysDeptService.getById(deptId);
+		SysDeptEntity dept = sysDeptService.queryInfo(deptId);
 		
 		return R.ok().put("dept", dept);
 	}
@@ -215,7 +235,7 @@ public class SysDeptController extends AbstractController {
 	}
 
 	/**
-	 * 禁用用
+	 * 禁用
 	 */
 	@PostMapping("/disable")
 	@RequiresPermissions("sys:dept:enable")

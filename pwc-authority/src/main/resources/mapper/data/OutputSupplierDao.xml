@@ -15,6 +15,7 @@
         <result property="bank" column="bank"/>
         <result property="bankAccount" column="bank_account"/>
         <result property="email" column="email"/>
+        <result property="invoiceType" column="invoice_type"/>
         <result property="delFlag" column="del_flag"/>
         <result property="createBy" column="create_by"/>
         <result property="createTime" column="create_time"/>

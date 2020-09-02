@@ -1,9 +1,16 @@
 package com.pwc.modules.data.controller;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Map;
 
+import com.pwc.common.excel.ExportExcel;
+import com.pwc.common.exception.RRException;
+import com.pwc.common.utils.DateUtils;
 import com.pwc.common.validator.ValidatorUtils;
+import com.pwc.modules.sys.shiro.ShiroUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +19,9 @@ import com.pwc.modules.data.entity.OutputSupplierEntity;
 import com.pwc.modules.data.service.OutputSupplierService;
 import com.pwc.common.utils.PageUtils;
 import com.pwc.common.utils.R;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 
 
 /**
@@ -23,6 +32,7 @@ import com.pwc.common.utils.R;
  */
 @RestController
 @RequestMapping("data/outputsupplier")
+@Slf4j
 public class OutputSupplierController {
     @Autowired
     private OutputSupplierService outputSupplierService;
@@ -31,7 +41,7 @@ public class OutputSupplierController {
      * 列表
      */
     @GetMapping("/list")
-    @RequiresPermissions("data:outputsupplier:list")
+//    @RequiresPermissions("data:outputsupplier:list")
     public R list(@RequestParam Map<String, Object> params){
         PageUtils page = outputSupplierService.queryPage(params);
 
@@ -43,7 +53,7 @@ public class OutputSupplierController {
      * 详情
      */
     @GetMapping("/info/{supplierId}")
-    @RequiresPermissions("data:outputsupplier:info")
+//    @RequiresPermissions("data:outputsupplier:info")
     public R info(@PathVariable("supplierId") Long supplierId){
         OutputSupplierEntity outputSupplier = outputSupplierService.getById(supplierId);
 
@@ -54,7 +64,7 @@ public class OutputSupplierController {
      * 新增
      */
     @PutMapping("/save")
-    @RequiresPermissions("data:outputsupplier:save")
+//    @RequiresPermissions("data:outputsupplier:save")
     public R save(@RequestBody OutputSupplierEntity outputSupplier){
         outputSupplierService.save(outputSupplier);
 
@@ -65,7 +75,7 @@ public class OutputSupplierController {
      * 编辑
      */
     @PostMapping("/update")
-    @RequiresPermissions("data:outputsupplier:update")
+//    @RequiresPermissions("data:outputsupplier:update")
     public R update(@RequestBody OutputSupplierEntity outputSupplier){
         ValidatorUtils.validateEntity(outputSupplier);
         outputSupplierService.updateById(outputSupplier);
@@ -77,7 +87,7 @@ public class OutputSupplierController {
      * 删除
      */
     @DeleteMapping("/delete")
-    @RequiresPermissions("data:outputsupplier:delete")
+//    @RequiresPermissions("data:outputsupplier:delete")
     public R delete(@RequestBody Long[] supplierIds){
         outputSupplierService.removeByIds(Arrays.asList(supplierIds));
 
@@ -92,6 +102,41 @@ public class OutputSupplierController {
         outputSupplierService.disableOrEnable(reqVo);
 
         return R.ok();
+    }
+
+    /**
+     * 关键字查询
+     */
+    @GetMapping("/search")
+    public R search(@RequestParam Map<String, Object> params){
+        PageUtils page = outputSupplierService.search(params);
+
+        return R.ok().put("page", page);
+    }
+
+    /**
+     * 数据导入
+     */
+    @PostMapping("/importSupplier")
+    public R importSupplier(@RequestParam("file") MultipartFile file){
+        Map<String, Object> resMap = outputSupplierService.importSupplier(file);
+
+        return R.ok().put("res", resMap);
+    }
+
+    /**
+     * 下载模板
+     */
+    @GetMapping("/exportTemplate")
+    public R exportTemplate(HttpServletResponse response){
+        try {
+            String fileName = "SupplierInfo" + DateUtils.format(new Date(), "yyyyMMddHHmmss") + ".xlsx";
+            new ExportExcel("", OutputSupplierEntity.class).write(response, fileName).dispose();
+        } catch (Exception e) {
+            log.error("下载供应商Excel模板出错: {}", e);
+            throw new RRException("下载供应商Excel模板发生异常");
+        }
+        return null;
     }
 
 }

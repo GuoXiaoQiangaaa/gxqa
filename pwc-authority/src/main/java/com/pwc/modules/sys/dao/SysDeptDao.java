@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.pwc.modules.sys.entity.SysDeptEntity;
 import com.pwc.modules.sys.entity.TreeSelectVo;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Map;
@@ -40,5 +41,10 @@ public interface SysDeptDao extends BaseMapper<SysDeptEntity> {
      * @return
      */
     List<String> queryTaxCodeByIds(Map<String, Object> params);
+
+    /**
+     * 根据部门id查询拥有全部或个人数据权限的用户名
+     */
+    List<String> queryUsernameByDeptId(@Param("deptId") Long deptId, @Param("justOwn") int justOwn);
 
 }

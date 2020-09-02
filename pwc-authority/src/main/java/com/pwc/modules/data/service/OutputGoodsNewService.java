@@ -2,35 +2,35 @@ package com.pwc.modules.data.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pwc.common.utils.PageUtils;
-import com.pwc.modules.data.entity.OutputCustomerNewEntity;
+import com.pwc.modules.data.entity.OutputGoodsNewEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
 /**
- * 客户信息服务
+ * 商品信息服务
  *
  * @author fanpf
  * @date 2020/8/24
  */
-public interface OutputCustomerNewService extends IService<OutputCustomerNewEntity> {
+public interface OutputGoodsNewService extends IService<OutputGoodsNewEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
 
     /**
      * 新增
      */
-    boolean save(OutputCustomerNewEntity outputCustomerNew);
+    boolean save(OutputGoodsNewEntity outputGoods);
 
     /**
      * 编辑
      */
-    boolean updateById(OutputCustomerNewEntity outputCustomerNew);
+    boolean updateById(OutputGoodsNewEntity outputGoods);
 
     /**
      * 禁用/启用
      */
-    void disableOrEnable(OutputCustomerNewEntity reqVo);
+    void disableOrEnable(OutputGoodsNewEntity reqVo);
 
     /**
      * 关键字查询
@@ -40,7 +40,6 @@ public interface OutputCustomerNewService extends IService<OutputCustomerNewEnti
     /**
      * 数据导入
      */
-    Map<String, Object> importCustomer(MultipartFile file);
-
+    Map<String, Object> importGoods(MultipartFile file);
 }
 

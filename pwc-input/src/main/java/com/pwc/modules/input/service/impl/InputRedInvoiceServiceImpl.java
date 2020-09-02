@@ -1,6 +1,8 @@
 package com.pwc.modules.input.service.impl;
 
 import cn.hutool.core.util.ClassUtil;
+import cn.hutool.poi.excel.ExcelReader;
+import cn.hutool.poi.excel.ExcelUtil;
 import com.fapiao.neon.client.in.CheckInvoiceClient;
 import com.fapiao.neon.model.CallResult;
 import com.fapiao.neon.model.in.inspect.*;
@@ -22,9 +24,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -32,6 +33,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pwc.modules.input.dao.InputRedInvoiceDao;
 import com.pwc.modules.input.entity.InputRedInvoiceEntity;
 import com.pwc.modules.input.service.InputRedInvoiceService;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -90,23 +93,55 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
      * @param file 待导入文件
      */
     @Override
-    public void importRedNotice(MultipartFile file) {
+    @Transactional(rollbackFor = Exception.class)
+    public Map<String, Object> importRedNotice(MultipartFile file) {
+        Map<String, Object> resMap = new HashMap<>();
+        // 数据校验正确的集合
+        List<InputRedInvoiceEntity> entityList = new ArrayList<>();
+        // 数据总量
+        int total = 0;
+        // 数据有误条数
+        int fail = 0;
         try {
-            ImportExcel ie = new ImportExcel(file, 1, 0);
-            List<InputRedInvoiceEntity> redInvoiceEntityList = ie.getDataList(InputRedInvoiceEntity.class);
-            Long userId = ShiroUtils.getUserId();
-            Date importDate = new Date();
-            redInvoiceEntityList.forEach(
-                    redInvoiceEntity -> {
-                        // 新导入的红字通知单状态为: 红字通知单开具
-                        redInvoiceEntity.setRedStatus("0");
-                        redInvoiceEntity.setCreateBy(String.valueOf(userId));
-                        redInvoiceEntity.setCreateTime(importDate);
-                    }
-            );
-            super.saveBatch(redInvoiceEntityList);
+            ExcelReader reader = ExcelUtil.getReader(file.getInputStream());
+            String[] excelHead = {"红字通知单编号", "填写日期", "购方名称", "购方纳税人识别号", "销方名称",
+                    "销方纳税人识别号", "发票总额", "不含税金额", "税额", "税率", "蓝字发票号码", "蓝字发票代码"};
+            String [] excelHeadAlias = {"redNoticeNumber", "writeDate", "purchaserCompany", "purchaserTaxCode",
+                    "sellCompany", "sellTaxCode", "totalPrice", "freePrice", "taxPrice", "taxRate", "blueInvoiceNumber", "blueInvoiceCode"};
+            for (int i = 0; i < excelHead.length; i++) {
+                reader.addHeaderAlias(excelHead[i], excelHeadAlias[i]);
+            }
+            List<InputRedInvoiceEntity> dataList = reader.read(0, 1, InputRedInvoiceEntity.class);
+
+            if(CollectionUtils.isEmpty(dataList)){
+                log.error("上传的Excel为空,请重新上传");
+                throw new RRException("上传的Excel为空,请重新上传");
+            }
+            total = dataList.size();
+            for (InputRedInvoiceEntity redInvoiceEntity : dataList) {
+                // 参数校验
+                if(1 == checkExcel(redInvoiceEntity)){
+                    // 参数有误
+                    fail += 1;
+                }else {
+                    // 添加转义后的实体
+                    redInvoiceEntity.setRedStatus("0");
+                    redInvoiceEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
+                    redInvoiceEntity.setCreateTime(new Date());
+                    entityList.add(redInvoiceEntity);
+                }
+            }
+            resMap.put("total", total);
+            resMap.put("success", entityList.size());
+            resMap.put("fail", fail);
+            super.saveBatch(entityList);
+
+            return resMap;
+        } catch (RRException e){
+            throw e;
         } catch (Exception e) {
             log.error("导入红字通知单出错: {}", e);
+            throw new RRException("导入红字通知单出现异常");
         }
     }
 
@@ -260,5 +295,19 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
             throw new RRException("发票验真发生异常");
         }
         return remarks;
+    }
+
+    /**
+     * 校验Excel中参数
+     */
+    private int checkExcel(InputRedInvoiceEntity entity){
+        if(StringUtils.isBlank(entity.getRedNoticeNumber()) || StringUtils.isBlank(entity.getPurchaserCompany()) ||
+            StringUtils.isBlank(entity.getPurchaserTaxCode()) || StringUtils.isBlank(entity.getSellCompany()) ||
+            StringUtils.isBlank(entity.getSellTaxCode()) || null == entity.getTotalPrice() ||
+            null == entity.getFreePrice() || null == entity.getTaxPrice() || StringUtils.isBlank(entity.getTaxRate()) ||
+            StringUtils.isBlank(entity.getBlueInvoiceNumber()) || StringUtils.isBlank(entity.getBlueInvoiceCode())){
+            return 1;
+        }
+        return 0;
     }
 }

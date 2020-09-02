@@ -2,35 +2,30 @@ package com.pwc.modules.data.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pwc.common.utils.PageUtils;
-import com.pwc.modules.data.entity.OutputCustomerNewEntity;
+import com.pwc.modules.data.entity.InputTaxCheckEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
 /**
- * 客户信息服务
+ * 进项税率校验服务
  *
  * @author fanpf
- * @date 2020/8/24
+ * @date 2020/8/29
  */
-public interface OutputCustomerNewService extends IService<OutputCustomerNewEntity> {
+public interface InputTaxCheckService extends IService<InputTaxCheckEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
 
     /**
      * 新增
      */
-    boolean save(OutputCustomerNewEntity outputCustomerNew);
-
-    /**
-     * 编辑
-     */
-    boolean updateById(OutputCustomerNewEntity outputCustomerNew);
+    boolean save(InputTaxCheckEntity inputTaxCheck);
 
     /**
      * 禁用/启用
      */
-    void disableOrEnable(OutputCustomerNewEntity reqVo);
+    void disableOrEnable(InputTaxCheckEntity reqVo);
 
     /**
      * 关键字查询
@@ -40,7 +35,6 @@ public interface OutputCustomerNewService extends IService<OutputCustomerNewEnti
     /**
      * 数据导入
      */
-    Map<String, Object> importCustomer(MultipartFile file);
-
+    Map<String, Object> importTaxCheck(MultipartFile file);
 }
 

@@ -6,7 +6,7 @@
 	<!-- 可根据自己的需求，是否要使用 -->
     <resultMap type="com.pwc.modules.output.entity.OutputGoodsEntity" id="outputGoodsMap">
         <result property="goodsId" column="goods_id"/>
-        <result property="goodsNo" column="goods_no"/>
+        <result property="goodsNumber" column="goods_number"/>
         <result property="goodsName" column="goods_name"/>
         <result property="deptId" column="dept_id"/>
         <result property="taxRate" column="tax_rate"/>

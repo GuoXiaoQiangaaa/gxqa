@@ -28,7 +28,7 @@ public class OutputGoodsEntity implements Serializable {
 	/**
 	 * 商品编号
 	 */
-	private String goodsNo;
+	private String goodsNumber;
 	/**
 	 * 商品名称
 	 */
