@@ -125,6 +125,8 @@ public class OutputItemListServiceImpl extends ServiceImpl<OutputItemListDao, Ou
             super.saveBatch(entityList);
 
             return resMap;
+        } catch (RRException e){
+            throw e;
         } catch (Exception e) {
             log.error("科目清单导入出错: {}", e);
             throw new RRException("科目清单导入出现异常");

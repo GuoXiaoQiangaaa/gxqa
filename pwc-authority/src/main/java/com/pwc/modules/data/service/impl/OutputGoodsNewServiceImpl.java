@@ -153,6 +153,8 @@ public class OutputGoodsNewServiceImpl extends ServiceImpl<OutputGoodsNewDao, Ou
             super.saveBatch(entityList);
 
             return resMap;
+        } catch (RRException e){
+            throw e;
         } catch (Exception e) {
             log.error("商品信息导入出错: {}", e);
             throw new RRException("商品信息导入出现异常");
@@ -196,7 +198,7 @@ public class OutputGoodsNewServiceImpl extends ServiceImpl<OutputGoodsNewDao, Ou
     /**
      * 枚举值转义
      * preferential 是否享受优惠政策0：否 1:是
-     * preferential_type 优惠政策类型(0:免税; 1:部分免税; 2:收税; 3:应税)
+     * preferential_type 优惠政策类型(0:免税; 1:部分免税; 2:应税)
      */
     private OutputGoodsNewEntity paraphraseParams(OutputGoodsNewEntity entity){
         // 对preferential转义
@@ -213,10 +215,8 @@ public class OutputGoodsNewServiceImpl extends ServiceImpl<OutputGoodsNewDao, Ou
                 entity.setPreferentialType("0");
             }else if("部分免税".equals(entity.getPreferentialType().trim())){
                 entity.setPreferentialType("1");
-            }else if("收税".equals(entity.getPreferentialType().trim())){
-                entity.setPreferentialType("2");
             }else if("应税".equals(entity.getPreferentialType().trim())){
-                entity.setPreferentialType("3");
+                entity.setPreferentialType("2");
             }
         }
         entity.setDelFlag("1");

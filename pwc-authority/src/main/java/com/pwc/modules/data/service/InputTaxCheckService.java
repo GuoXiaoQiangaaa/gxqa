@@ -18,6 +18,11 @@ public interface InputTaxCheckService extends IService<InputTaxCheckEntity> {
     PageUtils queryPage(Map<String, Object> params);
 
     /**
+     * 新增
+     */
+    boolean save(InputTaxCheckEntity inputTaxCheck);
+
+    /**
      * 禁用/启用
      */
     void disableOrEnable(InputTaxCheckEntity reqVo);

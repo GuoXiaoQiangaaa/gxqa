@@ -161,6 +161,8 @@ public class OutputCustomerNewServiceImpl extends ServiceImpl<OutputCustomerNewD
             super.saveBatch(entityList);
 
             return resMap;
+        } catch (RRException e){
+            throw e;
         } catch (Exception e) {
             log.error("客户信息导入出错: {}", e);
             throw new RRException("客户信息导入出现异常");

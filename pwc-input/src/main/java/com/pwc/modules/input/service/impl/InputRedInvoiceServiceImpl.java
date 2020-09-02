@@ -137,6 +137,8 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
             super.saveBatch(entityList);
 
             return resMap;
+        } catch (RRException e){
+            throw e;
         } catch (Exception e) {
             log.error("导入红字通知单出错: {}", e);
             throw new RRException("导入红字通知单出现异常");

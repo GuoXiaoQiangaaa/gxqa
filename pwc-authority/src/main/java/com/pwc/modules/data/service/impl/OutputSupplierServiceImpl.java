@@ -160,7 +160,9 @@ public class OutputSupplierServiceImpl extends ServiceImpl<OutputSupplierDao, Ou
             super.saveBatch(entityList);
 
             return resMap;
-        } catch (Exception e) {
+        } catch (RRException e){
+            throw e;
+        }  catch (Exception e) {
             log.error("供应商信息导入出错: {}", e);
             throw new RRException("供应商信息导入出现异常");
         }

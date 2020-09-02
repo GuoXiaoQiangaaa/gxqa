@@ -104,7 +104,7 @@ public class OutputGoodsNewEntity implements Serializable {
 	 */
 	private String goodsCode;
 	/**
-	 * 优惠政策类型(0:免税; 1:部分免税; 2:收税; 3:应税)
+	 * 优惠政策类型(0:免税; 1:部分免税; 2:应税)
 	 */
 	@ExcelField(title = "优惠政策类型", align = 1, sort = 1)
 	private String preferentialType;

@@ -126,6 +126,8 @@ public class OutputSapTaxListServiceImpl extends ServiceImpl<OutputSapTaxListDao
             super.saveBatch(entityList);
 
             return resMap;
+        } catch (RRException e){
+            throw e;
         } catch (Exception e) {
             log.error("SAP税码清单导入出错: {}", e);
             throw new RRException("SAP税码清单导入出现异常");
