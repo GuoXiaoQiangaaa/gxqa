@@ -66,6 +66,7 @@ public class OutputSupplierController {
     @PutMapping("/save")
 //    @RequiresPermissions("data:outputsupplier:save")
     public R save(@RequestBody OutputSupplierEntity outputSupplier){
+        ValidatorUtils.validateEntity(outputSupplier);
         outputSupplierService.save(outputSupplier);
 
         return R.ok();

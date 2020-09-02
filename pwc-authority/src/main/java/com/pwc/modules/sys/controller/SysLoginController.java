@@ -27,6 +27,9 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
@@ -85,7 +88,7 @@ public class SysLoginController {
 			map.put("perms", perms);
 			SysUserEntity userEntity = ShiroUtils.getUserEntity();
 			if (null != userEntity.getExpireDate()) {
-				if (DateUtil.compare(userEntity.getExpireDate(), DateUtil.date()) > 0) {
+				if (DateUtil.compare(userEntity.getExpireDate(), DateUtil.date()) < 0) {
 					return R.error("用户已过期");
 				}
 			}

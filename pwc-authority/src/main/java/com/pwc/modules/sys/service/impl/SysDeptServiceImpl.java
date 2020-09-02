@@ -213,6 +213,13 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 //			log.info("新增企业上传企业网报请求信息："+request.toString());
 //			log.info("新增企业上传企业网报返回信息："+TtkOrgUtil.saveTaxLoginInfo(request).toString());
 //		}
+		int count = super.count(
+				new QueryWrapper<SysDeptEntity>()
+						.eq("dept_code", deptEntity.getDeptCode())
+		);
+		if(count > 0){
+			throw new RRException("该数据已存在,请核对后再添加");
+		}
 		return super.save(deptEntity);
 	}
 

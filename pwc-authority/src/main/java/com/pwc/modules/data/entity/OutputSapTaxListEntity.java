@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.pwc.common.excel.annotation.ExcelField;
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -28,6 +29,7 @@ public class OutputSapTaxListEntity implements Serializable {
 	 * 税码
 	 */
 	@ExcelField(title = "税码", align = 1, sort = 1)
+	@NotBlank(message = "税码不能为空")
 	private String taxCode;
 	/**
 	 * 税种
@@ -43,6 +45,7 @@ public class OutputSapTaxListEntity implements Serializable {
 	 * 税率
 	 */
 	@ExcelField(title = "税率", align = 1, sort = 1)
+	@NotBlank(message = "税率不能为空")
 	private String taxRate;
 	/**
 	 * 是否停用(0:停用;1:正常)

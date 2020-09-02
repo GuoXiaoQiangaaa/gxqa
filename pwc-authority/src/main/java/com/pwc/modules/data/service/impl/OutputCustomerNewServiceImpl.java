@@ -1,5 +1,6 @@
 package com.pwc.modules.data.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import com.pwc.common.excel.ImportExcel;
@@ -48,7 +49,16 @@ public class OutputCustomerNewServiceImpl extends ServiceImpl<OutputCustomerNewD
     @Override
     public boolean save(OutputCustomerNewEntity outputCustomerNew) {
         // 参数校验
-        this.checkParams(outputCustomerNew);
+//        this.checkParams(outputCustomerNew);
+        int count = super.count(
+                new QueryWrapper<OutputCustomerNewEntity>()
+                        .eq("sap_code", outputCustomerNew.getSapCode())
+                        .eq("tax_code", outputCustomerNew.getTaxCode())
+        );
+
+        if(count > 0){
+            throw new RRException("该数据已存在,请核对后再添加");
+        }
 
         outputCustomerNew.setDelFlag("1");
         outputCustomerNew.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
@@ -62,7 +72,7 @@ public class OutputCustomerNewServiceImpl extends ServiceImpl<OutputCustomerNewD
     @Override
     public boolean updateById(OutputCustomerNewEntity outputCustomerNew) {
         // 参数校验
-        this.checkParams(outputCustomerNew);
+//        this.checkParams(outputCustomerNew);
 
         outputCustomerNew.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
         outputCustomerNew.setUpdateTime(new Date());
@@ -122,6 +132,8 @@ public class OutputCustomerNewServiceImpl extends ServiceImpl<OutputCustomerNewD
         Map<String, Object> resMap = new HashMap<>();
         // 数据校验正确的集合
         List<OutputCustomerNewEntity> entityList = new ArrayList<>();
+        // 数据重复的集合
+        List<OutputCustomerNewEntity> duplicateList = new ArrayList<>();
         // 数据总量
         int total = 0;
         // 数据有误条数
@@ -148,17 +160,38 @@ public class OutputCustomerNewServiceImpl extends ServiceImpl<OutputCustomerNewD
                     // 参数有误
                     fail += 1;
                 }else {
-                    // 添加校验正确的实体
-                    customerEntity.setDelFlag("1");
-                    customerEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
-                    customerEntity.setCreateTime(new Date());
-                    entityList.add(customerEntity);
+                    // 验重
+                    OutputCustomerNewEntity duplicate = super.getOne(
+                            new QueryWrapper<OutputCustomerNewEntity>()
+                                    .eq("sap_code", customerEntity.getSapCode())
+                                    .eq("tax_code", customerEntity.getTaxCode())
+                    );
+                    if(null != duplicate){
+                        duplicate.setDeptCode(customerEntity.getDeptCode());
+                        duplicate.setName(customerEntity.getName());
+                        duplicate.setNameCn(customerEntity.getNameCn());
+                        duplicate.setAddress(customerEntity.getAddress());
+                        duplicate.setContact(customerEntity.getContact());
+                        duplicate.setBank(customerEntity.getBank());
+                        duplicate.setBankAccount(customerEntity.getBankAccount());
+                        duplicate.setEmail(customerEntity.getEmail());
+                        duplicate.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
+                        duplicate.setUpdateTime(new Date());
+                        super.updateById(duplicate);
+                        duplicateList.add(duplicate);
+                    }else {
+                        // 添加校验正确的实体
+                        customerEntity.setDelFlag("1");
+                        customerEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
+                        customerEntity.setCreateTime(new Date());
+                        super.save(customerEntity);
+                        entityList.add(customerEntity);
+                    }
                 }
             }
             resMap.put("total", total);
-            resMap.put("success", entityList.size());
+            resMap.put("success", duplicateList.size() + entityList.size());
             resMap.put("fail", fail);
-            super.saveBatch(entityList);
 
             return resMap;
         } catch (RRException e){

@@ -17,6 +17,9 @@ public interface OutputItemListService extends IService<OutputItemListEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
 
+    /** 添加 */
+    boolean save(OutputItemListEntity outputItemList);
+
     /**
      * 禁用/启用
      */

@@ -64,6 +64,7 @@ public class OutputGoodsNewController {
     @PutMapping("/save")
 //    @RequiresPermissions("data:outputgoods:save")
     public R save(@RequestBody OutputGoodsNewEntity outputGoods){
+        ValidatorUtils.validateEntity(outputGoods);
         outputGoodsService.save(outputGoods);
 
         return R.ok();

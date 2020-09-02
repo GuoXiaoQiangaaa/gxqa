@@ -1,13 +1,16 @@
 package com.pwc.modules.data.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
+import com.google.common.collect.Lists;
 import com.pwc.common.excel.ImportExcel;
 import com.pwc.common.exception.RRException;
 import com.pwc.modules.sys.shiro.ShiroUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.text.NumberFormat;
 import java.util.*;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -40,6 +43,33 @@ public class OutputSapTaxListServiceImpl extends ServiceImpl<OutputSapTaxListDao
         );
 
         return new PageUtils(page);
+    }
+    /**
+     * 新增
+     */
+    @Override
+    public boolean save(OutputSapTaxListEntity entity) {
+
+        int count = super.count(
+                new QueryWrapper<OutputSapTaxListEntity>()
+                        .eq("tax_code", entity.getTaxCode())
+        );
+        if(count > 0){
+            throw new RRException("该数据已存在,请核对后再添加");
+        }
+        // 校验税率
+        String taxRate = entity.getTaxRate();
+        String [] taxRateArr = {"0%", "1%", "2%", "3%", "5%", "6%", "7%", "9%", "10%", "11%", "13%", "16%", "17%"};
+        List<String> taxRateList = Lists.newArrayList(taxRateArr);
+        if(StringUtils.isNotBlank(taxRate) && !CollectionUtil.contains(taxRateList, taxRate)){
+            throw new RRException("税率选择有误,请核对后再添加");
+        }
+
+        entity.setDelFlag("1");
+        entity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
+        entity.setCreateTime(new Date());
+
+        return super.save(entity);
     }
 
     /**
@@ -89,6 +119,8 @@ public class OutputSapTaxListServiceImpl extends ServiceImpl<OutputSapTaxListDao
         Map<String, Object> resMap = new HashMap<>();
         // 数据校验正确的集合
         List<OutputSapTaxListEntity> entityList = new ArrayList<>();
+        // 数据重复的集合
+        List<OutputSapTaxListEntity> duplicateList = new ArrayList<>();
         // 数据总量
         int total = 0;
         // 数据有误条数
@@ -113,17 +145,37 @@ public class OutputSapTaxListServiceImpl extends ServiceImpl<OutputSapTaxListDao
                     // 参数有误
                     fail += 1;
                 }else {
-                    // 添加校验正确的实体
-                    sapTaxEntity.setDelFlag("1");
-                    sapTaxEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
-                    sapTaxEntity.setCreateTime(new Date());
-                    entityList.add(sapTaxEntity);
+                    // 获取到的为小数类型,转为百分数
+                    String taxRate = sapTaxEntity.getTaxRate();
+                    NumberFormat nf = NumberFormat.getPercentInstance();
+                    sapTaxEntity.setTaxRate(nf.format(Double.valueOf(taxRate)));
+
+                    // 验重
+                    OutputSapTaxListEntity duplicate = super.getOne(
+                            new QueryWrapper<OutputSapTaxListEntity>()
+                                    .eq("tax_code", sapTaxEntity.getTaxCode())
+                    );
+                    if(null != duplicate){
+                        duplicate.setTaxType(sapTaxEntity.getTaxType());
+                        duplicate.setDescription(sapTaxEntity.getDescription());
+                        duplicate.setTaxRate(sapTaxEntity.getTaxRate());
+                        duplicate.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
+                        duplicate.setUpdateTime(new Date());
+                        super.updateById(duplicate);
+                        duplicateList.add(duplicate);
+                    }else {
+                        // 添加校验正确的实体
+                        sapTaxEntity.setDelFlag("1");
+                        sapTaxEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
+                        sapTaxEntity.setCreateTime(new Date());
+                        super.save(sapTaxEntity);
+                        entityList.add(sapTaxEntity);
+                    }
                 }
             }
             resMap.put("total", total);
-            resMap.put("success", entityList.size());
+            resMap.put("success", duplicateList.size() + entityList.size());
             resMap.put("fail", fail);
-            super.saveBatch(entityList);
 
             return resMap;
         } catch (RRException e){
@@ -139,6 +191,13 @@ public class OutputSapTaxListServiceImpl extends ServiceImpl<OutputSapTaxListDao
      */
     private int checkExcel(OutputSapTaxListEntity entity){
         if(StringUtils.isBlank(entity.getTaxCode()) || StringUtils.isBlank(entity.getTaxRate())){
+            return 1;
+        }
+        // 税率枚举校验 0%,1%,2%,3%,5%,6%,7%,9%,10%,11%,13%,16%,17%
+        String[] taxRateArr = {"0", "0.01", "0.02", "0.03", "0.05", "0.06", "0.07", "0.09", "0.1", "0.11", "0.13", "0.16", "0.17"};
+        List<String> taxRateList = Lists.newArrayList(taxRateArr);
+        String taxRate = entity.getTaxRate();
+        if(!CollectionUtil.contains(taxRateList, taxRate)){
             return 1;
         }
         return 0;

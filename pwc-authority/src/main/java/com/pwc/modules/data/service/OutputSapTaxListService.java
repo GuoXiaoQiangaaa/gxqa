@@ -18,6 +18,11 @@ public interface OutputSapTaxListService extends IService<OutputSapTaxListEntity
     PageUtils queryPage(Map<String, Object> params);
 
     /**
+     * 新增
+     */
+    boolean save(OutputSapTaxListEntity outputSapTaxList);
+
+    /**
      * 禁用/启用
      */
     void disableOrEnable(OutputSapTaxListEntity reqVo);

@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.pwc.common.excel.annotation.ExcelField;
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
 import java.io.Serializable;
 import java.util.Date;
@@ -31,11 +32,13 @@ public class OutputGoodsNewEntity implements Serializable {
 	 * 商品编号
 	 */
 	@ExcelField(title = "商品编码（必填）", align = 1, sort = 1)
+	@NotBlank(message = "商品编码不能为空")
 	private String goodsNumber;
 	/**
 	 * 商品名称
 	 */
 	@ExcelField(title = "商品名称（必填）", align = 1, sort = 1)
+	@NotBlank(message = "商品名称不能为空")
 	private String goodsName;
 	/**
 	 * 规格型号
@@ -62,11 +65,13 @@ public class OutputGoodsNewEntity implements Serializable {
 	 * 税收分类名称
 	 */
 	@ExcelField(title = "税收分类名称（必填）", align = 1, sort = 1)
+	@NotBlank(message = "税收分类名称不能为空")
 	private String taxCategoryName;
 	/**
 	 * 税收分类编码
 	 */
 	@ExcelField(title = "税收分类编码（必填）", align = 1, sort = 1)
+	@NotBlank(message = "税收分类编码不能为空")
 	private String taxCategoryCode;
 	/**
 	 * 所属企业id
@@ -76,6 +81,7 @@ public class OutputGoodsNewEntity implements Serializable {
 	 * 商品税率
 	 */
 	@ExcelField(title = "税率（必填）", align = 1, sort = 1)
+	@NotBlank(message = "商品税率不能为空")
 	private String taxRate;
 	/**
 	 * 是否享受优惠政策0：否 1:是

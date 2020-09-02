@@ -51,8 +51,16 @@ public class OutputSupplierServiceImpl extends ServiceImpl<OutputSupplierDao, Ou
     @Override
     public boolean save(OutputSupplierEntity outputSupplier) {
         // 校验参数
-        this.checkParams(outputSupplier);
+//        this.checkParams(outputSupplier);
 
+        int count = super.count(
+                new QueryWrapper<OutputSupplierEntity>()
+                        .eq("sap_code", outputSupplier.getSapCode())
+                        .eq("tax_code", outputSupplier.getTaxCode())
+        );
+        if(count > 0){
+            throw new RRException("该数据已存在,请核对后再添加");
+        }
         outputSupplier.setDelFlag("1");
         outputSupplier.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
         outputSupplier.setCreateTime(new Date());
@@ -65,7 +73,7 @@ public class OutputSupplierServiceImpl extends ServiceImpl<OutputSupplierDao, Ou
     @Override
     public boolean updateById(OutputSupplierEntity outputSupplier) {
         // 校验参数
-        this.checkParams(outputSupplier);
+//        this.checkParams(outputSupplier);
 
         outputSupplier.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
         outputSupplier.setUpdateTime(new Date());
@@ -124,6 +132,8 @@ public class OutputSupplierServiceImpl extends ServiceImpl<OutputSupplierDao, Ou
         Map<String, Object> resMap = new HashMap<>();
         // 数据校验正确的集合
         List<OutputSupplierEntity> entityList = new ArrayList<>();
+        // 数据重复的集合
+        List<OutputSupplierEntity> duplicateList = new ArrayList<>();
         // 数据总量
         int total = 0;
         // 数据有误条数
@@ -150,14 +160,38 @@ public class OutputSupplierServiceImpl extends ServiceImpl<OutputSupplierDao, Ou
                     // 参数有误
                     fail += 1;
                 }else {
-                    // 添加转义后的实体
-                    entityList.add(paraphraseParams(supplierEntity));
+                    OutputSupplierEntity duplicate = super.getOne(
+                            new QueryWrapper<OutputSupplierEntity>()
+                                    .eq("sap_code", supplierEntity.getSapCode())
+                                    .eq("tax_code", supplierEntity.getTaxCode())
+                    );
+                    if(null != duplicate){
+                        duplicate.setDeptCode(supplierEntity.getDeptCode());
+                        duplicate.setName(supplierEntity.getName());
+                        duplicate.setAddress(supplierEntity.getAddress());
+                        duplicate.setContact(supplierEntity.getContact());
+                        duplicate.setBank(supplierEntity.getBank());
+                        duplicate.setBankAccount(supplierEntity.getBankAccount());
+                        duplicate.setEmail(supplierEntity.getEmail());
+                        duplicate.setInvoiceType(supplierEntity.getInvoiceType());
+                        duplicate.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
+                        duplicate.setUpdateTime(new Date());
+                        super.updateById(this.paraphraseParams(duplicate));
+                        duplicateList.add(duplicate);
+                    }else {
+                        // 添加转义后的实体
+                        supplierEntity.setDelFlag("1");
+                        supplierEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
+                        supplierEntity.setCreateTime(new Date());
+                        super.save(this.paraphraseParams(supplierEntity));
+                        entityList.add(this.paraphraseParams(supplierEntity));
+                    }
+
                 }
             }
             resMap.put("total", total);
-            resMap.put("success", entityList.size());
+            resMap.put("success", duplicateList.size() + entityList.size());
             resMap.put("fail", fail);
-            super.saveBatch(entityList);
 
             return resMap;
         } catch (RRException e){
@@ -189,12 +223,13 @@ public class OutputSupplierServiceImpl extends ServiceImpl<OutputSupplierDao, Ou
     private int checkExcel(OutputSupplierEntity entity){
         // 非空校验
         if(StringUtils.isBlank(entity.getSapCode()) || StringUtils.isBlank(entity.getName()) ||
-                StringUtils.isBlank(entity.getTaxCode()) || StringUtils.isBlank(entity.getInvoiceType())){
+                StringUtils.isBlank(entity.getTaxCode())){
             return 1;
         }
+
         // 枚举校验
         /** 0:NonPo Related; 1:MKRO; 2:DFU; 3:EDI; 4:R&D_外部; 5:IC_R&D; 6:IC_RRB; 7:IC_非R&D; 8:Red-letter VAT; 9:General */
-        if(!("NonPo Related".trim().equalsIgnoreCase(entity.getInvoiceType().trim()) ||
+        if(StringUtils.isNotBlank(entity.getInvoiceType()) && !("NonPo Related".trim().equalsIgnoreCase(entity.getInvoiceType().trim()) ||
                "MKRO".equalsIgnoreCase(entity.getInvoiceType().trim()) ||
                 "DFU".equalsIgnoreCase(entity.getInvoiceType().trim()) ||
                 "EDI".equalsIgnoreCase(entity.getInvoiceType().trim()) ||
@@ -215,31 +250,30 @@ public class OutputSupplierServiceImpl extends ServiceImpl<OutputSupplierDao, Ou
     private OutputSupplierEntity paraphraseParams(OutputSupplierEntity entity){
         // 发票类型
         String type = entity.getInvoiceType();
-        if("NonPo Related".trim().equalsIgnoreCase(type.trim())){
-            entity.setInvoiceType("0");
-        }else if("MKRO".equalsIgnoreCase(type)){
-            entity.setInvoiceType("1");
-        }else if("DFU".equalsIgnoreCase(type)){
-            entity.setInvoiceType("2");
-        }else if("EDI".equalsIgnoreCase(type)){
-            entity.setInvoiceType("3");
-        }else if("R&D_外部".equalsIgnoreCase(type)){
-            entity.setInvoiceType("4");
-        }else if("IC_R&D".equalsIgnoreCase(type)){
-            entity.setInvoiceType("5");
-        }else if("IC_RRB".equalsIgnoreCase(type)){
-            entity.setInvoiceType("6");
-        }else if("IC_非R&D".equalsIgnoreCase(type)){
-            entity.setInvoiceType("7");
-        }else if("Red-letter VAT".trim().equalsIgnoreCase(type)){
-            entity.setInvoiceType("8");
-        }else{
-            // General类型
-            entity.setInvoiceType("9");
+        if(StringUtils.isNotBlank(type)){
+            if("NonPo Related".trim().equalsIgnoreCase(type.trim())){
+                entity.setInvoiceType("0");
+            }else if("MKRO".equalsIgnoreCase(type)){
+                entity.setInvoiceType("1");
+            }else if("DFU".equalsIgnoreCase(type)){
+                entity.setInvoiceType("2");
+            }else if("EDI".equalsIgnoreCase(type)){
+                entity.setInvoiceType("3");
+            }else if("R&D_外部".equalsIgnoreCase(type)){
+                entity.setInvoiceType("4");
+            }else if("IC_R&D".equalsIgnoreCase(type)){
+                entity.setInvoiceType("5");
+            }else if("IC_RRB".equalsIgnoreCase(type)){
+                entity.setInvoiceType("6");
+            }else if("IC_非R&D".equalsIgnoreCase(type)){
+                entity.setInvoiceType("7");
+            }else if("Red-letter VAT".trim().equalsIgnoreCase(type)){
+                entity.setInvoiceType("8");
+            }else if("General".equalsIgnoreCase(type)){
+                entity.setInvoiceType("9");
+            }
         }
-        entity.setDelFlag("1");
-        entity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
-        entity.setCreateTime(new Date());
+
         return entity;
     }
 

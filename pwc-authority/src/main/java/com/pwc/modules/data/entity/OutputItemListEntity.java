@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.pwc.common.excel.annotation.ExcelField;
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -28,11 +29,13 @@ public class OutputItemListEntity implements Serializable {
 	 * 科目编码
 	 */
 	@ExcelField(title = "科目编码", align = 1, sort = 1)
+	@NotBlank(message = "科目编码不能为空")
 	private String itemCode;
 	/**
 	 * 科目类型
 	 */
 	@ExcelField(title = "科目类型", align = 1, sort = 1)
+	@NotBlank(message = "科目类型不能为空")
 	private String itemType;
 	/**
 	 * 科目描述

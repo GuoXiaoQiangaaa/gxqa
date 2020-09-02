@@ -43,6 +43,25 @@ public class OutputItemListServiceImpl extends ServiceImpl<OutputItemListDao, Ou
     }
 
     /**
+     * 添加
+     */
+    @Override
+    public boolean save(OutputItemListEntity entity) {
+        int count = super.count(
+                new QueryWrapper<OutputItemListEntity>()
+                        .eq("item_code", entity.getItemCode())
+        );
+        if(count > 0){
+            throw new RRException("该数据已存在,请核对后再添加");
+        }
+
+        entity.setDelFlag("1");
+        entity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
+        entity.setCreateTime(new Date());
+        return super.save(entity);
+    }
+
+    /**
      * 禁用/启用
      */
     @Override
@@ -88,6 +107,8 @@ public class OutputItemListServiceImpl extends ServiceImpl<OutputItemListDao, Ou
         Map<String, Object> resMap = new HashMap<>();
         // 数据校验正确的集合
         List<OutputItemListEntity> entityList = new ArrayList<>();
+        // 数据重复的集合
+        List<OutputItemListEntity> duplicateList = new ArrayList<>();
         // 数据总量
         int total = 0;
         // 数据有误条数
@@ -112,17 +133,31 @@ public class OutputItemListServiceImpl extends ServiceImpl<OutputItemListDao, Ou
                     // 参数有误
                     fail += 1;
                 }else {
-                    // 添加校验正确的实体
-                    itemEntity.setDelFlag("1");
-                    itemEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
-                    itemEntity.setCreateTime(new Date());
-                    entityList.add(itemEntity);
+                    // 验重
+                    OutputItemListEntity duplicate = super.getOne(
+                            new QueryWrapper<OutputItemListEntity>()
+                                    .eq("item_code", itemEntity.getItemCode())
+                    );
+                    if(null != duplicate){
+                        duplicate.setItemType(itemEntity.getItemType());
+                        duplicate.setDescription(itemEntity.getDescription());
+                        duplicate.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
+                        duplicate.setUpdateTime(new Date());
+                        super.updateById(duplicate);
+                        duplicateList.add(duplicate);
+                    }else {
+                        // 添加校验正确的实体
+                        itemEntity.setDelFlag("1");
+                        itemEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
+                        itemEntity.setCreateTime(new Date());
+                        super.save(itemEntity);
+                        entityList.add(itemEntity);
+                    }
                 }
             }
             resMap.put("total", total);
-            resMap.put("success", entityList.size());
+            resMap.put("success", duplicateList.size() + entityList.size());
             resMap.put("fail", fail);
-            super.saveBatch(entityList);
 
             return resMap;
         } catch (RRException e){

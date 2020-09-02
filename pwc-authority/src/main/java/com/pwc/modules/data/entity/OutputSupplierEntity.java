@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.pwc.common.excel.annotation.ExcelField;
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -29,6 +30,7 @@ public class OutputSupplierEntity implements Serializable {
 	 * 供应商SAP代码
 	 */
 	@ExcelField(title = "SAP代码（必填）", align = 1, sort = 1)
+	@NotBlank(message = "供应商SAP代码不能为空")
 	private String sapCode;
 	/**
 	 * 公司代码
@@ -39,11 +41,13 @@ public class OutputSupplierEntity implements Serializable {
 	 * 供应商名称
 	 */
 	@ExcelField(title = "供应商名称（必填）", align = 1, sort = 1)
+	@NotBlank(message = "供应商名称不能为空")
 	private String name;
 	/**
 	 * 纳税人识别号
 	 */
 	@ExcelField(title = "纳税人识别号（必填）", align = 1, sort = 1)
+	@NotBlank(message = "纳税人识别号不能为空")
 	private String taxCode;
 	/**
 	 * 地址

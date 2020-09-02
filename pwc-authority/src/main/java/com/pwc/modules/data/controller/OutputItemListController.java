@@ -65,9 +65,8 @@ public class OutputItemListController {
     @PutMapping("/save")
 //    @RequiresPermissions("data:outputitemlist:save")
     public R save(@RequestBody OutputItemListEntity outputItemList){
-        outputItemList.setDelFlag("1");
-        outputItemList.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
-        outputItemList.setCreateTime(new Date());
+        ValidatorUtils.validateEntity(outputItemList);
+
         outputItemListService.save(outputItemList);
 
         return R.ok();

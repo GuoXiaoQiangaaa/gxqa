@@ -65,6 +65,7 @@ public class OutputCustomerNewController {
     @PutMapping("/save")
 //    @RequiresPermissions("data:outputcustomernew:save")
     public R save(@RequestBody OutputCustomerNewEntity outputCustomerNew){
+        ValidatorUtils.validateEntity(outputCustomerNew);
         outputCustomerNewService.save(outputCustomerNew);
 
         return R.ok();

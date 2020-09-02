@@ -27,6 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.NotBlank;
+
 /**
  * 进项税率校验服务实现
  *
@@ -61,6 +63,14 @@ public class InputTaxCheckServiceImpl extends ServiceImpl<InputTaxCheckDao, Inpu
         if(count > 0){
             throw new RRException("该数据已存在,请核对后再添加");
         }
+        // 校验税率
+        String taxRate = entity.getTaxRate();
+        String [] taxRateArr = {"0%", "1%", "2%", "3%", "5%", "6%", "7%", "9%", "10%", "11%", "13%", "16%", "17%"};
+        List<String> taxRateList = Lists.newArrayList(taxRateArr);
+        if(StringUtils.isNotBlank(taxRate) && !CollectionUtil.contains(taxRateList, taxRate)){
+            throw new RRException("税率选择有误,请核对后再添加");
+        }
+
         entity.setDelFlag("1");
         entity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
         entity.setCreateTime(new Date());
@@ -154,12 +164,14 @@ public class InputTaxCheckServiceImpl extends ServiceImpl<InputTaxCheckDao, Inpu
                     if(null != duplicate){
                         duplicate.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
                         duplicate.setUpdateTime(new Date());
+                        super.updateById(duplicate);
                         duplicateList.add(duplicate);
                     }else {
                         // 添加校验正确的实体
                         taxCheckEntity.setDelFlag("1");
                         taxCheckEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
                         taxCheckEntity.setCreateTime(new Date());
+                        super.save(taxCheckEntity);
                         entityList.add(taxCheckEntity);
                     }
                 }
@@ -167,12 +179,6 @@ public class InputTaxCheckServiceImpl extends ServiceImpl<InputTaxCheckDao, Inpu
             resMap.put("total", total);
             resMap.put("success", duplicateList.size() + entityList.size());
             resMap.put("fail", fail);
-            if(CollectionUtil.isNotEmpty(duplicateList)){
-                super.updateBatchById(duplicateList);
-            }
-            if(CollectionUtil.isNotEmpty(entityList)){
-                super.saveBatch(entityList);
-            }
 
             return resMap;
         } catch (RRException e){
