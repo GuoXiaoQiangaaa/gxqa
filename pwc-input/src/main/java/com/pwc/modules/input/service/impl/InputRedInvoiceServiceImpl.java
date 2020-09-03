@@ -1,5 +1,6 @@
 package com.pwc.modules.input.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.*;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -58,9 +60,20 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
+        String purchaserCompany = (String) params.get("purchaserCompany");
+        String redNoticeNumber = (String) params.get("redNoticeNumber");
+        String blueInvoiceNumber = (String) params.get("blueInvoiceNumber");
+        String redStatus = (String) params.get("redStatus");
+
+        redStatus = StringUtils.isNotBlank(redStatus) ? redStatus : "0";
         IPage<InputRedInvoiceEntity> page = this.page(
                 new Query<InputRedInvoiceEntity>().getPage(params),
                 new QueryWrapper<InputRedInvoiceEntity>()
+                        .like(StringUtils.isNotBlank(purchaserCompany), "purchaser_company", purchaserCompany)
+                        .eq(StringUtils.isNotBlank(redNoticeNumber), "red_notice_number", redNoticeNumber)
+                        .eq(StringUtils.isNotBlank(blueInvoiceNumber), "blue_invoice_number", blueInvoiceNumber)
+                        .eq(StringUtils.isNotBlank(redStatus), "red_status", redStatus)
+                        .orderByDesc("red_id")
         );
 
         return new PageUtils(page);
@@ -82,7 +95,7 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
                         .like(StringUtils.isNotBlank(redInvoiceEntity.getPurchaserCompany()), "purchaser_company", redInvoiceEntity.getPurchaserCompany())
                         .eq(StringUtils.isNotBlank(redInvoiceEntity.getRedNoticeNumber()), "red_notice_number", redInvoiceEntity.getRedNoticeNumber())
                         .eq(StringUtils.isNotBlank(redInvoiceEntity.getBlueInvoiceNumber()), "blue_invoice_number", redInvoiceEntity.getBlueInvoiceNumber())
-                        .eq(StringUtils.isNotBlank(redInvoiceEntity.getRedStatus()), "red_status", !StringUtils.isNotBlank(redInvoiceEntity.getRedStatus()) ? "0" : redInvoiceEntity.getRedStatus())
+                        .eq(StringUtils.isNotBlank(redInvoiceEntity.getRedStatus()), "red_status", StringUtils.isBlank(redInvoiceEntity.getRedStatus()) ? "0" : redInvoiceEntity.getRedStatus())
         );
         return new PageUtils(page);
     }
@@ -98,6 +111,8 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
         Map<String, Object> resMap = new HashMap<>();
         // 数据校验正确的集合
         List<InputRedInvoiceEntity> entityList = new ArrayList<>();
+        // 数据重复的集合
+        List<InputRedInvoiceEntity> duplicateList = new ArrayList<>();
         // 数据总量
         int total = 0;
         // 数据有误条数
@@ -118,23 +133,63 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
                 throw new RRException("上传的Excel为空,请重新上传");
             }
             total = dataList.size();
+            List<String> repeatDataList = new ArrayList<>();
             for (InputRedInvoiceEntity redInvoiceEntity : dataList) {
                 // 参数校验
                 if(1 == checkExcel(redInvoiceEntity)){
                     // 参数有误
                     fail += 1;
                 }else {
-                    // 添加转义后的实体
-                    redInvoiceEntity.setRedStatus("0");
-                    redInvoiceEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
-                    redInvoiceEntity.setCreateTime(new Date());
-                    entityList.add(redInvoiceEntity);
+                    // 税率获取到的为小数类型,转为百分数
+                    String taxRate = redInvoiceEntity.getTaxRate();
+                    NumberFormat nf = NumberFormat.getPercentInstance();
+                    redInvoiceEntity.setTaxRate(nf.format(Double.valueOf(taxRate)));
+                    // 去除Excel中重复数据
+                    String repeatData = redInvoiceEntity.toString();
+                    if(CollectionUtil.contains(repeatDataList, repeatData)){
+                        fail += 1;
+                        continue;
+                    }
+                    repeatDataList.add(repeatData);
+
+                    // 数据库验重
+                    InputRedInvoiceEntity duplicate = super.getOne(
+                            new QueryWrapper<InputRedInvoiceEntity>()
+                                    .eq("red_notice_number", redInvoiceEntity.getRedNoticeNumber())
+                                    .eq("write_date", redInvoiceEntity.getWriteDate())
+                                    .eq("purchaser_company", redInvoiceEntity.getPurchaserCompany())
+                                    .eq("purchaser_tax_code", redInvoiceEntity.getPurchaserTaxCode())
+                                    .eq("sell_company", redInvoiceEntity.getSellCompany())
+                                    .eq("sell_tax_code", redInvoiceEntity.getSellTaxCode())
+                                    .eq("total_price", redInvoiceEntity.getTotalPrice())
+                                    .eq("free_price", redInvoiceEntity.getFreePrice())
+                                    .eq("tax_price", redInvoiceEntity.getTaxPrice())
+                                    .eq("tax_rate", redInvoiceEntity.getTaxRate())
+                                    .eq("blue_invoice_number", redInvoiceEntity.getBlueInvoiceNumber())
+                                    .eq("blue_invoice_code", redInvoiceEntity.getBlueInvoiceCode())
+                    );
+                    if(null != duplicate){
+                        duplicate.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
+                        duplicate.setUpdateTime(new Date());
+                        duplicateList.add(duplicate);
+                    }else {
+                        redInvoiceEntity.setRedStatus("0");
+                        redInvoiceEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
+                        redInvoiceEntity.setCreateTime(new Date());
+                        entityList.add(redInvoiceEntity);
+                    }
                 }
             }
             resMap.put("total", total);
-            resMap.put("success", entityList.size());
+            resMap.put("success", duplicateList.size() + entityList.size());
             resMap.put("fail", fail);
-            super.saveBatch(entityList);
+
+            if(CollectionUtil.isNotEmpty(duplicateList)){
+                super.updateBatchById(duplicateList);
+            }
+            if(CollectionUtil.isNotEmpty(entityList)){
+                super.saveBatch(entityList);
+            }
 
             return resMap;
         } catch (RRException e){
@@ -237,6 +292,33 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
     }
 
     /**
+     * 关联红字发票
+     */
+    @Override
+    public boolean link(Long redId, Map<String, Object> params) {
+        String redInvoiceNumber = (String) params.get("redInvoiceNumber");
+        String redInvoiceCode = (String) params.get("redInvoiceCode");
+        if(StringUtils.isBlank(redInvoiceNumber)){
+            throw new RRException("红字发票号码不能为空");
+        }
+        if(StringUtils.isBlank(redInvoiceCode)){
+            throw new RRException("红字发票代码不能为空");
+        }
+        InputRedInvoiceEntity entity = super.getById(redId);
+        // 根据参数查询符合条件的红票信息
+
+
+        // 更新红字通知单的状态及信息
+        entity.setRedInvoiceNumber(redInvoiceNumber);
+        entity.setRedInvoiceCode(redInvoiceCode);
+        entity.setRedStatus("1");
+        entity.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
+        entity.setUpdateTime(new Date());
+        super.updateById(entity);
+        return true;
+    }
+
+    /**
      * 发票验真获取发票备注信息
      *
      * @param invoiceCode 发票代码
@@ -301,11 +383,12 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
      * 校验Excel中参数
      */
     private int checkExcel(InputRedInvoiceEntity entity){
-        if(StringUtils.isBlank(entity.getRedNoticeNumber()) || StringUtils.isBlank(entity.getPurchaserCompany()) ||
-            StringUtils.isBlank(entity.getPurchaserTaxCode()) || StringUtils.isBlank(entity.getSellCompany()) ||
-            StringUtils.isBlank(entity.getSellTaxCode()) || null == entity.getTotalPrice() ||
-            null == entity.getFreePrice() || null == entity.getTaxPrice() || StringUtils.isBlank(entity.getTaxRate()) ||
-            StringUtils.isBlank(entity.getBlueInvoiceNumber()) || StringUtils.isBlank(entity.getBlueInvoiceCode())){
+        if(StringUtils.isBlank(entity.getRedNoticeNumber()) || null == entity.getWriteDate() ||
+                StringUtils.isBlank(entity.getPurchaserCompany()) || StringUtils.isBlank(entity.getPurchaserTaxCode()) ||
+                StringUtils.isBlank(entity.getSellCompany()) || StringUtils.isBlank(entity.getSellTaxCode()) ||
+                null == entity.getTotalPrice() || null == entity.getFreePrice() || null == entity.getTaxPrice() ||
+                StringUtils.isBlank(entity.getTaxRate()) || StringUtils.isBlank(entity.getBlueInvoiceNumber()) ||
+                StringUtils.isBlank(entity.getBlueInvoiceCode())){
             return 1;
         }
         return 0;

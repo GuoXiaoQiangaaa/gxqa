@@ -79,8 +79,7 @@ public class OutputSapTaxListController {
 //    @RequiresPermissions("data:outputsaptaxlist:update")
     public R update(@RequestBody OutputSapTaxListEntity outputSapTaxList){
         ValidatorUtils.validateEntity(outputSapTaxList);
-        outputSapTaxList.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
-        outputSapTaxList.setUpdateTime(new Date());
+
         outputSapTaxListService.updateById(outputSapTaxList);
         
         return R.ok();

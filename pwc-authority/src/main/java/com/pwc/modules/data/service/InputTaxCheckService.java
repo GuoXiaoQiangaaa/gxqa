@@ -23,6 +23,11 @@ public interface InputTaxCheckService extends IService<InputTaxCheckEntity> {
     boolean save(InputTaxCheckEntity inputTaxCheck);
 
     /**
+     * 更新
+     */
+    boolean updateById(InputTaxCheckEntity inputTaxCheck);
+
+    /**
      * 禁用/启用
      */
     void disableOrEnable(InputTaxCheckEntity reqVo);

@@ -1,5 +1,6 @@
 package com.pwc.modules.data.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import com.pwc.common.excel.ImportExcel;
@@ -59,6 +60,23 @@ public class OutputItemListServiceImpl extends ServiceImpl<OutputItemListDao, Ou
         entity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
         entity.setCreateTime(new Date());
         return super.save(entity);
+    }
+
+    /**
+     * 修改
+     */
+    @Override
+    public boolean updateById(OutputItemListEntity entity) {
+        OutputItemListEntity itemListEntity = super.getOne(
+                new QueryWrapper<OutputItemListEntity>()
+                        .eq("item_code", entity.getItemCode())
+        );
+        if(null != itemListEntity && entity.getItemId().equals(itemListEntity.getItemId())){
+            throw new RRException("该数据已存在,请核对后再修改");
+        }
+        entity.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
+        entity.setUpdateTime(new Date());
+        return super.updateById(entity);
     }
 
     /**
@@ -127,12 +145,20 @@ public class OutputItemListServiceImpl extends ServiceImpl<OutputItemListDao, Ou
                 throw new RRException("上传的Excel为空,请重新上传");
             }
             total = dataList.size();
+            List<String> repeatDataList = new ArrayList<>();
             for (OutputItemListEntity itemEntity : dataList) {
                 // 参数校验
                 if(1 == checkExcel(itemEntity)){
                     // 参数有误
                     fail += 1;
                 }else {
+                    // 去除Excel中重复数据
+                    String repeatData = itemEntity.getItemCode();
+                    if(CollectionUtil.contains(repeatDataList, repeatData)){
+                        fail += 1;
+                        continue;
+                    }
+                    repeatDataList.add(repeatData);
                     // 验重
                     OutputItemListEntity duplicate = super.getOne(
                             new QueryWrapper<OutputItemListEntity>()
@@ -143,14 +169,12 @@ public class OutputItemListServiceImpl extends ServiceImpl<OutputItemListDao, Ou
                         duplicate.setDescription(itemEntity.getDescription());
                         duplicate.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
                         duplicate.setUpdateTime(new Date());
-                        super.updateById(duplicate);
                         duplicateList.add(duplicate);
                     }else {
                         // 添加校验正确的实体
                         itemEntity.setDelFlag("1");
                         itemEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
                         itemEntity.setCreateTime(new Date());
-                        super.save(itemEntity);
                         entityList.add(itemEntity);
                     }
                 }
@@ -158,6 +182,13 @@ public class OutputItemListServiceImpl extends ServiceImpl<OutputItemListDao, Ou
             resMap.put("total", total);
             resMap.put("success", duplicateList.size() + entityList.size());
             resMap.put("fail", fail);
+
+            if(CollectionUtil.isNotEmpty(duplicateList)){
+                super.updateBatchById(duplicateList);
+            }
+            if(CollectionUtil.isNotEmpty(entityList)){
+                super.saveBatch(entityList);
+            }
 
             return resMap;
         } catch (RRException e){

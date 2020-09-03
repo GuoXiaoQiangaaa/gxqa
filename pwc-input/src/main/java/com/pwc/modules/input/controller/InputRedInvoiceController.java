@@ -64,6 +64,7 @@ public class InputRedInvoiceController {
     @PutMapping("/save")
 //    @RequiresPermissions("input:inputredinvoice:save")
     public R save(@RequestBody InputRedInvoiceEntity inputRedInvoice){
+        ValidatorUtils.validateEntity(inputRedInvoice);
         inputRedInvoiceService.save(inputRedInvoice);
 
         return R.ok();
@@ -145,5 +146,18 @@ public class InputRedInvoiceController {
         PageUtils page = inputRedInvoiceService.redList(params, redInvoiceEntity);
         r.put("page", page);
         return r;
+    }
+
+    /**
+     * 关联红字发票
+     */
+    @GetMapping("/link/{redId}")
+    public R link(@PathVariable("redId") Long redId, @RequestParam Map<String, Object> params){
+        boolean link = inputRedInvoiceService.link(redId, params);
+        if(link){
+            return R.ok();
+        }else {
+            return R.error("未查询到红字发票信息,关联失败");
+        }
     }
 }

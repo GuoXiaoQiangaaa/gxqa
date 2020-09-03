@@ -250,6 +250,14 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 //		request.setDlxxDto(loginInfo);
 //		log.info("新增企业上传企业网报请求信息："+request.toString());
 //		log.info("新增企业上传企业网报返回信息："+TtkOrgUtil.saveTaxLoginInfo(request).toString());
+		// 验重
+		SysDeptEntity entity = super.getOne(
+				new QueryWrapper<SysDeptEntity>()
+						.eq("dept_code", deptEntity.getDeptCode())
+		);
+		if(null != entity && deptEntity.getDeptId().equals(entity.getDeptId())){
+			throw new RRException("该数据已存在,请核对后再修改");
+		}
 		return super.updateById(deptEntity);
 	}
 

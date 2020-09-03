@@ -78,8 +78,7 @@ public class InputTaxCheckController {
 //    @RequiresPermissions("data:inputtaxcheck:update")
     public R update(@RequestBody InputTaxCheckEntity inputTaxCheck){
         ValidatorUtils.validateEntity(inputTaxCheck);
-        inputTaxCheck.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
-        inputTaxCheck.setUpdateTime(new Date());
+
         inputTaxCheckService.updateById(inputTaxCheck);
         
         return R.ok();

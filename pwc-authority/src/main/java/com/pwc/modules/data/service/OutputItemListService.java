@@ -20,6 +20,8 @@ public interface OutputItemListService extends IService<OutputItemListEntity> {
     /** 添加 */
     boolean save(OutputItemListEntity outputItemList);
 
+    boolean updateById(OutputItemListEntity outputItemList);
+
     /**
      * 禁用/启用
      */

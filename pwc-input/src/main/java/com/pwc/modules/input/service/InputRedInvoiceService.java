@@ -36,5 +36,10 @@ public interface InputRedInvoiceService extends IService<InputRedInvoiceEntity> 
      * 红字发票监控条件查询
      */
     PageUtils redList(Map<String, Object> params, InputRedInvoiceEntity redInvoiceEntity);
+
+    /**
+     * 关联红字发票
+     */
+    boolean link(Long redId, Map<String, Object> params);
 }
 

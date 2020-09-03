@@ -73,6 +73,16 @@ public class OutputCustomerNewServiceImpl extends ServiceImpl<OutputCustomerNewD
     public boolean updateById(OutputCustomerNewEntity outputCustomerNew) {
         // 参数校验
 //        this.checkParams(outputCustomerNew);
+        // 验重
+        OutputCustomerNewEntity entity = super.getOne(
+                new QueryWrapper<OutputCustomerNewEntity>()
+                        .eq("sap_code", outputCustomerNew.getSapCode())
+                        .eq("tax_code", outputCustomerNew.getTaxCode())
+        );
+
+        if(null != entity && outputCustomerNew.getCustomerId().equals(entity.getCustomerId())){
+            throw new RRException("该数据已存在,请核对后再修改");
+        }
 
         outputCustomerNew.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
         outputCustomerNew.setUpdateTime(new Date());
@@ -154,12 +164,20 @@ public class OutputCustomerNewServiceImpl extends ServiceImpl<OutputCustomerNewD
                 throw new RRException("上传的Excel为空,请重新上传");
             }
             total = dataList.size();
+            List<String> repeatDataList = new ArrayList<>();
             for (OutputCustomerNewEntity customerEntity : dataList) {
                 // 参数校验
                 if(1 == checkExcel(customerEntity)){
                     // 参数有误
                     fail += 1;
                 }else {
+                    // 去除Excel中重复数据
+                    String repeatData = customerEntity.getSapCode() + customerEntity.getTaxCode();
+                    if(CollectionUtil.contains(repeatDataList, repeatData)){
+                        fail += 1;
+                        continue;
+                    }
+                    repeatDataList.add(repeatData);
                     // 验重
                     OutputCustomerNewEntity duplicate = super.getOne(
                             new QueryWrapper<OutputCustomerNewEntity>()
@@ -177,14 +195,12 @@ public class OutputCustomerNewServiceImpl extends ServiceImpl<OutputCustomerNewD
                         duplicate.setEmail(customerEntity.getEmail());
                         duplicate.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
                         duplicate.setUpdateTime(new Date());
-                        super.updateById(duplicate);
                         duplicateList.add(duplicate);
                     }else {
                         // 添加校验正确的实体
                         customerEntity.setDelFlag("1");
                         customerEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
                         customerEntity.setCreateTime(new Date());
-                        super.save(customerEntity);
                         entityList.add(customerEntity);
                     }
                 }
@@ -192,6 +208,14 @@ public class OutputCustomerNewServiceImpl extends ServiceImpl<OutputCustomerNewD
             resMap.put("total", total);
             resMap.put("success", duplicateList.size() + entityList.size());
             resMap.put("fail", fail);
+
+            if(CollectionUtil.isNotEmpty(duplicateList)){
+                super.updateBatchById(duplicateList);
+            }
+            if(CollectionUtil.isNotEmpty(entityList)){
+                super.saveBatch(entityList);
+            }
+
 
             return resMap;
         } catch (RRException e){

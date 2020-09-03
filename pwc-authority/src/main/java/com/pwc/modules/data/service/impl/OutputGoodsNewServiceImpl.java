@@ -89,6 +89,21 @@ public class OutputGoodsNewServiceImpl extends ServiceImpl<OutputGoodsNewDao, Ou
     public boolean updateById(OutputGoodsNewEntity outputGoods) {
         // 参数校验
 //        this.checkParams(outputGoods);
+        // 验重
+        OutputGoodsNewEntity entity = super.getOne(
+                new QueryWrapper<OutputGoodsNewEntity>()
+                        .eq("goods_number", outputGoods.getGoodsNumber())
+        );
+        if(null != entity && outputGoods.getGoodsId().equals(entity.getGoodsId())){
+            throw new RRException("该数据已存在,请核对后再修改");
+        }
+        // 校验税率
+        String taxRate = outputGoods.getTaxRate();
+        String [] taxRateArr = {"0%", "1%", "2%", "3%", "5%", "6%", "7%", "9%", "10%", "11%", "13%", "16%", "17%"};
+        List<String> taxRateList = Lists.newArrayList(taxRateArr);
+        if(StringUtils.isNotBlank(taxRate) && !CollectionUtil.contains(taxRateList, taxRate)){
+            throw new RRException("税率选择有误,请核对后再添加");
+        }
 
         outputGoods.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
         outputGoods.setUpdateTime(new Date());
@@ -156,16 +171,24 @@ public class OutputGoodsNewServiceImpl extends ServiceImpl<OutputGoodsNewDao, Ou
                 throw new RRException("上传的Excel为空,请重新上传");
             }
             total = dataList.size();
+            List<String> repeatDataList = new ArrayList<>();
             for (OutputGoodsNewEntity goodsEntity : dataList) {
                 // 参数校验
                 if(1 == checkExcel(goodsEntity)){
                     // 参数有误
                     fail += 1;
                 }else {
-                    // 获取到的为小数类型,转为百分数
+                    // 税率获取到的为小数类型,转为百分数
                     String taxRate = goodsEntity.getTaxRate();
                     NumberFormat nf = NumberFormat.getPercentInstance();
                     goodsEntity.setTaxRate(nf.format(Double.valueOf(taxRate)));
+                    // 去除Excel中重复数据
+                    String repeatData = goodsEntity.getGoodsNumber();
+                    if(CollectionUtil.contains(repeatDataList, repeatData)){
+                        fail += 1;
+                        continue;
+                    }
+                    repeatDataList.add(repeatData);
                     // 验重
                     OutputGoodsNewEntity duplicate = super.getOne(
                             new QueryWrapper<OutputGoodsNewEntity>()
@@ -185,14 +208,12 @@ public class OutputGoodsNewServiceImpl extends ServiceImpl<OutputGoodsNewDao, Ou
                         duplicate.setPreferentialType(goodsEntity.getPreferentialType());
                         duplicate.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
                         duplicate.setUpdateTime(new Date());
-                        super.updateById(this.paraphraseParams(duplicate));
-                        duplicateList.add(duplicate);
+                        duplicateList.add(this.paraphraseParams(duplicate));
                     }else {
                         // 添加转义后的实体
                         goodsEntity.setDelFlag("1");
                         goodsEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
                         goodsEntity.setCreateTime(new Date());
-                        super.save(this.paraphraseParams(goodsEntity));
                         entityList.add(paraphraseParams(goodsEntity));
                     }
                 }
@@ -200,6 +221,13 @@ public class OutputGoodsNewServiceImpl extends ServiceImpl<OutputGoodsNewDao, Ou
             resMap.put("total", total);
             resMap.put("success", duplicateList.size() + entityList.size());
             resMap.put("fail", fail);
+
+            if(CollectionUtil.isNotEmpty(duplicateList)){
+                super.updateBatchById(duplicateList);
+            }
+            if(CollectionUtil.isNotEmpty(entityList)){
+                super.saveBatch(entityList);
+            }
 
             return resMap;
         } catch (RRException e){

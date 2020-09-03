@@ -23,6 +23,11 @@ public interface OutputSapTaxListService extends IService<OutputSapTaxListEntity
     boolean save(OutputSapTaxListEntity outputSapTaxList);
 
     /**
+     * 更新
+     */
+    boolean updateById(OutputSapTaxListEntity outputSapTaxList);
+
+    /**
      * 禁用/启用
      */
     void disableOrEnable(OutputSapTaxListEntity reqVo);

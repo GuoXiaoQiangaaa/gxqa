@@ -79,8 +79,7 @@ public class OutputItemListController {
 //    @RequiresPermissions("data:outputitemlist:update")
     public R update(@RequestBody OutputItemListEntity outputItemList){
         ValidatorUtils.validateEntity(outputItemList);
-        outputItemList.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
-        outputItemList.setUpdateTime(new Date());
+
         outputItemListService.updateById(outputItemList);
         
         return R.ok();

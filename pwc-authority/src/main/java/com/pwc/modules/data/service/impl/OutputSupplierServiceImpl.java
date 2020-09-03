@@ -1,5 +1,6 @@
 package com.pwc.modules.data.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import com.pwc.common.excel.ExportExcel;
@@ -74,6 +75,15 @@ public class OutputSupplierServiceImpl extends ServiceImpl<OutputSupplierDao, Ou
     public boolean updateById(OutputSupplierEntity outputSupplier) {
         // 校验参数
 //        this.checkParams(outputSupplier);
+        // 验重
+        OutputSupplierEntity entity = super.getOne(
+                new QueryWrapper<OutputSupplierEntity>()
+                        .eq("sap_code", outputSupplier.getSapCode())
+                        .eq("tax_code", outputSupplier.getTaxCode())
+        );
+        if(null != entity && outputSupplier.getSupplierId().equals(entity.getSupplierId())){
+            throw new RRException("该数据已存在,请核对后再修改");
+        }
 
         outputSupplier.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
         outputSupplier.setUpdateTime(new Date());
@@ -154,12 +164,20 @@ public class OutputSupplierServiceImpl extends ServiceImpl<OutputSupplierDao, Ou
                 throw new RRException("上传的Excel为空,请重新上传");
             }
             total = dataList.size();
+            List<String> repeatDataList = new ArrayList<>();
             for (OutputSupplierEntity supplierEntity : dataList) {
                 // 参数校验
                 if(1 == checkExcel(supplierEntity)){
                     // 参数有误
                     fail += 1;
                 }else {
+                    // 去除Excel中重复数据
+                    String repeatData = supplierEntity.getSapCode() + supplierEntity.getTaxCode();
+                    if(CollectionUtil.contains(repeatDataList, repeatData)){
+                        fail += 1;
+                        continue;
+                    }
+                    repeatDataList.add(repeatData);
                     OutputSupplierEntity duplicate = super.getOne(
                             new QueryWrapper<OutputSupplierEntity>()
                                     .eq("sap_code", supplierEntity.getSapCode())
@@ -176,14 +194,12 @@ public class OutputSupplierServiceImpl extends ServiceImpl<OutputSupplierDao, Ou
                         duplicate.setInvoiceType(supplierEntity.getInvoiceType());
                         duplicate.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
                         duplicate.setUpdateTime(new Date());
-                        super.updateById(this.paraphraseParams(duplicate));
-                        duplicateList.add(duplicate);
+                        duplicateList.add(this.paraphraseParams(duplicate));
                     }else {
                         // 添加转义后的实体
                         supplierEntity.setDelFlag("1");
                         supplierEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
                         supplierEntity.setCreateTime(new Date());
-                        super.save(this.paraphraseParams(supplierEntity));
                         entityList.add(this.paraphraseParams(supplierEntity));
                     }
 
@@ -192,6 +208,13 @@ public class OutputSupplierServiceImpl extends ServiceImpl<OutputSupplierDao, Ou
             resMap.put("total", total);
             resMap.put("success", duplicateList.size() + entityList.size());
             resMap.put("fail", fail);
+
+            if(CollectionUtil.isNotEmpty(duplicateList)){
+                super.updateBatchById(duplicateList);
+            }
+            if(CollectionUtil.isNotEmpty(entityList)){
+                super.saveBatch(entityList);
+            }
 
             return resMap;
         } catch (RRException e){
