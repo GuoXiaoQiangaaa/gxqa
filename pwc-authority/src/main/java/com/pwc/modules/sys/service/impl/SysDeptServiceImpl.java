@@ -25,12 +25,14 @@ import com.pwc.modules.sys.entity.SysDeptEntity;
 import com.pwc.modules.sys.entity.TreeSelectVo;
 import com.pwc.modules.sys.service.FilingThirdCityCodeService;
 import com.pwc.modules.sys.service.SysDeptService;
+import com.pwc.modules.sys.shiro.ShiroUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -88,7 +90,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 						.like(StringUtils.isNotBlank(owner),"owner", owner)
 						.eq(StringUtils.isNotBlank(parentId),"parent_id", parentId)
 						.apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
-						.orderByDesc("dept_id")
+						.orderByDesc("create_time")
 		);
 
 		for(SysDeptEntity sysDeptEntity : page.getRecords()){
@@ -126,7 +128,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 							.like("contact", keyWords)
 							.eq(StringUtils.isNotBlank(parentId),"parent_id", parentId)
 							.apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
-							.orderByDesc("dept_id")
+							.orderByDesc("create_time")
 			);
 			return new PageUtils(page);
 		}else {
@@ -141,6 +143,8 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 	public boolean updateStatus(Long deptId, Integer status) {
 		SysDeptEntity sysDeptEntity = new SysDeptEntity();
 		sysDeptEntity.setStatus(status);
+		sysDeptEntity.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
+		sysDeptEntity.setUpdateTime(new Date());
 		return this.update(sysDeptEntity, new QueryWrapper<SysDeptEntity>().eq("dept_id", deptId));
 	}
 
@@ -220,6 +224,8 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 		if(count > 0){
 			throw new RRException("该数据已存在,请核对后再添加");
 		}
+		deptEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
+		deptEntity.setCreateTime(new Date());
 		return super.save(deptEntity);
 	}
 
@@ -255,9 +261,11 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 				new QueryWrapper<SysDeptEntity>()
 						.eq("dept_code", deptEntity.getDeptCode())
 		);
-		if(null != entity && deptEntity.getDeptId().equals(entity.getDeptId())){
+		if(null != entity && !deptEntity.getDeptId().equals(entity.getDeptId())){
 			throw new RRException("该数据已存在,请核对后再修改");
 		}
+		deptEntity.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
+		deptEntity.setUpdateTime(new Date());
 		return super.updateById(deptEntity);
 	}
 

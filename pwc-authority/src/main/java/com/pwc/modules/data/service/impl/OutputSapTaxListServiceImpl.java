@@ -40,6 +40,7 @@ public class OutputSapTaxListServiceImpl extends ServiceImpl<OutputSapTaxListDao
         IPage<OutputSapTaxListEntity> page = this.page(
                 new Query<OutputSapTaxListEntity>().getPage(params),
                 new QueryWrapper<OutputSapTaxListEntity>()
+                        .orderByDesc("create_time")
         );
 
         return new PageUtils(page);
@@ -81,7 +82,7 @@ public class OutputSapTaxListServiceImpl extends ServiceImpl<OutputSapTaxListDao
                 new QueryWrapper<OutputSapTaxListEntity>()
                         .eq("tax_code", entity.getTaxCode())
         );
-        if(null != sapTaxListEntity && entity.getTaxId().equals(sapTaxListEntity.getTaxId())){
+        if(null != sapTaxListEntity && !entity.getTaxId().equals(sapTaxListEntity.getTaxId())){
             throw new RRException("该数据已存在,请核对后再修改");
         }
         // 校验税率
@@ -124,11 +125,13 @@ public class OutputSapTaxListServiceImpl extends ServiceImpl<OutputSapTaxListDao
                             .like("tax_type", keyWords).or()
                             .like("description", keyWords).or()
                             .like("tax_rate", keyWords)
+                            .orderByDesc("create_time")
             );
         }else {
             page = this.page(
                     new Query<OutputSapTaxListEntity>().getPage(params),
                     new QueryWrapper<OutputSapTaxListEntity>()
+                            .orderByDesc("create_time")
             );
         }
 

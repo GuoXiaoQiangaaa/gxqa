@@ -32,7 +32,7 @@
 
     <!--获取列表-->
     <select id="list" resultMap="outputGoodsNewMap">
-        SELECT t1.*, t2.name FROM output_goods t1 LEFT JOIN sys_dept t2 ON t1.dept_id = t2.dept_id
+        SELECT t1.*, t2.name FROM output_goods t1 LEFT JOIN sys_dept t2 ON t1.dept_id = t2.dept_id order by t1.create_time
     </select>
 
     <!--关键字查询-->
@@ -47,5 +47,6 @@
            or t1.tax_category_name like #{keyWords}
            or t1.tax_rate like #{keyWords}
            or t1.preferential_type like #{keyWords}
+        order by t1.create_time
     </select>
 </mapper>

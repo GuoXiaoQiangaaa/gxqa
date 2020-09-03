@@ -10,6 +10,7 @@ import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 
@@ -232,5 +233,17 @@ public class SysDeptEntity implements Serializable {
 	 */
 	@TableField(exist = false)
 	private Integer justOwn;
+
+	/** 创建时间 */
+	private Date createTime;
+
+	/** 创建人 */
+	private String createBy;
+
+	/** 更新时间 */
+	private Date updateTime;
+
+	/** 更新人 */
+	private String updateBy;
 
 }

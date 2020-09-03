@@ -2,10 +2,7 @@
 
 package com.pwc.modules.sys.entity;
 
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.pwc.common.validator.group.AddGroup;
 import com.pwc.common.validator.group.UpdateGroup;
@@ -107,6 +104,7 @@ public class SysUserEntity implements Serializable {
 	/**
 	 * 有效期
 	 */
+	@TableField(updateStrategy = FieldStrategy.IGNORED)
 	private Date expireDate;
 
 	/**

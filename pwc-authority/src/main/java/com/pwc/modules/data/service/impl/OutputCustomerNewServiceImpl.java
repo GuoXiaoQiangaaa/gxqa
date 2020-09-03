@@ -38,6 +38,7 @@ public class OutputCustomerNewServiceImpl extends ServiceImpl<OutputCustomerNewD
         IPage<OutputCustomerNewEntity> page = this.page(
                 new Query<OutputCustomerNewEntity>().getPage(params),
                 new QueryWrapper<OutputCustomerNewEntity>()
+                        .orderByDesc("create_time")
         );
 
         return new PageUtils(page);
@@ -80,7 +81,7 @@ public class OutputCustomerNewServiceImpl extends ServiceImpl<OutputCustomerNewD
                         .eq("tax_code", outputCustomerNew.getTaxCode())
         );
 
-        if(null != entity && outputCustomerNew.getCustomerId().equals(entity.getCustomerId())){
+        if(null != entity && !outputCustomerNew.getCustomerId().equals(entity.getCustomerId())){
             throw new RRException("该数据已存在,请核对后再修改");
         }
 
@@ -122,11 +123,13 @@ public class OutputCustomerNewServiceImpl extends ServiceImpl<OutputCustomerNewD
                             .like("bank", keyWords).or()
                             .like("bank_account", keyWords).or()
                             .like("email", keyWords)
+                            .orderByDesc("create_time")
             );
         }else {
             page = this.page(
                     new Query<OutputCustomerNewEntity>().getPage(params),
                     new QueryWrapper<OutputCustomerNewEntity>()
+                            .orderByDesc("create_time")
             );
         }
 

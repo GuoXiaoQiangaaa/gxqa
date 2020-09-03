@@ -44,6 +44,7 @@ public class InputTaxCheckServiceImpl extends ServiceImpl<InputTaxCheckDao, Inpu
         IPage<InputTaxCheckEntity> page = this.page(
                 new Query<InputTaxCheckEntity>().getPage(params),
                 new QueryWrapper<InputTaxCheckEntity>()
+                        .orderByDesc("create_time")
         );
 
         return new PageUtils(page);
@@ -89,7 +90,7 @@ public class InputTaxCheckServiceImpl extends ServiceImpl<InputTaxCheckDao, Inpu
                         .eq("tax_type_code", entity.getTaxTypeCode())
                         .eq("tax_rate", entity.getTaxRate())
         );
-        if(null != checkEntity && entity.getCheckId().equals(checkEntity.getCheckId())){
+        if(null != checkEntity && !entity.getCheckId().equals(checkEntity.getCheckId())){
             throw new RRException("该数据已存在,请核对后再修改");
         }
 
@@ -131,11 +132,13 @@ public class InputTaxCheckServiceImpl extends ServiceImpl<InputTaxCheckDao, Inpu
                             .like("goods_name", keyWords).or()
                             .like("tax_type_code", keyWords).or()
                             .like("tax_rate", keyWords)
+                            .orderByDesc("create_time")
             );
         }else {
             page = this.page(
                     new Query<InputTaxCheckEntity>().getPage(params),
                     new QueryWrapper<InputTaxCheckEntity>()
+                            .orderByDesc("create_time")
             );
         }
 

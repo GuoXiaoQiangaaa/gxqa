@@ -38,6 +38,7 @@ public class OutputItemListServiceImpl extends ServiceImpl<OutputItemListDao, Ou
         IPage<OutputItemListEntity> page = this.page(
                 new Query<OutputItemListEntity>().getPage(params),
                 new QueryWrapper<OutputItemListEntity>()
+                        .orderByDesc("create_time")
         );
 
         return new PageUtils(page);
@@ -71,7 +72,7 @@ public class OutputItemListServiceImpl extends ServiceImpl<OutputItemListDao, Ou
                 new QueryWrapper<OutputItemListEntity>()
                         .eq("item_code", entity.getItemCode())
         );
-        if(null != itemListEntity && entity.getItemId().equals(itemListEntity.getItemId())){
+        if(null != itemListEntity && !entity.getItemId().equals(itemListEntity.getItemId())){
             throw new RRException("该数据已存在,请核对后再修改");
         }
         entity.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
@@ -105,11 +106,13 @@ public class OutputItemListServiceImpl extends ServiceImpl<OutputItemListDao, Ou
                             .like("item_code", keyWords).or()
                             .like("item_type", keyWords).or()
                             .like("description", keyWords)
+                            .orderByDesc("create_time")
             );
         }else {
             page = this.page(
                     new Query<OutputItemListEntity>().getPage(params),
                     new QueryWrapper<OutputItemListEntity>()
+                            .orderByDesc("create_time")
             );
         }
 

@@ -91,7 +91,7 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
         IPage<InputRedInvoiceEntity> page = this.page(
                 new Query<InputRedInvoiceEntity>().getPage(params, null, true),
                 new QueryWrapper<InputRedInvoiceEntity>()
-                        .orderByDesc("red_id")
+                        .orderByDesc("create_time")
                         .like(StringUtils.isNotBlank(redInvoiceEntity.getPurchaserCompany()), "purchaser_company", redInvoiceEntity.getPurchaserCompany())
                         .eq(StringUtils.isNotBlank(redInvoiceEntity.getRedNoticeNumber()), "red_notice_number", redInvoiceEntity.getRedNoticeNumber())
                         .eq(StringUtils.isNotBlank(redInvoiceEntity.getBlueInvoiceNumber()), "blue_invoice_number", redInvoiceEntity.getBlueInvoiceNumber())
@@ -287,6 +287,7 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
                         .eq(StringUtils.isNotBlank(redInvoiceEntity.getRedNoticeNumber()), "red_notice_number", redInvoiceEntity.getRedNoticeNumber())
                         .eq(StringUtils.isNotBlank(redInvoiceEntity.getRedInvoiceNumber()), "red_invoice_number", redInvoiceEntity.getRedInvoiceNumber())
                         .eq(StringUtils.isNotBlank(redInvoiceEntity.getRedStatus()), "red_status", !StringUtils.isNotBlank(redInvoiceEntity.getRedStatus()) ? "0" : redInvoiceEntity.getRedStatus())
+                        .orderByDesc("create_time")
         );
         return new PageUtils(page);
     }

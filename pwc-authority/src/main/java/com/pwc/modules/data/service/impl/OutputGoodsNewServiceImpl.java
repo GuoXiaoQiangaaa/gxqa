@@ -94,7 +94,7 @@ public class OutputGoodsNewServiceImpl extends ServiceImpl<OutputGoodsNewDao, Ou
                 new QueryWrapper<OutputGoodsNewEntity>()
                         .eq("goods_number", outputGoods.getGoodsNumber())
         );
-        if(null != entity && outputGoods.getGoodsId().equals(entity.getGoodsId())){
+        if(null != entity && !outputGoods.getGoodsId().equals(entity.getGoodsId())){
             throw new RRException("该数据已存在,请核对后再修改");
         }
         // 校验税率

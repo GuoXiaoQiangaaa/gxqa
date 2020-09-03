@@ -41,6 +41,7 @@ public class OutputSupplierServiceImpl extends ServiceImpl<OutputSupplierDao, Ou
         IPage<OutputSupplierEntity> page = this.page(
                 new Query<OutputSupplierEntity>().getPage(params),
                 new QueryWrapper<OutputSupplierEntity>()
+                        .orderByDesc("create_time")
         );
 
         return new PageUtils(page);
@@ -81,7 +82,7 @@ public class OutputSupplierServiceImpl extends ServiceImpl<OutputSupplierDao, Ou
                         .eq("sap_code", outputSupplier.getSapCode())
                         .eq("tax_code", outputSupplier.getTaxCode())
         );
-        if(null != entity && outputSupplier.getSupplierId().equals(entity.getSupplierId())){
+        if(null != entity && !outputSupplier.getSupplierId().equals(entity.getSupplierId())){
             throw new RRException("该数据已存在,请核对后再修改");
         }
 
@@ -122,11 +123,13 @@ public class OutputSupplierServiceImpl extends ServiceImpl<OutputSupplierDao, Ou
                             .like("bank", keyWords).or()
                             .like("bank_account", keyWords).or()
                             .like("email", keyWords)
+                            .orderByDesc("create_time")
             );
         }else {
             page = this.page(
                     new Query<OutputSupplierEntity>().getPage(params),
                     new QueryWrapper<OutputSupplierEntity>()
+                            .orderByDesc("create_time")
             );
         }
 
