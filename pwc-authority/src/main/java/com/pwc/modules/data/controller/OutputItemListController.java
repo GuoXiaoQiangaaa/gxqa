@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
+import com.pwc.common.annotation.SysLog;
 import com.pwc.common.excel.ExportExcel;
 import com.pwc.common.exception.RRException;
 import com.pwc.common.utils.DateUtils;
@@ -62,6 +63,7 @@ public class OutputItemListController {
     /**
      * 保存
      */
+    @SysLog("添加科目")
     @PutMapping("/save")
 //    @RequiresPermissions("data:outputitemlist:save")
     public R save(@RequestBody OutputItemListEntity outputItemList){
