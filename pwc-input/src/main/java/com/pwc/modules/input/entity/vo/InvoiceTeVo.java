@@ -1,7 +1,6 @@
 package com.pwc.modules.input.entity.vo;
 
 import com.pwc.common.utils.excel.annotation.ExcelField;
-import com.sun.xml.internal.bind.v2.model.core.ID;
 import lombok.Data;
 
 /**
