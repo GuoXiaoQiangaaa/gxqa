@@ -49,4 +49,10 @@ public interface SysMenuService extends IService<SysMenuEntity> {
 	 * @return
 	 */
     List<SysMenuEntity> queryAll();
+	/**
+	 * 根据类型查询列表
+	 * @param type
+	 * @return
+	 */
+	List<SysMenuEntity> queryListType(Integer type);
 }

@@ -56,16 +56,16 @@
         <!--            <version>RELEASE</version>-->
         <!--            <scope>compile</scope>-->
         <!--        </dependency>-->
-        <dependency>
-            <!--<groupId>sapjco3</groupId>
+        <!--<dependency>
+            &lt;!&ndash;<groupId>sapjco3</groupId>
             <artifactId>sapjco3</artifactId>
-            <version>1.0.0</version>-->
+            <version>1.0.0</version>&ndash;&gt;
             <groupId>org.hibersap</groupId>
             <artifactId>sapjco3</artifactId>
             <version>3.0</version>
-            <!--			<scope>system</scope>-->
-            <!--			<systemPath>${project.basedir}/src/main/resources/lib/sapjco3.jar</systemPath>-->
-        </dependency>
+            &lt;!&ndash;			<scope>system</scope>&ndash;&gt;
+            &lt;!&ndash;			<systemPath>${project.basedir}/src/main/resources/lib/sapjco3.jar</systemPath>&ndash;&gt;
+        </dependency>-->
         <dependency>
             <groupId>neon</groupId>
             <artifactId>neon</artifactId>

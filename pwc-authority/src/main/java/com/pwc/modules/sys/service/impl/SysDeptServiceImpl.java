@@ -2,6 +2,7 @@
 
 package com.pwc.modules.sys.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.log.Log;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -24,11 +25,14 @@ import com.pwc.modules.sys.entity.SysDeptEntity;
 import com.pwc.modules.sys.entity.TreeSelectVo;
 import com.pwc.modules.sys.service.FilingThirdCityCodeService;
 import com.pwc.modules.sys.service.SysDeptService;
+import com.pwc.modules.sys.shiro.ShiroUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +46,8 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 
 	@Autowired
 	private FilingThirdCityCodeService filingThirdCityCodeService;
+	@Resource
+	private SysDeptDao sysDeptDao;
 
 	private final Log log = Log.get(this.getClass());
 
@@ -84,7 +90,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 						.like(StringUtils.isNotBlank(owner),"owner", owner)
 						.eq(StringUtils.isNotBlank(parentId),"parent_id", parentId)
 						.apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
-						.orderByDesc("dept_id")
+						.orderByDesc("create_time")
 		);
 
 		for(SysDeptEntity sysDeptEntity : page.getRecords()){
@@ -95,11 +101,50 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 		return new PageUtils(page);
 	}
 
+	/**
+	 * 关键字查询
+	 */
+	@Override
+	@DataFilter(subDept = true, user = false)
+	public PageUtils search(Map<String, Object> params) {
+		String keyWords = (String) params.get("keyWords");
 
+		if(StringUtils.isNotBlank(keyWords)){
+			keyWords = keyWords.trim();
+			String parentId = (String) params.get("parentId");
+			parentId = StringUtils.isNotBlank(parentId) ? parentId : "0";
+
+			IPage<SysDeptEntity> page = this.page(
+					new Query<SysDeptEntity>().getPage(params),
+					new QueryWrapper<SysDeptEntity>()
+							.like("dept_code", keyWords).or()
+							.like("sap_dept_code", keyWords).or()
+							.like("name", keyWords).or()
+							.like("tax_code", keyWords).or()
+							.like("manage_address", keyWords).or()
+							.like("regist_address", keyWords).or()
+							.like("bank", keyWords).or()
+							.like("bank_account", keyWords).or()
+							.like("contact", keyWords)
+							.eq(StringUtils.isNotBlank(parentId),"parent_id", parentId)
+							.apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
+							.orderByDesc("create_time")
+			);
+			return new PageUtils(page);
+		}else {
+			return this.queryPage(params);
+		}
+	}
+
+	/**
+	 * 修改部门状态 启用/禁用
+	 */
 	@Override
 	public boolean updateStatus(Long deptId, Integer status) {
 		SysDeptEntity sysDeptEntity = new SysDeptEntity();
 		sysDeptEntity.setStatus(status);
+		sysDeptEntity.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
+		sysDeptEntity.setUpdateTime(new Date());
 		return this.update(sysDeptEntity, new QueryWrapper<SysDeptEntity>().eq("dept_id", deptId));
 	}
 
@@ -140,53 +185,62 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 	@Override
 	public boolean saveDept(SysDeptEntity deptEntity) {
 		// 创建企业第三方返回企业ID
-		TtkOrgRequest createOrgReq = new TtkOrgRequest();
-		createOrgReq.setName(deptEntity.getName());
-		createOrgReq.setAccountingStandards(Long.parseLong(deptEntity.getThirdAccountingStandards()));
-		createOrgReq.setEnabledMonth(deptEntity.getThirdEnabledMonth());
-		createOrgReq.setEnabledYear(deptEntity.getThirdEnabledYear());
-		createOrgReq.setVatTaxpayer(Long.parseLong(deptEntity.getThirdVatTaxpayer()));
-		TtkResponse<TtkOrgResponse> createOrgResponse = TtkOrgUtil.createOrg(createOrgReq);
-		log.info("新增企业创建第三方平台企业信息："+createOrgResponse.toString());
-		if (createOrgResponse.getHead().getErrorCode().equals(TtkConstants.TtkResCode.SUCCESS.getValue())) {
-			deptEntity.setThirdOrgId(createOrgResponse.getBody().getOrgId());
-			TtkTaxLoginInfoRequest request = new TtkTaxLoginInfoRequest();
-			request.setId(deptEntity.getThirdOrgId());
-			request.setReturnValue(true);
-			TaxLoginInfo loginInfo = new TaxLoginInfo();
-			loginInfo.setDLFS(deptEntity.getThirdLoginMethod().toString());
-			loginInfo.setNSRSBH(deptEntity.getTaxCode());
-			loginInfo.setQYMC(deptEntity.getName());
-			// 获取第三方citycode
-			String cityCode = filingThirdCityCodeService.getByDeptCityCode(deptEntity.getCityCode());
-			if (StrUtil.isBlank(cityCode)) {
-				throw new RRException("未匹配到第三方地区");
-			}
-//			loginInfo.setSS(TtkConstants.DISTRICT_MAP.get(deptEntity.getCityCode()));
-			loginInfo.setSS(cityCode);
-			loginInfo.setCanChange(!"false".equals(deptEntity.getThirdCanChange().toLowerCase()));
-			loginInfo.setDLZH(deptEntity.getThirdLoginAccount());
-			loginInfo.setDLMM(deptEntity.getThirdLoginPassword());
-			loginInfo.setGssbmm(deptEntity.getThirdFilingPassowrd());
-			request.setDlxxDto(loginInfo);
-			log.info("新增企业上传企业网报请求信息："+request.toString());
-			log.info("新增企业上传企业网报返回信息："+TtkOrgUtil.saveTaxLoginInfo(request).toString());
+//		TtkOrgRequest createOrgReq = new TtkOrgRequest();
+//		createOrgReq.setName(deptEntity.getName());
+//		createOrgReq.setAccountingStandards(Long.parseLong(deptEntity.getThirdAccountingStandards()));
+//		createOrgReq.setEnabledMonth(deptEntity.getThirdEnabledMonth());
+//		createOrgReq.setEnabledYear(deptEntity.getThirdEnabledYear());
+//		createOrgReq.setVatTaxpayer(Long.parseLong(deptEntity.getThirdVatTaxpayer()));
+//		TtkResponse<TtkOrgResponse> createOrgResponse = TtkOrgUtil.createOrg(createOrgReq);
+//		log.info("新增企业创建第三方平台企业信息："+createOrgResponse.toString());
+//		if (createOrgResponse.getHead().getErrorCode().equals(TtkConstants.TtkResCode.SUCCESS.getValue())) {
+//			deptEntity.setThirdOrgId(createOrgResponse.getBody().getOrgId());
+//			TtkTaxLoginInfoRequest request = new TtkTaxLoginInfoRequest();
+//			request.setId(deptEntity.getThirdOrgId());
+//			request.setReturnValue(true);
+//			TaxLoginInfo loginInfo = new TaxLoginInfo();
+//			loginInfo.setDLFS(deptEntity.getThirdLoginMethod().toString());
+//			loginInfo.setNSRSBH(deptEntity.getTaxCode());
+//			loginInfo.setQYMC(deptEntity.getName());
+//			// 获取第三方citycode
+//			String cityCode = filingThirdCityCodeService.getByDeptCityCode(deptEntity.getCityCode());
+//			if (StrUtil.isBlank(cityCode)) {
+//				throw new RRException("未匹配到第三方地区");
+//			}
+////			loginInfo.setSS(TtkConstants.DISTRICT_MAP.get(deptEntity.getCityCode()));
+//			loginInfo.setSS(cityCode);
+//			loginInfo.setCanChange(!"false".equals(deptEntity.getThirdCanChange().toLowerCase()));
+//			loginInfo.setDLZH(deptEntity.getThirdLoginAccount());
+//			loginInfo.setDLMM(deptEntity.getThirdLoginPassword());
+//			loginInfo.setGssbmm(deptEntity.getThirdFilingPassowrd());
+//			request.setDlxxDto(loginInfo);
+//			log.info("新增企业上传企业网报请求信息："+request.toString());
+//			log.info("新增企业上传企业网报返回信息："+TtkOrgUtil.saveTaxLoginInfo(request).toString());
+//		}
+		int count = super.count(
+				new QueryWrapper<SysDeptEntity>()
+						.eq("dept_code", deptEntity.getDeptCode())
+		);
+		if(count > 0){
+			throw new RRException("该数据已存在,请核对后再添加");
 		}
+		deptEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
+		deptEntity.setCreateTime(new Date());
 		return super.save(deptEntity);
 	}
 
 	@Override
 	public boolean updateDept(SysDeptEntity deptEntity) {
 		// 修改企业第三方
-		TtkOrgRequest updateOrgReq = new TtkOrgRequest();
-		updateOrgReq.setOrgId(deptEntity.getThirdOrgId());
-		updateOrgReq.setName(deptEntity.getName());
-		updateOrgReq.setAccountingStandards(Long.parseLong(deptEntity.getThirdAccountingStandards()));
-		updateOrgReq.setEnabledMonth(deptEntity.getThirdEnabledMonth());
-		updateOrgReq.setEnabledYear(deptEntity.getThirdEnabledYear());
-		updateOrgReq.setVatTaxpayer(Long.parseLong(deptEntity.getThirdVatTaxpayer()));
-		TtkResponse<TtkOrgResponse> updateOrgResponse = TtkOrgUtil.createOrg(updateOrgReq);
-		log.info("更新企业修改第三方平台企业信息："+updateOrgResponse.toString());
+//		TtkOrgRequest updateOrgReq = new TtkOrgRequest();
+//		updateOrgReq.setOrgId(deptEntity.getThirdOrgId());
+//		updateOrgReq.setName(deptEntity.getName());
+//		updateOrgReq.setAccountingStandards(Long.parseLong(deptEntity.getThirdAccountingStandards()));
+//		updateOrgReq.setEnabledMonth(deptEntity.getThirdEnabledMonth());
+//		updateOrgReq.setEnabledYear(deptEntity.getThirdEnabledYear());
+//		updateOrgReq.setVatTaxpayer(Long.parseLong(deptEntity.getThirdVatTaxpayer()));
+//		TtkResponse<TtkOrgResponse> updateOrgResponse = TtkOrgUtil.createOrg(updateOrgReq);
+//		log.info("更新企业修改第三方平台企业信息："+updateOrgResponse.toString());
 //		TtkTaxLoginInfoRequest request = new TtkTaxLoginInfoRequest();
 //		request.setId(deptEntity.getThirdOrgId());
 //		request.setReturnValue(true);
@@ -202,6 +256,16 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 //		request.setDlxxDto(loginInfo);
 //		log.info("新增企业上传企业网报请求信息："+request.toString());
 //		log.info("新增企业上传企业网报返回信息："+TtkOrgUtil.saveTaxLoginInfo(request).toString());
+		// 验重
+		SysDeptEntity entity = super.getOne(
+				new QueryWrapper<SysDeptEntity>()
+						.eq("dept_code", deptEntity.getDeptCode())
+		);
+		if(null != entity && !deptEntity.getDeptId().equals(entity.getDeptId())){
+			throw new RRException("该数据已存在,请核对后再修改");
+		}
+		deptEntity.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
+		deptEntity.setUpdateTime(new Date());
 		return super.updateById(deptEntity);
 	}
 
@@ -242,6 +306,28 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 		);
 
 		return new PageUtils(page);
+	}
+
+	/**
+	 * 查询详情
+	 */
+	@Override
+	public SysDeptEntity queryInfo(Long deptId) {
+		SysDeptEntity deptEntity = super.getById(deptId);
+		// 查询该部门的权限分配人员
+		// allData
+		List<String> allData = sysDeptDao.queryUsernameByDeptId(deptId, 0);
+		// singleData
+		List<String> singleData = sysDeptDao.queryUsernameByDeptId(deptId, 1);
+
+		if(CollectionUtil.isNotEmpty(allData)){
+			deptEntity.setAllData(allData);
+		}
+
+		if(CollectionUtil.isNotEmpty(singleData)){
+			deptEntity.setSingleData(singleData);
+		}
+		return deptEntity;
 	}
 
 	/**

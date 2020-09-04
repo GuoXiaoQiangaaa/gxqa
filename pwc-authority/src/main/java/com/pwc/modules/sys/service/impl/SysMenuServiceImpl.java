@@ -81,6 +81,10 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuDao, SysMenuEntity> i
 		return baseMapper.queryAll();
 	}
 
+	@Override
+	public List<SysMenuEntity> queryListType(Integer type) {
+		return this.list(new QueryWrapper<SysMenuEntity>().eq("type", type));
+	}
 	/**
 	 * 获取所有菜单列表
 	 */

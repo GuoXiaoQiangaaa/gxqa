@@ -39,7 +39,12 @@ public interface SysDeptService extends IService<SysDeptEntity> {
 	PageUtils queryPage(Map<String, Object> params);
 
 	/**
-	 * 修改部门状态
+	 * 关键字查询
+	 */
+	PageUtils search(Map<String, Object> params);
+
+	/**
+	 * 修改部门状态 启用/禁用
 	 * @param deptId
 	 * @param status
 	 * @return
@@ -104,4 +109,9 @@ public interface SysDeptService extends IService<SysDeptEntity> {
 	 * @return
 	 */
 	PageUtils queryPageForStatistics(Map<String, Object> params);
+
+	/**
+	 * 查询详情
+	 */
+	SysDeptEntity queryInfo(Long deptId);
 }

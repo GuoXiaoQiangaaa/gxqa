@@ -3,7 +3,9 @@
 package com.pwc.modules.sys.controller;
 
 
+import cn.hutool.core.collection.CollUtil;
 import com.pwc.common.exception.RRException;
+import com.pwc.common.utils.Constant;
 import com.pwc.common.utils.PageUtils;
 import com.pwc.common.utils.R;
 import com.pwc.common.utils.StatusDefine;
@@ -11,21 +13,20 @@ import com.pwc.common.validator.Assert;
 import com.pwc.common.validator.ValidatorUtils;
 import com.pwc.common.validator.group.AddGroup;
 import com.pwc.common.validator.group.UpdateGroup;
+import com.pwc.modules.sys.controller.form.SetUserPermsForm;
+import com.pwc.modules.sys.controller.form.UserPermsForm;
 import com.pwc.modules.sys.entity.SysDeptEntity;
+import com.pwc.modules.sys.entity.SysMenuEntity;
 import com.pwc.modules.sys.entity.SysUserEntity;
-import com.pwc.modules.sys.service.SysDeptService;
-import com.pwc.modules.sys.service.SysUserRoleService;
-import com.pwc.modules.sys.service.SysUserService;
+import com.pwc.modules.sys.entity.SysUserMenuEntity;
+import com.pwc.modules.sys.service.*;
 import com.pwc.modules.sys.shiro.ShiroUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 系统用户
@@ -41,6 +42,10 @@ public class SysUserController extends AbstractController {
 	private SysUserRoleService sysUserRoleService;
 	@Autowired
 	private SysDeptService sysDeptService;
+	@Autowired
+	private SysUserMenuService sysUserMenuService;
+	@Autowired
+	private SysMenuService sysMenuService;
 
 	@GetMapping("/checkName")
 	public R checkName(String name) {
@@ -133,7 +138,9 @@ public class SysUserController extends AbstractController {
 	@RequiresPermissions("sys:user:save")
 	public R save(@RequestBody SysUserEntity user){
 		ValidatorUtils.validateEntity(user, AddGroup.class);
-		
+		if (sysUserService.checkUserName(user.getUsername())) {
+			return R.error("用户名已存在");
+		}
 		sysUserService.saveUser(user);
 		
 		return R.ok();
@@ -200,5 +207,69 @@ public class SysUserController extends AbstractController {
 		}
 
 		return R.ok();
+	}
+
+
+	/**
+	 * 设置用户权限
+	 * @param perms
+	 * @return
+	 */
+	@PostMapping("/setPermission")
+	public R setPermission(@RequestBody SetUserPermsForm perms) {
+		List<SysUserMenuEntity> permsList = new ArrayList<>();
+		List<UserPermsForm> userPermsForms = perms.getUserPerms();
+		for (UserPermsForm permsForm : userPermsForms) {
+			SysUserMenuEntity userMenuEntity = permsForm.getPerms();
+			userMenuEntity.setMenuId(permsForm.getModules());
+			userMenuEntity.setUserId(perms.getUserId());
+			permsList.add(userMenuEntity);
+		}
+		if (CollUtil.isNotEmpty(permsList)) {
+			// 先删除
+			sysUserMenuService.deleteByUserId(perms.getUserId());
+			// 再添加
+			sysUserMenuService.saveBatch(permsList);
+		}
+		return R.ok();
+	}
+
+	/**
+	 * 所有模块
+	 * @return
+	 */
+	@GetMapping("/allModulesPermssions")
+	public R allmodulePermissions() {
+		List<SysMenuEntity> menuEntityList = sysMenuService.queryListType(Constant.MenuType.CATALOG.getValue());
+
+		List<SysDeptEntity> deptEntityList = sysDeptService.getTreeDeptList(getDeptId());
+		for (SysMenuEntity menuEntity : menuEntityList) {
+			menuEntity.setDepts(deptEntityList);
+		}
+		return R.ok().put("data", menuEntityList);
+	}
+
+	/**
+	 * 用户已设置的模块权限
+	 * @return
+	 */
+	@GetMapping("/userModulePermissions")
+	public R userModulePermissions(Long userId) {
+		List<SysMenuEntity> menulist = new ArrayList<>();
+		List<SysUserMenuEntity> userMenuEntityList = sysUserMenuService.getByUserId(userId);
+		for (SysUserMenuEntity userMenu : userMenuEntityList) {
+			SysMenuEntity menuEntity = sysMenuService.getById(userMenu.getMenuId());
+			SysDeptEntity dept = sysDeptService.getById(userMenu.getDeptId());
+			if (null != dept) {
+				dept.setJustOwn(userMenu.getJustOwn());
+			}
+			List<SysDeptEntity> deptlist = new ArrayList<>();
+			deptlist.add(dept);
+			if (null != menuEntity) {
+				menuEntity.setDepts(deptlist);
+			}
+			menulist.add(menuEntity);
+		}
+		return R.ok().put("data", menulist);
 	}
 }
