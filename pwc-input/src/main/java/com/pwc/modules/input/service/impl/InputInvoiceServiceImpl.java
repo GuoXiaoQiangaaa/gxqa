@@ -24,6 +24,7 @@ import com.pwc.common.utils.*;
 import com.pwc.common.utils.apidemo.utils.Base64Util;
 import com.pwc.common.utils.apidemo.utils.HttpUtil;
 import com.pwc.common.utils.apidemo.utils.SignUtil;
+import com.pwc.common.utils.excel.ImportExcel;
 import com.pwc.modules.input.dao.InputInvoiceDao;
 import com.pwc.modules.input.dao.InputWhiteBlackDao;
 import com.pwc.modules.input.dao.InputWhiteBlackListDao;
@@ -31,6 +32,7 @@ import com.pwc.modules.input.entity.*;
 import com.pwc.modules.input.entity.rpa.ZInvoiceAccount;
 import com.pwc.modules.input.entity.rpa.ZInvoiceDetailInfo;
 import com.pwc.modules.input.entity.rpa.ZInvoiceInfo;
+import com.pwc.modules.input.entity.vo.InvoiceTeVo;
 import com.pwc.modules.input.service.*;
 import com.pwc.modules.sys.entity.SysDeptEntity;
 import com.pwc.modules.sys.service.SysDeptService;
@@ -42,7 +44,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
-
+import org.springframework.web.multipart.MultipartFile;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -108,8 +110,10 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
     private InputInvoiceUnitDifferentService invoiceUnitDifferentService;
     @Autowired
     private InputInvoiceTaxationService inputInvoiceTaxationService;
-
-
+    @Autowired
+    private  InputInvoicePoService inputInvoicePoService;
+    @Autowired
+    private InputInvoiceUploadService inputInvoiceUploadService;
     /**
      * 票据总览页面方法
      *
@@ -119,54 +123,41 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
     @Override
     @DataFilter(deptId = "company_id",subDept = true, user = false)
     public PageUtils queryPage(Map<String, Object> params, InputInvoiceEntity invoiceEntity) {
-        String invoiceUploadDateArray = (String) params.get("invoiceUploadDateArray");
-        String invoiceCreateDateArray = (String) params.get("invoiceCreateDateArray");
-        String entryDateArray = (String) params.get("entryDateArray");
-        String[] batchNumbers = ((String) params.get("invoiceBatchNumberList")).split(",");
-//        String invoiceReturn = (String) params.get("invoiceReturn");
-//        String invoiceDelete = (String) params.get("invoiceDelete");
-        Integer createBy = invoiceEntity.getCreateBy();
-        String invoiceStatus = (String) params.get("invoiceStatus");
-        // 是否是认证列表
-        String certification = (String) params.get("certification");
-        // 认证勾选状态
-        List<String> statusList = new ArrayList<String>(){{
-            add("9");
-            add("10");
-            add("12");
-            add("13");
-        }};
+        // 发票分类
+        String invoiceStypl = ParamsMap.findMap(params,"invoiceStypl");
+        String invoiceStatus = ParamsMap.findMap(params,"invoiceStatus"); // 发票状态
+        // 所属公司、发票号码、销方税号、销方名称、金税发票状态（认证时）、确认/认证日期、认证状态、统计状态、税率、开票日期、购方名称、认证所属期、税额范围
+        String companyId =ParamsMap.findMap(params,"companyId"); //所属公司
+        String invoiceNumber = ParamsMap.findMap(params,"invoiceNumber"); // 发票号码
+        String invoiceSellParagraph = ParamsMap.findMap(params,"invoiceSellParagraph"); // 销方税号
+        String invoiceSellCompany = ParamsMap.findMap(params,"invoiceSellCompany"); // 销方企业名称
+ //       String 金税发票状态（认证时）
+        String invoiceAuthDate = ParamsMap.findMap(params,"invoiceAuthDate"); // 认证日期
+//        String invoiceStatus = ParamsMap.findMap(params,"invoiceStatus"); // 发票状态
+//         状态
+        String applyStatus= ParamsMap.findMap(params,"applyStatus"); //统计状态
+        // 税率
+        String invoiceCreateDate = ParamsMap.findMap(params,"invoiceCreateDate"); // 开票日期
+        String invoicePurchaserCompany =ParamsMap.findMap(params,"invoicePurchaserCompany"); // 购方名称
+        String invoiceDeductiblePeriod = ParamsMap.findMap(params,"invoiceDeductiblePeriod"); // 认证所属期
+        String invoiceTaxPrice = ParamsMap.findMap(params,"invoiceTaxPrice"); // 税额范围
         IPage<InputInvoiceEntity> page = this.page(
                 new Query<InputInvoiceEntity>().getPage(params, null, true),
                 new QueryWrapper<InputInvoiceEntity>()
-                        .orderByDesc("invoice_upload_date")
-                        .eq(StringUtils.isNotBlank(invoiceStatus),"invoice_status",invoiceStatus)
-                        // 如果为空证明没查状态，直接查所有勾选认证的状态
-                        .in(StringUtils.isBlank(invoiceStatus) && "0".equals(certification),"invoice_status", statusList)
-                        .in(batchNumbers[0] != null && !"".equals(batchNumbers[0]),"invoice_batch_number",batchNumbers)
-                        .eq(createBy!=0,"create_by",createBy)
-                        .eq(invoiceEntity.getInvoiceCode() !=null && !"".equals(invoiceEntity.getInvoiceCode()),"invoice_code",invoiceEntity.getInvoiceCode())
-                        .eq(invoiceEntity.getInvoiceNumber() !=null && !"".equals(invoiceEntity.getInvoiceNumber()),"invoice_number",invoiceEntity.getInvoiceNumber())
-                        .eq(invoiceEntity.getExpressNumber() !=null && !"".equals(invoiceEntity.getExpressNumber()),"express_number",invoiceEntity.getExpressNumber())
-                        .eq(invoiceEntity.getEntrySuccessCode() !=null && !"".equals(invoiceEntity.getEntrySuccessCode()),"entry_success_code",invoiceEntity.getEntrySuccessCode())
-                        .eq(invoiceEntity.getBelnr() !=null && !"".equals(invoiceEntity.getBelnr()),"belnr",invoiceEntity.getBelnr())
-                        .eq(invoiceEntity.getInvoiceSapType() !=null && !"".equals(invoiceEntity.getInvoiceSapType()),"invoice_sap_type",invoiceEntity.getInvoiceSapType())
-                        .like(invoiceEntity.getInvoicePurchaserCompany() !=null && !"".equals(invoiceEntity.getInvoicePurchaserCompany()),"invoice_purchaser_company",invoiceEntity.getInvoicePurchaserCompany())
-                        .like(invoiceEntity.getInvoiceSellCompany() !=null && !"".equals(invoiceEntity.getInvoiceSellCompany()),"invoice_sell_company",invoiceEntity.getInvoiceSellCompany())
-                        .eq(invoiceEntity.getInvoiceType()!=null && !"".equals(invoiceEntity.getInvoiceType()),"invoice_type",invoiceEntity.getInvoiceType())
-                        .eq(invoiceEntity.getInvoiceEntity()!=null && !"".equals(invoiceEntity.getInvoiceEntity()),"invoice_entity",invoiceEntity.getInvoiceEntity())
-                        .eq(invoiceEntity.getInvoiceFromto()!=null && !"".equals(invoiceEntity.getInvoiceFromto()),"invoice_fromto",invoiceEntity.getInvoiceFromto())
-                        .eq(invoiceEntity.getInvoiceRecognition()!=null && !"".equals(invoiceEntity.getInvoiceRecognition()),"invoice_recognition",invoiceEntity.getInvoiceRecognition())
-                        .ge(StringUtils.isNotBlank(entryDateArray),"entry_date",!StringUtils.isNotBlank(entryDateArray)?"":entryDateArray.split(",")[0])
-                        .le(StringUtils.isNotBlank(entryDateArray),"entry_date",!StringUtils.isNotBlank(entryDateArray)?"":entryDateArray.split(",")[1])
-                        .ge(StringUtils.isNotBlank(invoiceUploadDateArray),"invoice_upload_date",!StringUtils.isNotBlank(invoiceUploadDateArray)?"":invoiceUploadDateArray.split(",")[0])
-                        .le(StringUtils.isNotBlank(invoiceUploadDateArray),"invoice_upload_date",!StringUtils.isNotBlank(invoiceUploadDateArray)?"":invoiceUploadDateArray.split(",")[1])
-                        .ge(StringUtils.isNotBlank(invoiceCreateDateArray),"invoice_create_date",!StringUtils.isNotBlank(invoiceCreateDateArray)?"":invoiceCreateDateArray.split(",")[0])
-                        .le(StringUtils.isNotBlank(invoiceCreateDateArray),"invoice_create_date",!StringUtils.isNotBlank(invoiceCreateDateArray)?"":invoiceCreateDateArray.split(",")[1])
-                        .ge(invoiceEntity.getInvoiceTotalPriceBegin()!=null &&!"".equals(invoiceEntity.getInvoiceTotalPriceBegin()),"invoice_total_price",invoiceEntity.getInvoiceTotalPriceBegin())
-                        .le(invoiceEntity.getInvoiceTotalPriceEnd()!=null &&!"".equals(invoiceEntity.getInvoiceTotalPriceEnd()),"invoice_total_price",invoiceEntity.getInvoiceTotalPriceEnd())
-                        .eq(StringUtils.isNotBlank(invoiceStatus) &&!"undefined".equals(invoiceStatus),"invoice_status",invoiceStatus)
-                        .in(batchNumbers[0] != null && !"".equals(batchNumbers[0]),"invoice_batch_number",batchNumbers)
+                        .eq(StringUtils.isNotBlank(companyId),"company_id",companyId)  //所属公司
+                        .eq(StringUtils.isNotBlank(invoiceNumber),"invoice_number",invoiceNumber) // 发票号码
+                        .eq(StringUtils.isNotBlank(invoiceSellParagraph),"invoice_sell_paragraph",invoiceSellParagraph)  // 销方税号
+                        .like(StringUtils.isNotBlank(invoiceSellCompany),"invoice_sell_company",invoiceSellCompany)   // 销方企业名称
+                        .eq(StringUtils.isNotBlank(invoiceSellParagraph),"",invoiceSellParagraph) // String 金税发票状态（认证时）
+                        .eq(StringUtils.isNotBlank(invoiceAuthDate),"invoice_auth_date",invoiceAuthDate) // // 认证日期
+                        .eq(StringUtils.isNotBlank(invoiceStatus),"invoice_status",invoiceStatus) // // 发票状态
+                        .eq(StringUtils.isNotBlank(applyStatus),"apply_status",applyStatus) //统计状态
+                        .eq(StringUtils.isNotBlank(invoiceSellParagraph),"",invoiceSellParagraph) // 开票日期
+                        .eq(StringUtils.isNotBlank(invoicePurchaserCompany),"invoice_purchaser_company",invoicePurchaserCompany) // 购方名称
+                        .eq(StringUtils.isNotBlank(invoiceDeductiblePeriod),"",invoiceDeductiblePeriod) // 认证所属期
+                        .eq(StringUtils.isNotBlank(invoiceSellParagraph),"",invoiceSellParagraph)  // 税额范围
+                        .eq(StringUtils.isNotBlank(invoiceStypl),"invoice_style",invoiceStypl) // 发票分类
+                        .orderByDesc("update_time")
                         .apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
         );
         return new PageUtils(page);
@@ -255,11 +246,11 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
         SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String fileName = "/data" + invoiceEntity.getInvoiceImage();
         String content = "";
+        Integer type = null;
 
         content = getInvoiceOCRresult(invoiceEntity);
         invoiceEntity.setCreateBy(ShiroUtils.getUserId().intValue());
         invoiceEntity.setCompanyId(ShiroUtils.getUserEntity().getDeptId().intValue());
-
         if (content.startsWith("<h1>Server Error (500)</h1>")) {
             invoiceEntity.setInvoiceErrorDescription("OCR接口识别失败!");
             invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue());
@@ -292,7 +283,6 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
         }
         JSONArray jsonArray = null;
         jsonArray = JSONArray.fromObject("[" + content + "]");
-
         System.out.println(content);
         System.out.println(jsonArray);
         Pattern pattern = Pattern.compile("[0-9]*");
@@ -303,7 +293,6 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
 
                 if (error != null) {
                     invoiceEntity.setInvoiceErrorDescription(error.toString());
-//
                     invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue());
                     invoiceEntity.setInvoiceUploadType("1");
                     invoiceEntity.setInvoiceReturn("0");
@@ -315,157 +304,52 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                         update(invoiceEntity);
                     }
                     //将该接口的日志生成到服务器中
-                    Map<String, String> map = new HashMap<>();
-                    map.put("invoiceEntity", invoiceEntity.toString());
-                    String inParam = map.toString();
-                    String outParam = content;
-                    createLog(inParam, outParam, "functionSaveInvoice");
+//                    Map<String, String> map = new HashMap<>();
+//                    map.put("invoiceEntity", invoiceEntity.toString());
+//                    String inParam = map.toString();
+//                    String outParam = content;
+//                    createLog(inParam, outParam, "functionSaveInvoice");
                     return "400_";   //返回结果400，无数据
                 } else {
+//                    String  type = jsb.get("type").toString();
                     JSONArray data = JSONArray.fromObject(jsb.get("scan_result"));
                     System.out.println(data);
                     if (data.size() > 0) {
-                        for (int k = 0; k < data.size(); k++) {
-                            if (data.getJSONObject(k).get("vat_type") != null && !"".equals(data.getJSONObject(k).get("vat_type"))) {
-                                invoiceEntity.setInvoiceEntity((String) data.getJSONObject(k).get("vat_type"));
-                                if (data.getJSONObject(k).get("vat_type").equals("电子发票")) {
-                                    invoiceEntity.setInvoiceType("电子");
-                                } else {
-                                    if (data.getJSONObject(k).get("printed_number") != null && !"".equals(data.getJSONObject(k).get("printed_number"))) {
-                                        invoiceEntity.setInvoicePrintedNumber((String) data.getJSONObject(k).get("printed_number"));
-                                    }
-                                    if (data.getJSONObject(k).get("printed_code") != null && !"".equals(data.getJSONObject(k).get("printed_code"))) {
-                                        invoiceEntity.setInvoicePrintedCode((String) data.getJSONObject(k).get("printed_code"));
-                                    }
-                                    invoiceEntity.setInvoiceType("纸质");
-                                }
-                            }
-                            if (data.getJSONObject(k).get("number") != null && !"".equals(data.getJSONObject(k).get("number"))) {
-                                invoiceEntity.setInvoiceNumber((String) data.getJSONObject(k).get("number"));
-
-                            }
-                            if (data.getJSONObject(k).get("code") != null && !"".equals(data.getJSONObject(k).get("code"))) {
-                                invoiceEntity.setInvoiceCode((String) data.getJSONObject(k).get("code"));
-                            }
-                            if (data.getJSONObject(k).get("check_code") != null && !"".equals(data.getJSONObject(k).get("check_code"))) {
-                                invoiceEntity.setInvoiceCheckCode((String) data.getJSONObject(k).get("check_code"));
-                            }
-                            if (data.getJSONObject(k).get("date") != null && !"".equals(data.getJSONObject(k).get("date"))) {
-                                String createDate = (String) data.getJSONObject(k).get("date");
-                                try {
-                                    if (FormatUtil.formatDate(createDate)) {
-                                        invoiceEntity.setInvoiceCreateDate(DateUtil.format(DateUtil.parseDate(createDate), "yyyy-MM-dd"));
-                                    }
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                            if (data.getJSONObject(k).get("total_amount_without_tax") != null && !"".equals(data.getJSONObject(k).get("total_amount_without_tax"))) {
-                                if (FormatUtil.formatPrice((String) data.getJSONObject(k).get("total_amount_without_tax"))) {
-                                    invoiceEntity.setInvoiceFreePrice(new BigDecimal((String) data.getJSONObject(k).get("total_amount_without_tax")));
-                                }
-                            }
+//                        if(){} 判断类型然后进行保存
+                        saveInputInvoiceEntity(data,invoiceEntity);
+                        type = InputConstant.InvoiceStyle.COMMON.getValue();
+                        invoiceEntity.setInvoiceUploadType("1");
+                        invoiceEntity.setInvoiceReturn("0");
+                        invoiceEntity.setInvoiceDelete("0");
+                        invoiceEntity.setInvoiceUploadDate(sdf_result.format(new Date()));
+                        //判断解析的5要素全部不为空，设置invoiceStatus 已识别
+                        // 判断四要素
+                        invoiceEntity=findElement(invoiceEntity);
+                        if (invoiceEntity.getId() == null) {
+                            save(invoiceEntity);
+                        } else {
+                            update(invoiceEntity);
                         }
+                        // 验重
+                        getRepeat(invoiceEntity);
+                        // 存入po表
+//                        inputInvoicePoService
                     }
                 }
-
             }
         }
-        invoiceEntity.setInvoiceUploadType("1");
-        invoiceEntity.setInvoiceReturn("0");
-        invoiceEntity.setInvoiceDelete("0");
-
-        invoiceEntity.setInvoiceUploadDate(sdf_result.format(new Date()));
-        //判断解析的5要素全部不为空，设置invoiceStatus 已识别
-        if (("专用发票".equals(invoiceEntity.getInvoiceEntity()) && (invoiceEntity.getInvoiceEntity() != null && !"".equals(invoiceEntity.getInvoiceEntity())) &&
-                (invoiceEntity.getInvoiceNumber() != null && !"".equals(invoiceEntity.getInvoiceNumber())) &&
-                (invoiceEntity.getInvoiceCode() != null && !"".equals(invoiceEntity.getInvoiceCode())) &&
-                (invoiceEntity.getInvoiceCreateDate() != null && !"".equals(invoiceEntity.getInvoiceCreateDate())) &&
-                (invoiceEntity.getInvoiceFreePrice() != null && !"".equals(invoiceEntity.getInvoiceFreePrice()))) ||
-                ("普通发票".equals(invoiceEntity.getInvoiceEntity()) && (invoiceEntity.getInvoiceEntity() != null && !"".equals(invoiceEntity.getInvoiceEntity())) &&
-                        (invoiceEntity.getInvoiceNumber() != null && !"".equals(invoiceEntity.getInvoiceNumber())) &&
-                        (invoiceEntity.getInvoiceCode() != null && !"".equals(invoiceEntity.getInvoiceCode())) &&
-                        (invoiceEntity.getInvoiceCreateDate() != null && !"".equals(invoiceEntity.getInvoiceCreateDate())) &&
-                        (invoiceEntity.getInvoiceCheckCode() != null && !"".equals(invoiceEntity.getInvoiceCheckCode()))) ||
-                ("电子发票".equals(invoiceEntity.getInvoiceEntity()) && (invoiceEntity.getInvoiceEntity() != null && !"".equals(invoiceEntity.getInvoiceEntity())) &&
-                        (invoiceEntity.getInvoiceNumber() != null && !"".equals(invoiceEntity.getInvoiceNumber())) &&
-                        (invoiceEntity.getInvoiceCode() != null && !"".equals(invoiceEntity.getInvoiceCode())) &&
-                        (invoiceEntity.getInvoiceCreateDate() != null && !"".equals(invoiceEntity.getInvoiceCreateDate())) &&
-                        (invoiceEntity.getInvoiceCheckCode() != null && !"".equals(invoiceEntity.getInvoiceCheckCode())))) {
-            //纸质发票需判断小号是否与发票号匹配，不匹配即为串号
-            if (invoiceEntity.getInvoiceEntity().equals("专用发票") || invoiceEntity.getInvoiceEntity().equals("普通发票")) {
-                if (invoiceEntity.getInvoicePrintedCode() != null && !"".equals(invoiceEntity.getInvoicePrintedCode())) {
-                    if (!invoiceEntity.getInvoicePrintedCode().equals(invoiceEntity.getInvoiceCode())) {
-                        invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.DIFFERENCE.getValue());
-                        invoiceEntity.setInvoiceErrorDescription("发票代码串号!");
-                    } else {
-                        if (invoiceEntity.getInvoicePrintedNumber() != null && !"".equals(invoiceEntity.getInvoicePrintedNumber())) {
-                            if (invoiceEntity.getInvoicePrintedNumber() != null && !"".equals(invoiceEntity.getInvoicePrintedNumber())) {
-                                if (!invoiceEntity.getInvoicePrintedNumber().equals(invoiceEntity.getInvoiceNumber())) {
-                                    invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.DIFFERENCE.getValue());
-                                    invoiceEntity.setInvoiceErrorDescription("发票号码串号!");
-                                } else {
-                                    invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_VERIFICATION.getValue());
-                                }
-                            } else {
-                                invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.DIFFERENCE.getValue());
-                                invoiceEntity.setInvoiceErrorDescription("发票号码串号!");
-                            }
-                        }
-                    }
-                } else {
-                    invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.DIFFERENCE.getValue());
-                    invoiceEntity.setInvoiceErrorDescription("发票代码串号!");
-                }
-            } else {
-                if (invoiceEntity.getInvoiceType().equals("电子") && invoiceEntity.getInvoiceEntity().equals("电子发票")) {
-                    invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_VERIFICATION.getValue());
-                } else {
-                    invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue());
-                }
-            }
-        } else if (invoiceEntity.getInvoiceNumber() == null || "".equals(invoiceEntity.getInvoiceNumber())) {
-            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue());
-            invoiceEntity.setInvoiceErrorDescription("发票号码识别失败！");
-        } else if (invoiceEntity.getInvoiceCode() == null || "".equals(invoiceEntity.getInvoiceCode())) {
-            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue());
-            invoiceEntity.setInvoiceErrorDescription("发票代码识别失败！");
-        } else if (invoiceEntity.getInvoiceCreateDate() == null || "".equals(invoiceEntity.getInvoiceCreateDate())) {
-            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue());
-            invoiceEntity.setInvoiceErrorDescription("开票日期识别失败！");
-        } else if (invoiceEntity.getInvoiceFreePrice() == null || "".equals(invoiceEntity.getInvoiceFreePrice())) {
-            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue());
-            invoiceEntity.setInvoiceErrorDescription("不含税价格识别失败！");
-        } else if (invoiceEntity.getInvoiceCheckCode() == null || "".equals(invoiceEntity.getInvoiceCheckCode())) {
-            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue());
-            invoiceEntity.setInvoiceErrorDescription("校验码识别失败！");
-        }
-        if (invoiceEntity.getId() == null) {
-            save(invoiceEntity);
-        } else {
-            update(invoiceEntity);
-        }
-        Integer num = this.getOAInvoiceList(invoiceEntity.getInvoiceCode(), invoiceEntity.getInvoiceNumber());
-
-        if (num >= 2) {
-            //根据发票号码和发票代码更新发票重复状态
-            this.updateRepeat(invoiceEntity.getInvoiceCode(), invoiceEntity.getInvoiceNumber(), "1");
-            invoiceEntity.setRepeatBill("1");
-            // 新发票状态 重复也写进状态字段里 author zk
-            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.REPEAT.getValue());
-            invoiceEntity.setInvoiceErrorDescription("发票重复！");
-        } else {
-            //根据发票号码和发票代码更新发票重复状态
-            this.updateRepeat(invoiceEntity.getInvoiceCode(), invoiceEntity.getInvoiceNumber(), "0");
-            invoiceEntity.setRepeatBill("0");
-        }
-        update(invoiceEntity);
+        InputInvoiceUploadEntity uploadEntity = new InputInvoiceUploadEntity();
+        uploadEntity.setUploadName("");
+        uploadEntity.setUploadType(type); // 类型
+        uploadEntity.setUploadSource(1); //
+        uploadEntity.setUploadImage(invoiceEntity.getInvoiceImage());
+        inputInvoiceUploadService.save(uploadEntity);
         //将该接口的日志生成到服务器中
-        Map<String, String> map = new HashMap<>();
-        map.put("invoiceEntity", invoiceEntity.toString());
-        String inParam = map.toString();
-        String outParam = content;
-        createLog(inParam, outParam, "functionSaveInvoice");
+//        Map<String, String> map = new HashMap<>();
+//        map.put("invoiceEntity", invoiceEntity.toString());
+//        String inParam = map.toString();
+//        String outParam = content;
+//        createLog(inParam, outParam, "functionSaveInvoice");
         return "0";
     }
 
@@ -514,6 +398,8 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                         .eq(StringUtils.isNotBlank(invoiceEntity.getInvoiceCreateDate()), "invoice_create_date", invoiceEntity.getInvoiceCreateDate())
                         .eq("invoice_free_price", invoiceEntity.getInvoiceFreePrice())
                         .like(StringUtils.isNotBlank(invoiceEntity.getInvoiceCheckCode()), "invoice_check_code", invoiceEntity.getInvoiceCheckCode())
+                        .eq("invoice_delete",0)
+                        .eq("invoice_return",0)
                         .apply("id != " + invoiceEntity.getId())
                 .eq(null !=invoiceEntity.getCompanyId(), "company_id", invoiceEntity.getCompanyId())
         );
@@ -600,12 +486,12 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
         // 更新批次状态
         invoiceBatchService.updateStatus(invoiceEntity.getInvoiceBatchNumber());
         if ("验真成功".equals(msg)) {
-
 //            ScheduleJobEntity scheduleJobEntity = scheduleJobService.getJob("autoDeductInvoiceTask");
 //            // 验真成功是否自动勾选
 //            if (null != scheduleJobEntity && 0 == scheduleJobEntity.getStatus()) {
 //                invoiceSyncService.deductInvoices(invoiceEntity, "1");
 //            }
+
         }
         return msg;
     }
@@ -663,7 +549,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
         }
         return msg;
     }
-    
+
     /**
      * 数据同步
      */
@@ -3848,4 +3734,205 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
         }
         return null;
     }
+
+    /**
+     * te发票上传
+     * @param file
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public List<String> receiveInvoice(MultipartFile file) throws Exception {
+        List<String> invoiceNumbers = new ArrayList<>();
+        ImportExcel ei = new ImportExcel(file, 1, 0);
+        List<InvoiceTeVo> list = ei.getDataList(InvoiceTeVo.class);
+        for (InvoiceTeVo vo : list) {
+            InputInvoiceEntity invoiceEntity = new InputInvoiceEntity();
+            invoiceEntity.setLegalEntity(vo.getLegalEntity());
+            invoiceEntity.setInvoiceBatchNumber(vo.getReportId());
+            invoiceEntity.setInvoiceCode(vo.getInvoiceCode());
+            invoiceEntity.setInvoiceNumber(vo.getInvoiceNumber());
+            invoiceEntity.setInvoiceCreateDate(vo.getInvoiceCreateDate());
+            invoiceEntity.setInvoiceFreePrice(new BigDecimal(vo.getInvoiceFreePrice()));
+            InputInvoiceSyncEntity invoiceSyncEntity = invoiceSyncService.findInvoiceSync(invoiceEntity); // 底账库
+            // 公司编码
+            if (invoiceSyncEntity != null) {
+                invoiceEntity =copyInputInvoiceEntity(invoiceEntity,invoiceSyncEntity);
+                invoiceEntity.setInvoiceStyle(InputConstant.InvoiceStyle.TE.getValue());
+                save(invoiceEntity);
+                String result = functionCheckTrue(invoiceEntity);
+                if (!"验真成功".equals(result)) {
+                    invoiceNumbers.add("发票号码："+invoiceEntity.getInvoiceNumber()+" "+result);
+                }
+            } else {
+                invoiceNumbers.add("发票号码："+invoiceEntity.getInvoiceNumber()+" 抵账库未查询到数据！");
+            }
+        }
+        return invoiceNumbers;
+    }
+
+    //所有流程 都走这里
+
+
+    public InputInvoiceEntity copyInputInvoiceEntity(InputInvoiceEntity invoiceEntity,InputInvoiceSyncEntity invoiceSyncEntity){
+        invoiceEntity.setInvoiceCreateDate(invoiceSyncEntity.getBillingDate()); // 开票日期
+        if (invoiceSyncEntity.getDeductible().equals("1")) { //已勾选
+            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.SUCCESSFUL_AUTHENTICATION.getValue());
+        } else {
+            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_CERTIFIED.getValue());
+        }
+        invoiceEntity.setInvoiceAuthDate(invoiceSyncEntity.getDeductibleDate()); // 认证日期
+        invoiceEntity.setInvoiceDeductiblePeriod(invoiceSyncEntity.getDeductiblePeriod());//认证属期
+        invoiceEntity.setInvoiceAuthType(invoiceSyncEntity.getDeductibleType());//认证方式
+        invoiceEntity.setInvoiceAuthPattern(invoiceSyncEntity.getDeductibleMode()); // 认证模式
+        invoiceEntity.setInvoiceCode(invoiceSyncEntity.getInvoiceCode()); // 发票代码
+        invoiceEntity.setInvoiceNumber(invoiceSyncEntity.getInvoiceNumber()); // 发票号码
+        invoiceEntity.setInvoiceType(invoiceSyncEntity.getInvoiceType());// 发票类型
+        invoiceEntity.setInvoicePurchaserCompany(invoiceSyncEntity.getPurchaserName()); // 购方名称
+        invoiceEntity.setInvoicePurchaserParagraph(invoiceSyncEntity.getPurchaserTaxNo()); // 购方税号
+        invoiceEntity.setInvoiceSellCompany(invoiceSyncEntity.getSalesTaxName());
+        invoiceEntity.setInvoiceSellParagraph(invoiceSyncEntity.getSalesTaxNo());
+        invoiceEntity.setInvoiceStatus(invoiceSyncEntity.getState());
+        invoiceEntity.setInvoiceFreePrice(invoiceSyncEntity.getTotalAmount()!=null?new BigDecimal(invoiceSyncEntity.getTotalAmount()):BigDecimal.ZERO);
+        invoiceEntity.setInvoiceTaxPrice(invoiceSyncEntity.getTotalTax()!=null?new BigDecimal(invoiceSyncEntity.getTotalTax()):BigDecimal.ZERO);
+
+        // 有效税额
+        invoiceEntity.setInvoiceCheckCode(invoiceSyncEntity.getCheckCode());
+        return invoiceEntity;
+    }
+
+    // 解析 保存invoice
+    public InputInvoiceEntity saveInputInvoiceEntity(JSONArray data,InputInvoiceEntity invoiceEntity){
+        for (int k = 0; k < data.size(); k++){
+            if (data.getJSONObject(k).get("vat_type") != null && !"".equals(data.getJSONObject(k).get("vat_type"))) {
+                invoiceEntity.setInvoiceEntity((String) data.getJSONObject(k).get("vat_type"));
+                if (data.getJSONObject(k).get("vat_type").equals("电子发票")) {
+                    invoiceEntity.setInvoiceType("电子");
+                } else {
+                    if (data.getJSONObject(k).get("printed_number") != null && !"".equals(data.getJSONObject(k).get("printed_number"))) {
+                        invoiceEntity.setInvoicePrintedNumber((String) data.getJSONObject(k).get("printed_number"));
+                    }
+                    if (data.getJSONObject(k).get("printed_code") != null && !"".equals(data.getJSONObject(k).get("printed_code"))) {
+                        invoiceEntity.setInvoicePrintedCode((String) data.getJSONObject(k).get("printed_code"));
+                    }
+                    invoiceEntity.setInvoiceType("纸质");
+                }
+            }
+            if (data.getJSONObject(k).get("number") != null && !"".equals(data.getJSONObject(k).get("number"))) {
+                invoiceEntity.setInvoiceNumber((String) data.getJSONObject(k).get("number"));
+
+            }
+            if (data.getJSONObject(k).get("code") != null && !"".equals(data.getJSONObject(k).get("code"))) {
+                invoiceEntity.setInvoiceCode((String) data.getJSONObject(k).get("code"));
+            }
+            if (data.getJSONObject(k).get("check_code") != null && !"".equals(data.getJSONObject(k).get("check_code"))) {
+                invoiceEntity.setInvoiceCheckCode((String) data.getJSONObject(k).get("check_code"));
+            }
+            if (data.getJSONObject(k).get("date") != null && !"".equals(data.getJSONObject(k).get("date"))) {
+                String createDate = (String) data.getJSONObject(k).get("date");
+                try {
+                    if (FormatUtil.formatDate(createDate)) {
+                        invoiceEntity.setInvoiceCreateDate(DateUtil.format(DateUtil.parseDate(createDate), "yyyy-MM-dd"));
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            if (data.getJSONObject(k).get("total_amount_without_tax") != null && !"".equals(data.getJSONObject(k).get("total_amount_without_tax"))) {
+                if (FormatUtil.formatPrice((String) data.getJSONObject(k).get("total_amount_without_tax"))) {
+                    invoiceEntity.setInvoiceFreePrice(new BigDecimal((String) data.getJSONObject(k).get("total_amount_without_tax")));
+                }
+            }
+        }
+        return invoiceEntity;
+    }
+
+     // 四要素识别
+    public InputInvoiceEntity findElement(InputInvoiceEntity invoiceEntity){
+        if (("专用发票".equals(invoiceEntity.getInvoiceEntity()) && (invoiceEntity.getInvoiceEntity() != null && !"".equals(invoiceEntity.getInvoiceEntity())) &&
+                (invoiceEntity.getInvoiceNumber() != null && !"".equals(invoiceEntity.getInvoiceNumber())) &&
+                (invoiceEntity.getInvoiceCode() != null && !"".equals(invoiceEntity.getInvoiceCode())) &&
+                (invoiceEntity.getInvoiceCreateDate() != null && !"".equals(invoiceEntity.getInvoiceCreateDate())) &&
+                (invoiceEntity.getInvoiceFreePrice() != null && !"".equals(invoiceEntity.getInvoiceFreePrice()))) ||
+                ("普通发票".equals(invoiceEntity.getInvoiceEntity()) && (invoiceEntity.getInvoiceEntity() != null && !"".equals(invoiceEntity.getInvoiceEntity())) &&
+                        (invoiceEntity.getInvoiceNumber() != null && !"".equals(invoiceEntity.getInvoiceNumber())) &&
+                        (invoiceEntity.getInvoiceCode() != null && !"".equals(invoiceEntity.getInvoiceCode())) &&
+                        (invoiceEntity.getInvoiceCreateDate() != null && !"".equals(invoiceEntity.getInvoiceCreateDate())) &&
+                        (invoiceEntity.getInvoiceCheckCode() != null && !"".equals(invoiceEntity.getInvoiceCheckCode()))) ||
+                ("电子发票".equals(invoiceEntity.getInvoiceEntity()) && (invoiceEntity.getInvoiceEntity() != null && !"".equals(invoiceEntity.getInvoiceEntity())) &&
+                        (invoiceEntity.getInvoiceNumber() != null && !"".equals(invoiceEntity.getInvoiceNumber())) &&
+                        (invoiceEntity.getInvoiceCode() != null && !"".equals(invoiceEntity.getInvoiceCode())) &&
+                        (invoiceEntity.getInvoiceCreateDate() != null && !"".equals(invoiceEntity.getInvoiceCreateDate())) &&
+                        (invoiceEntity.getInvoiceCheckCode() != null && !"".equals(invoiceEntity.getInvoiceCheckCode())))) {
+            //纸质发票需判断小号是否与发票号匹配，不匹配即为串号
+            if (invoiceEntity.getInvoiceEntity().equals("专用发票") || invoiceEntity.getInvoiceEntity().equals("普通发票")) {
+                if (invoiceEntity.getInvoicePrintedCode() != null && !"".equals(invoiceEntity.getInvoicePrintedCode())) {
+                    if (!invoiceEntity.getInvoicePrintedCode().equals(invoiceEntity.getInvoiceCode())) {
+                        invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.DIFFERENCE.getValue());
+                        invoiceEntity.setInvoiceErrorDescription("发票代码串号!");
+                    } else {
+                        if (invoiceEntity.getInvoicePrintedNumber() != null && !"".equals(invoiceEntity.getInvoicePrintedNumber())) {
+                            if (invoiceEntity.getInvoicePrintedNumber() != null && !"".equals(invoiceEntity.getInvoicePrintedNumber())) {
+                                if (!invoiceEntity.getInvoicePrintedNumber().equals(invoiceEntity.getInvoiceNumber())) {
+                                    invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.DIFFERENCE.getValue());
+                                    invoiceEntity.setInvoiceErrorDescription("发票号码串号!");
+                                } else {
+                                    invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_VERIFICATION.getValue());
+                                }
+                            } else {
+                                invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.DIFFERENCE.getValue());
+                                invoiceEntity.setInvoiceErrorDescription("发票号码串号!");
+                            }
+                        }
+                    }
+                } else {
+                    invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.DIFFERENCE.getValue());
+                    invoiceEntity.setInvoiceErrorDescription("发票代码串号!");
+                }
+            } else {
+                if (invoiceEntity.getInvoiceType().equals("电子") && invoiceEntity.getInvoiceEntity().equals("电子发票")) {
+                    invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_VERIFICATION.getValue());
+                } else {
+                    invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue());
+                }
+            }
+        } else if (invoiceEntity.getInvoiceNumber() == null || "".equals(invoiceEntity.getInvoiceNumber())) {
+            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue());
+            invoiceEntity.setInvoiceErrorDescription("发票号码识别失败！");
+        } else if (invoiceEntity.getInvoiceCode() == null || "".equals(invoiceEntity.getInvoiceCode())) {
+            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue());
+            invoiceEntity.setInvoiceErrorDescription("发票代码识别失败！");
+        } else if (invoiceEntity.getInvoiceCreateDate() == null || "".equals(invoiceEntity.getInvoiceCreateDate())) {
+            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue());
+            invoiceEntity.setInvoiceErrorDescription("开票日期识别失败！");
+        } else if (invoiceEntity.getInvoiceFreePrice() == null || "".equals(invoiceEntity.getInvoiceFreePrice())) {
+            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue());
+            invoiceEntity.setInvoiceErrorDescription("不含税价格识别失败！");
+        } else if (invoiceEntity.getInvoiceCheckCode() == null || "".equals(invoiceEntity.getInvoiceCheckCode())) {
+            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue());
+            invoiceEntity.setInvoiceErrorDescription("校验码识别失败！");
+        }
+        return invoiceEntity;
+    }
+    // 验重
+    public InputInvoiceEntity getRepeat(InputInvoiceEntity invoiceEntity){
+        Integer num = this.getOAInvoiceList(invoiceEntity.getInvoiceCode(), invoiceEntity.getInvoiceNumber());
+        if (num >= 2) {
+            //根据发票号码和发票代码更新发票重复状态
+            this.updateRepeat(invoiceEntity.getInvoiceCode(), invoiceEntity.getInvoiceNumber(), "1");
+            invoiceEntity.setRepeatBill("1");
+            // 新发票状态 重复也写进状态字段里 author zk
+            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.REPEAT.getValue());
+            invoiceEntity.setInvoiceErrorDescription("发票重复！");
+        } else {
+            //根据发票号码和发票代码更新发票重复状态
+            this.updateRepeat(invoiceEntity.getInvoiceCode(), invoiceEntity.getInvoiceNumber(), "0");
+            invoiceEntity.setRepeatBill("0");
+        }
+        update(invoiceEntity);
+        return invoiceEntity;
+    }
+     // 自动分类
+
+
 }

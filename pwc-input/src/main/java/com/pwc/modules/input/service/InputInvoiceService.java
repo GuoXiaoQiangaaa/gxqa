@@ -4,7 +4,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.pwc.common.utils.PageUtils;
 import com.pwc.common.utils.R;
 import com.pwc.modules.input.entity.*;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -187,5 +190,5 @@ public interface InputInvoiceService extends IService<InputInvoiceEntity> {
      * @return
      */
     String getLastSeq(String invoiceSeq);
-
+    List<String> receiveInvoice(MultipartFile file) throws Exception;
 }

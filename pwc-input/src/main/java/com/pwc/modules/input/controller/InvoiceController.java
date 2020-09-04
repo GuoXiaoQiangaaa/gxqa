@@ -199,9 +199,7 @@ public class InvoiceController {
                 invoice.setCreateBy(ShiroUtils.getUserId().intValue());
                 invoice.setUploadType(invoiceEntity.getUploadType());
                 invoice.setInvoiceFromto(invoiceEntity.getInvoiceFromto());
-
                 String str = invoiceService.functionSaveInvoice(invoice);
-
                 invoiceService.functionCheckTrue(invoice);
                 if (InputConstant.InvoiceStatus.PENDING_VERIFICATION.getValue().equals(invoice.getInvoiceStatus())) {
                     recSum++;
@@ -212,14 +210,10 @@ public class InvoiceController {
                     return R.error(510,"网络不稳定，请重新操作！");
                 }
             }
-
-
         r.put("tolSum", tolSum);
         r.put("recSum", recSum);
         r.put("partSum", partSum);
         r.put("failSum", failSum);
-
-
         } catch (Exception e) {
             e.printStackTrace();
             return r.error(601, "系统异常，请稍后再试");
@@ -380,7 +374,7 @@ public class InvoiceController {
         try {
             invoiceEntity = invoiceService.get(invoiceEntity);
 
-//            invoiceService.functionVerfy(invoiceEntity);
+            invoiceService.functionVerfy(invoiceEntity);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -636,5 +630,33 @@ public class InvoiceController {
         }
         return R.ok();
     }
+    @RequestMapping("/poListUpload")
+    @RequiresPermissions("input:invoice:poListUpload")
+    public  R poListUpload(@RequestBody InputInvoiceEntity invoiceEntity){
+
+        return R.ok();
+    }
+
+
+    /**
+     * 作废
+     * @param params
+     * @return
+     */
+    @RequestMapping("updateVoid")
+    //   @RequiresPermissions("input:invoicete:updateVoid")
+    public  R  updateVoid(@RequestParam Map<String, Object> params){
+        String[] ids = params.get("ids").toString().split(",");
+        for(String id:ids){
+            InputInvoiceEntity invoiceEntity =  invoiceService.getById(Integer.valueOf(id));
+            if((InputConstant.InvoiceStatus.PENDING_CERTIFIED.getValue()).equals(invoiceEntity.getInvoiceStatus())){ //未认证 可以 PENDING_CERTIFIED
+                invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.INVALID.getValue());
+                invoiceService.updateById(invoiceEntity);
+            }
+        }
+        return R.ok();
+    }
+
+
 
 }

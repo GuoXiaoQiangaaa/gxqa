@@ -25,15 +25,18 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
 
         if (!"com.pwc.modules.input.entity.InputUnformatInvoiceEntity".equals(classname)) {
 //            if(metaObject.getValue("createTime")==null){
-                setFieldValByName("createTime", new Date(), metaObject);
+            setFieldValByName("createTime", new Date(), metaObject);
+            setFieldValByName("updateTime", new Date(), metaObject);
 //            }
         }
 
         try {
             if (ShiroUtils.getUserEntity() != null) {
-                if (!classname.contains("input")) {
-                    setFieldValByName("createBy", ShiroUtils.getUserEntity().getUsername(), metaObject);
-                }
+//                if (!classname.contains("input")) {
+                    setFieldValByName("createBy", ShiroUtils.getUserEntity().getUserId().intValue(), metaObject);
+                    setFieldValByName("updateBy", ShiroUtils.getUserEntity().getUserId().intValue(), metaObject);
+                setFieldValByName("deptId", ShiroUtils.getUserEntity().getDeptId().intValue(), metaObject);
+//                }
             }
         } catch (UnavailableSecurityManagerException e) {
             System.out.println("定时任务不能由shiro管理，所以执行shiro方法会报错");
@@ -51,9 +54,9 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
         }
         try {
             if (ShiroUtils.getUserEntity() != null) {
-                if (!classname.contains("input")) {
-                    setFieldValByName("updateBy", ShiroUtils.getUserEntity().getUsername(), metaObject);
-                }
+//                if (!classname.contains("input")) {
+                    setFieldValByName("updateBy", ShiroUtils.getUserEntity().getUserId().intValue(), metaObject);
+//                }
             }
         } catch (UnavailableSecurityManagerException e) {
             System.out.println("定时任务不能由shiro管理,所以执行shiro方法会报错");

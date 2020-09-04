@@ -11,17 +11,21 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.sound.midi.Soundbank;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.sql.SQLOutput;
+import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -213,12 +217,14 @@ public class ImportExcel {
 		Object val = "";
 		try{
 			Cell cell = row.getCell(column);
-			if (cell != null){
-//				if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC){
-//					val = cell.getNumericCellValue();
-//				}else if (cell.getCellType() == Cell.CELL_TYPE_STRING){
-//					val = cell.getStringCellValue();
-//				}else if (cell.getCellType() == Cell.CELL_TYPE_FORMULA){
+			if (cell != null) {
+				if (cell.getCellType().equals(CellType.NUMERIC)){
+					DecimalFormat df = new DecimalFormat("0");
+					val = df.format(cell.getNumericCellValue());
+				}else if (cell.getCellType().equals(CellType.STRING)){
+					val = cell.getStringCellValue();
+				}
+//				else if (cell.getCellType() == Cell.CELL_TYPE_FORMULA){
 //					val = cell.getCellFormula();
 //				}else if (cell.getCellType() == Cell.CELL_TYPE_BOOLEAN){
 //					val = cell.getBooleanCellValue();
@@ -226,7 +232,8 @@ public class ImportExcel {
 //					val = cell.getErrorCellValue();
 //				}
 //				cell.setCellType(Cell.CELL_TYPE_STRING);
-				val = cell.getStringCellValue();
+
+//				val = cell.getStringCellValue();
 			}
 		}catch (Exception e) {
 			return val;

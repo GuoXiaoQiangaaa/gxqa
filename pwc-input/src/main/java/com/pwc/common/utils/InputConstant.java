@@ -341,4 +341,19 @@ public class InputConstant {
             return value;
         }
     }
+    public enum InvoiceStyle {
+        COMMON(0), // ap
+        PO(1), // po
+        TE(2) // te
+        ;
+        private  int value;
+
+        InvoiceStyle(int value) {
+            this.value = value;
+        }
+        public int getValue() {
+            return value;
+        }
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.pwc.modules.input.entity;
 
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -193,9 +194,9 @@ public class InputInvoiceEntity implements Serializable {
     private Integer outFlag; // 转出状态
     @TableField(exist = false)
     private BigDecimal outRatio; // 转出比例
-
-
-
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Date updateTime;
+    private String legalEntity; // 公司编码
     /**
      * 请求id来请求勾选结果
      */
@@ -223,6 +224,9 @@ public class InputInvoiceEntity implements Serializable {
      */
     @TableField(exist = false)
     private String ticketDiff;
+    // 0 红票 1 po 2 te
+    private int invoiceStyle;
+
 
     @Override
     public String toString() {
