@@ -157,9 +157,10 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
      */
     @Override
     @DataFilter(deptId = "company_id", subDept = true, user = false)
-    public PageUtils queryPage(Map<String, Object> params, InputInvoiceEntity invoiceEntity) {
+    public PageUtils queryPage(Map<String, Object> params, InputInvoiceEntity inputInvoiceEntity) {
         // 发票分类
         String invoiceStyle = ParamsMap.findMap(params, "invoiceStyle");
+        String invoiceEntity = ParamsMap.findMap(params, "invoiceEntity");
         String invoiceStatus = ParamsMap.findMap(params, "invoiceStatus"); // 发票状态
         String invoiceClass = ParamsMap.findMap(params, "invoiceClass");
         // 所属公司、发票号码、销方税号、销方名称、金税发票状态（认证时）、确认/认证日期、认证状态、统计状态、税率、开票日期、购方名称、认证所属期、税额范围
@@ -234,6 +235,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                         .like(StringUtils.isNotBlank(tax), "tax", tax)
                         .like(StringUtils.isNotBlank(invoiceErrorDescription), "invoice_error_description", invoiceErrorDescription)
                         .eq(StringUtils.isNotBlank(invoiceClass), "invoice_class", invoiceClass) // 发票分类
+                        .eq(StringUtils.isNotBlank(invoiceEntity), "invoice_entity", invoiceEntity) // 发票类型
                         .eq(StringUtils.isNotBlank(invoiceMatch), "invoice_match", invoiceMatch)
                         .orderByDesc("invoice_batch_number")
                         .apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))

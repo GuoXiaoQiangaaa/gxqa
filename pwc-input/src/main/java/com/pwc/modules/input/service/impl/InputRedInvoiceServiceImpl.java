@@ -110,8 +110,8 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
                 new QueryWrapper<InputRedInvoiceEntity>()
                         .orderByDesc("create_time")
                         .eq(null != redInvoiceEntity.getDeptId(), "dept_id", redInvoiceEntity.getDeptId())
-                        .eq(StringUtils.isNotBlank(redInvoiceEntity.getRedNoticeNumber()), "red_notice_number", redInvoiceEntity.getRedNoticeNumber())
-                        .eq(StringUtils.isNotBlank(redInvoiceEntity.getBlueInvoiceNumber()), "blue_invoice_number", redInvoiceEntity.getBlueInvoiceNumber())
+                        .like(StringUtils.isNotBlank(redInvoiceEntity.getRedNoticeNumber()), "red_notice_number", redInvoiceEntity.getRedNoticeNumber())
+                        .like(StringUtils.isNotBlank(redInvoiceEntity.getBlueInvoiceNumber()), "blue_invoice_number", redInvoiceEntity.getBlueInvoiceNumber())
                         .eq(StringUtils.isNotBlank(redInvoiceEntity.getRedStatus()), "red_status", StringUtils.isBlank(redInvoiceEntity.getRedStatus()) ? "0" : redInvoiceEntity.getRedStatus())
         );
         return new PageUtils(page);

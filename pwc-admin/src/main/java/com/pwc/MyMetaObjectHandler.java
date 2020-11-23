@@ -25,7 +25,6 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
      */
     @Override
     public void insertFill(MetaObject metaObject) {
-        logger.info("新增的时候干点不可描述的事情");
         String classname = metaObject.getOriginalObject().getClass().getName();
 
         if (!"com.pwc.modules.input.entity.InputUnformatInvoiceEntity".equals(classname)) {
@@ -49,7 +48,6 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
      */
     @Override
     public void updateFill(MetaObject metaObject) {
-        logger.info("更新的时候干点不可描述的事情");
         String classname = metaObject.getOriginalObject().getClass().getName();
 
         if (!"com.pwc.modules.input.entity.InputUnformatInvoiceEntity".equals(classname)) {
