@@ -4,16 +4,15 @@ package com.pwc.modules.job.task;
 import com.fapiao.neon.model.CallResult;
 import com.fapiao.neon.model.in.SyncInvoiceInfo;
 import com.fapiao.neon.param.in.SyncInvoiceParamBody;
-import com.pwc.common.utils.InputConstant;
 import com.pwc.modules.input.service.InputInvoiceSyncService;
+import com.pwc.modules.sys.entity.SysDeptEntity;
+import com.pwc.modules.sys.service.SysDeptService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.List;
 
 /**
  * 底账库更新
@@ -26,22 +25,19 @@ public class InvoiceSyncTask implements ITask {
 
     @Autowired
     private InputInvoiceSyncService invoiceSyncService;
+    @Autowired
+    private SysDeptService sysDeptService;
 
 
     @Override
     public void run(String params) {
-//        int page = 1;
-//        Date date = new Date();
-//        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");//设置日期格式
-//        Calendar c = Calendar.getInstance();
-//        c.add(Calendar.DATE, -1);//-1.昨天时间 0.当前时间 1.明天时间 *以此类推
-//        String yesterday = df.format(c.getTime());
-//        String nowTime = df.format(date);
-//        System.out.println("yesterday:" + yesterday);
-//        System.out.println("nowTime:" + nowTime);
-//        for ( String taxNo: InputConstant.TAX_CODE) {
-//            syncInvoice(page, yesterday, nowTime, taxNo);
-//        }
+        List<SysDeptEntity>  deptEntitys= sysDeptService.getDeptByStatus();
+        for(SysDeptEntity deptEntity:deptEntitys){
+            if(deptEntity.getTaxCode()!=null &&!"".equals(deptEntity.getTaxCode())){
+                System.out.println(deptEntity.getTaxCode());
+                invoiceSyncService.syncInvoice(1, "", "", deptEntity.getTaxCode());
+            }
+        }
     }
 
 
@@ -64,6 +60,5 @@ public class InvoiceSyncTask implements ITask {
             this.syncInvoice(currentPage + 1, startTime, endTime, taxNo);
             logger.info("==nextPage==" + (currentPage+1));
         }
-
     }
 }

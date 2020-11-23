@@ -1,22 +1,17 @@
 package com.pwc.modules.input.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.pwc.common.utils.PageUtils;
 import com.pwc.common.utils.R;
 import com.pwc.modules.input.entity.InputCompanyEntity;
-import com.pwc.modules.input.entity.InputInvoiceBatchEntity;
-import com.pwc.modules.input.entity.InputInvoiceEntity;
 import com.pwc.modules.input.service.InputCompanyService;
 import com.pwc.modules.sys.entity.SysDeptEntity;
 import com.pwc.modules.sys.service.SysDeptService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 @RestController
@@ -49,5 +44,54 @@ public class CompanyController {
             sysDeptEntity.setCompany(company);
         }
         return R.ok().put("list", page);
+    }
+
+    /**
+     * 统计情况列表
+     */
+    @GetMapping("/list")
+    public R list(@RequestParam Map<String, Object> params){
+        PageUtils page = inputCompanyService.list(params);
+
+        return R.ok().put("page", page);
+    }
+
+    /**
+     * 统计详情列表
+     */
+    @GetMapping("/details/{companyId}")
+    public R details(@PathVariable("companyId") Integer companyId, @RequestParam Map<String, Object> params){
+        PageUtils page = inputCompanyService.details(companyId, params);
+
+        return R.ok().put("page", page);
+    }
+
+    /**
+     * 统计成功发票列表
+     */
+    @GetMapping("/invoices/{companyId}")
+    public R invoices(@PathVariable("companyId") Integer companyId, @RequestParam Map<String, Object> params){
+        PageUtils page = inputCompanyService.invoices(companyId, params);
+
+        return R.ok().put("page", page);
+    }
+
+    /**
+     * 统计差异发票列表
+     */
+    @GetMapping("/differenceInvoices/{companyId}")
+    public R differenceInvoices(@PathVariable("companyId") Integer companyId, @RequestParam Map<String, Object> params){
+        PageUtils page = inputCompanyService.differenceInvoices(companyId, params);
+
+        return R.ok().put("page", page);
+    }
+
+    /**
+     * 导出数据
+     */
+    @GetMapping("/exportData")
+    public R exportData(@RequestParam Map<String, Object> params, HttpServletResponse response){
+
+        return null;
     }
 }

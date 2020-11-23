@@ -1,27 +1,22 @@
 package com.pwc.modules.data.controller;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Map;
-
 import com.pwc.common.excel.ExportExcel;
 import com.pwc.common.exception.RRException;
 import com.pwc.common.utils.DateUtils;
-import com.pwc.common.validator.ValidatorUtils;
-import com.pwc.modules.sys.shiro.ShiroUtils;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import com.pwc.modules.data.entity.OutputSupplierEntity;
-import com.pwc.modules.data.service.OutputSupplierService;
 import com.pwc.common.utils.PageUtils;
 import com.pwc.common.utils.R;
+import com.pwc.common.validator.ValidatorUtils;
+import com.pwc.modules.data.entity.OutputSupplierEntity;
+import com.pwc.modules.data.service.OutputSupplierService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Map;
 
 
 /**
@@ -119,8 +114,8 @@ public class OutputSupplierController {
      * 数据导入
      */
     @PostMapping("/importSupplier")
-    public R importSupplier(@RequestParam("file") MultipartFile file){
-        Map<String, Object> resMap = outputSupplierService.importSupplier(file);
+    public R importSupplier(@RequestParam("files") MultipartFile[] files){
+        Map<String, Object> resMap = outputSupplierService.importSupplier(files);
 
         return R.ok().put("res", resMap);
     }

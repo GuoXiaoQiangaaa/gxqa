@@ -40,6 +40,6 @@ public interface OutputGoodsNewService extends IService<OutputGoodsNewEntity> {
     /**
      * 数据导入
      */
-    Map<String, Object> importGoods(MultipartFile file);
+    Map<String, Object> importGoods(MultipartFile[] files);
 }
 

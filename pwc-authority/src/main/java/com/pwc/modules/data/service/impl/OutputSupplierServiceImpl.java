@@ -3,28 +3,24 @@ package com.pwc.modules.data.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
-import com.pwc.common.excel.ExportExcel;
-import com.pwc.common.excel.ImportExcel;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pwc.common.exception.RRException;
+import com.pwc.common.utils.PageUtils;
+import com.pwc.common.utils.Query;
+import com.pwc.modules.data.dao.OutputSupplierDao;
+import com.pwc.modules.data.entity.OutputSupplierEntity;
+import com.pwc.modules.data.service.OutputSupplierService;
 import com.pwc.modules.sys.shiro.ShiroUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.pwc.common.utils.PageUtils;
-import com.pwc.common.utils.Query;
-
-import com.pwc.modules.data.dao.OutputSupplierDao;
-import com.pwc.modules.data.entity.OutputSupplierEntity;
-import com.pwc.modules.data.service.OutputSupplierService;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.*;
 
 /**
  * 供应商信息服务实现
@@ -141,7 +137,7 @@ public class OutputSupplierServiceImpl extends ServiceImpl<OutputSupplierDao, Ou
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Map<String, Object> importSupplier(MultipartFile file) {
+    public Map<String, Object> importSupplier(MultipartFile[] files) {
         Map<String, Object> resMap = new HashMap<>();
         // 数据校验正确的集合
         List<OutputSupplierEntity> entityList = new ArrayList<>();
@@ -151,66 +147,90 @@ public class OutputSupplierServiceImpl extends ServiceImpl<OutputSupplierDao, Ou
         int total = 0;
         // 数据有误条数
         int fail = 0;
+        // 记录excel中的重复数据
+        List<String> repeatDataList = new ArrayList<>();
+        // 记录数据有误的文件
+        StringBuffer sb = new StringBuffer();
         try {
-            ExcelReader reader = ExcelUtil.getReader(file.getInputStream());
-            String[] excelHead = {"SAP代码（必填）", "公司代码", "供应商名称（必填）", "纳税人识别号（必填）",
-                    "地址", "电话号码", "开户行", "银行账号", "供应商邮箱", "分类"};
-            String [] excelHeadAlias = {"sapCode", "deptCode", "name", "taxCode", "address", "contact",
-                    "bank", "bankAccount", "email", "invoiceType"};
-            for (int i = 0; i < excelHead.length; i++) {
-                reader.addHeaderAlias(excelHead[i], excelHeadAlias[i]);
-            }
-            List<OutputSupplierEntity> dataList = reader.read(0, 1, OutputSupplierEntity.class);
+            for (MultipartFile file : files) {
+                String filename = file.getOriginalFilename();
+                ExcelReader reader = ExcelUtil.getReader(file.getInputStream());
+                String[] excelHead = {"SAP代码（必填）", "公司代码", "供应商名称（必填）", "纳税人识别号（必填）",
+                        "地址", "电话号码", "开户行", "银行账号", "供应商邮箱", "分类"};
+                String [] excelHeadAlias = {"sapCode", "deptCode", "name", "taxCode", "address", "contact",
+                        "bank", "bankAccount", "email", "invoiceType"};
+                for (int i = 0; i < excelHead.length; i++) {
+                    reader.addHeaderAlias(excelHead[i], excelHeadAlias[i]);
+                }
+                List<OutputSupplierEntity> dataList = reader.read(0, 1, OutputSupplierEntity.class);
 
-            if(CollectionUtils.isEmpty(dataList)){
-                log.error("上传的Excel为空,请重新上传");
-                throw new RRException("上传的Excel为空,请重新上传");
-            }
-            total = dataList.size();
-            List<String> repeatDataList = new ArrayList<>();
-            for (OutputSupplierEntity supplierEntity : dataList) {
-                // 参数校验
-                if(1 == checkExcel(supplierEntity)){
-                    // 参数有误
-                    fail += 1;
-                }else {
-                    // 去除Excel中重复数据
-                    String repeatData = supplierEntity.getSapCode() + supplierEntity.getTaxCode();
-                    if(CollectionUtil.contains(repeatDataList, repeatData)){
+                if(CollectionUtils.isEmpty(dataList)){
+                    log.error("上传的{}Excel为空,请重新上传", filename);
+//                    throw new RRException("上传的Excel为空,请重新上传");
+                    continue;
+                }
+                total += dataList.size();
+                int count = 1;
+                for (OutputSupplierEntity supplierEntity : dataList) {
+                    count++;
+                    // 参数校验
+                    if(1 == checkExcel(supplierEntity)){
+                        // 参数有误
                         fail += 1;
-                        continue;
-                    }
-                    repeatDataList.add(repeatData);
-                    OutputSupplierEntity duplicate = super.getOne(
-                            new QueryWrapper<OutputSupplierEntity>()
-                                    .eq("sap_code", supplierEntity.getSapCode())
-                                    .eq("tax_code", supplierEntity.getTaxCode())
-                    );
-                    if(null != duplicate){
-                        duplicate.setDeptCode(supplierEntity.getDeptCode());
-                        duplicate.setName(supplierEntity.getName());
-                        duplicate.setAddress(supplierEntity.getAddress());
-                        duplicate.setContact(supplierEntity.getContact());
-                        duplicate.setBank(supplierEntity.getBank());
-                        duplicate.setBankAccount(supplierEntity.getBankAccount());
-                        duplicate.setEmail(supplierEntity.getEmail());
-                        duplicate.setInvoiceType(supplierEntity.getInvoiceType());
-                        duplicate.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
-                        duplicate.setUpdateTime(new Date());
-                        duplicateList.add(this.paraphraseParams(duplicate));
+                        if(!StringUtils.contains(sb.toString(), filename)){
+                            sb.append("文件" + filename + "的错误行号为:");
+                        }
+                        sb.append(count + ",");
                     }else {
-                        // 添加转义后的实体
-                        supplierEntity.setDelFlag("1");
-                        supplierEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
-                        supplierEntity.setCreateTime(new Date());
-                        entityList.add(this.paraphraseParams(supplierEntity));
+                        // 去除Excel中重复数据
+                        String repeatData = supplierEntity.getSapCode() + supplierEntity.getTaxCode();
+                        if(CollectionUtil.contains(repeatDataList, repeatData)){
+                            fail += 1;
+                            if(!StringUtils.contains(sb.toString(), filename)){
+                                sb.append("文件" + filename + "的错误行号为:");
+                            }
+                            sb.append(count + ",");
+                            continue;
+                        }
+                        repeatDataList.add(repeatData);
+                        OutputSupplierEntity duplicate = super.getOne(
+                                new QueryWrapper<OutputSupplierEntity>()
+                                        .eq("sap_code", supplierEntity.getSapCode())
+                                        .eq("tax_code", supplierEntity.getTaxCode())
+                        );
+                        if(null != duplicate){
+                            duplicate.setDeptCode(supplierEntity.getDeptCode());
+                            duplicate.setName(supplierEntity.getName());
+                            duplicate.setAddress(supplierEntity.getAddress());
+                            duplicate.setContact(supplierEntity.getContact());
+                            duplicate.setBank(supplierEntity.getBank());
+                            duplicate.setBankAccount(supplierEntity.getBankAccount());
+                            duplicate.setEmail(supplierEntity.getEmail());
+                            duplicate.setInvoiceType(supplierEntity.getInvoiceType());
+                            duplicate.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
+                            duplicate.setUpdateTime(new Date());
+                            duplicateList.add(this.paraphraseParams(duplicate));
+                        }else {
+                            // 添加转义后的实体
+                            supplierEntity.setDelFlag("1");
+                            supplierEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
+                            supplierEntity.setCreateTime(new Date());
+                            entityList.add(this.paraphraseParams(supplierEntity));
+                        }
                     }
-
+                }
+                if(sb.toString().endsWith(",")){
+                    sb.deleteCharAt(sb.lastIndexOf(",")).append(";");
                 }
             }
+            if(sb.toString().endsWith(";")){
+                sb.deleteCharAt(sb.lastIndexOf(";")).append("。");
+            }
+
             resMap.put("total", total);
             resMap.put("success", duplicateList.size() + entityList.size());
             resMap.put("fail", fail);
+            resMap.put("failDetail", sb.toString());
 
             if(CollectionUtil.isNotEmpty(duplicateList)){
                 super.updateBatchById(duplicateList);
@@ -301,6 +321,19 @@ public class OutputSupplierServiceImpl extends ServiceImpl<OutputSupplierDao, Ou
         }
 
         return entity;
+    }
+
+    /**
+     * 根据税号查询供应商信息
+     * @param taxCode
+     * @return
+     */
+    @Override
+    public OutputSupplierEntity getListByTaxCode(String taxCode){
+        return this.getOne(
+                new QueryWrapper<OutputSupplierEntity>()
+                        .eq("tax_code",taxCode)
+        );
     }
 
 }

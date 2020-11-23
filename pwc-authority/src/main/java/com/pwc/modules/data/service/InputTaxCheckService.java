@@ -40,6 +40,13 @@ public interface InputTaxCheckService extends IService<InputTaxCheckEntity> {
     /**
      * 数据导入
      */
-    Map<String, Object> importTaxCheck(MultipartFile file);
+    Map<String, Object> importTaxCheck(MultipartFile[] files);
+
+    /**
+     *  根据商品名称查询正常数据
+     * @param name
+     * @return
+     */
+    InputTaxCheckEntity findGoodsName(String name);
 }
 

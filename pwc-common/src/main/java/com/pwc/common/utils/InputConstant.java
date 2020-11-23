@@ -51,7 +51,12 @@ public class InputConstant {
     private static Map<String, String> INVOICE_VERIFYTRYTH_MAP = Maps.newHashMap();
 
     private static Map<String, String> TOLERANCE_FLAG_MAP = Maps.newHashMap();
+    private static Map<String, String> UPDOLD_STATE = Maps.newHashMap();
+    private static Map<String, String> INVOICE_ENTITY = Maps.newHashMap();
+    private static Map<String, String> GOLDENTAX_STATUS = Maps.newHashMap();
+    private static Map<String, String> INVOICE_CLASS = Maps.newHashMap();
 
+    private static Map<String, String> INVOICE_STYLE = Maps.newHashMap();
 
 
     static {
@@ -142,8 +147,9 @@ public class InputConstant {
         INVOICE_FROMTO_MAP.put("3", "报销费用");
         ALL.put("invoiceFromto", INVOICE_FROMTO_MAP);
 
-        INVOICE_UPLOADTYPE_MAP.put("1", "手动上传pdf");
-        INVOICE_UPLOADTYPE_MAP.put("2", "扫描上传");
+        INVOICE_UPLOADTYPE_MAP.put("0", "抵账库同步");
+        INVOICE_UPLOADTYPE_MAP.put("1", "扫描仪上传");
+        INVOICE_UPLOADTYPE_MAP.put("2", "手工上传");
         ALL.put("invoiceUploadType", INVOICE_UPLOADTYPE_MAP);
 
         INVOICE_VERIFYTRYTH_MAP.put("1", "自动验真");
@@ -156,7 +162,41 @@ public class InputConstant {
         ALL.put("toleranceFlag", TOLERANCE_FLAG_MAP);
 
 
+        UPDOLD_STATE.put("0","未识别");
+        UPDOLD_STATE.put("1","识别失败");
+        UPDOLD_STATE.put("2","识别成功");
+        UPDOLD_STATE.put("3","重复识别");
+        ALL.put("UpdoldState", UPDOLD_STATE);
 
+        INVOICE_ENTITY.put("1","增值税专用发票");
+        INVOICE_ENTITY.put("4","增值税普通发票");
+        INVOICE_ENTITY.put("10","增值税电子普通发票");
+        ALL.put("invoiceEntity",INVOICE_ENTITY);
+
+        GOLDENTAX_STATUS.put("0","正常");
+        GOLDENTAX_STATUS.put("1","失控");
+        GOLDENTAX_STATUS.put("2","作废");
+        GOLDENTAX_STATUS.put("3","红冲");
+        ALL.put("goldenTaxStatus",GOLDENTAX_STATUS);
+
+        INVOICE_CLASS.put("0","NonPo Related");
+        INVOICE_CLASS.put("1","MKRO");
+        INVOICE_CLASS.put("2","DFU");
+        INVOICE_CLASS.put("3","EDI");
+        INVOICE_CLASS.put("4","R&D_外部");
+        INVOICE_CLASS.put("5","IC_R&D");
+        INVOICE_CLASS.put("6","IC_RRB");
+        INVOICE_CLASS.put("7","IC_非R&D");
+        INVOICE_CLASS.put("8","Red-letter VAT");
+        INVOICE_CLASS.put("9","General");
+        ALL.put("invoiceClass",GOLDENTAX_STATUS);
+
+        INVOICE_STYLE.put("0","未识别");
+        INVOICE_STYLE.put("1","识别失败");
+        INVOICE_STYLE.put("2","识别成功");
+        INVOICE_STYLE.put("4","重复识别");
+        INVOICE_STYLE.put("5","重复识别");
+        ALL.put("invoiceStyle", INVOICE_STYLE);
     }
 
     public static String getValue(String key, String type) {
@@ -220,7 +260,7 @@ public class InputConstant {
          */
         VERIFICATION_FAILED("4"),
         /**
-         * 待匹配（验真成功）
+         * （验真成功）
          */
         PENDING_MATCHED("5"),
         /**
@@ -244,7 +284,7 @@ public class InputConstant {
          */
         CERTIFICATION("10"),
         /**
-         * 撤销认证
+         * 撤销认证中
          */
         UNDO_CERTIFICATION("11"),
         /**
@@ -255,6 +295,10 @@ public class InputConstant {
          * 认证失败
          */
         AUTHENTICATION_FAILED("13"),
+        /**
+         * 撤销认证失败
+         */
+        REVOKE_CERTIFICATION("14"),
         /**
          * 完成
          */
@@ -268,19 +312,19 @@ public class InputConstant {
          */
         REFUND("-2"),
         /**
-         * 删除（入账前）
+         * 购方信息不一致
          */
-        DELETE("-3"),
+        DIFFERENT_MESSAGE("-3"),
         /**
-         * 冲销（入账前）
+         *   购方信息错误
          */
         CHARGE_AGAINST("-4"),
         /**ii
-         * 串号（OCR识别/发票号码和发票代码不一致）
+         * PO信息缺失
          */
         DIFFERENCE("-5"),
         /**
-         * 红冲
+         * 税率异常
          */
         REVERSE("-6"),
         /**
@@ -303,34 +347,35 @@ public class InputConstant {
     }
 
     /*
-    *
-    * */
+     *
+     * */
 
     public enum TaxationStats {
-        BENRU_WEIREN("1"),// 1 本月入账未认证
-
-        BENRU_BENREN("2"),// 2 本月入账认证
-
-        QIANRU_WEIREN("3"),//3 前月入账未认证
-
-        QIANRU_BENREN("4"),//4 前月入账本月认证
-
-        BENREN_WEIRU("5"),//5 本月认证未入账
-
-        BENREN_BENRU("6"),//6 本月认证入账
-
-        QIANREN_WEIRU("7"),//7 前月认证未入账
-        
-        QIANEN_BENRU("8"),//8 前月认证本月入账
-
-        REASON("9"), //9 调整原因
-
-        TOLERANCE("10"),//设置容差数据
-
-        FLAG_TAXATION("1"),// 1 页面展示打√
-
-        YES("1"), // 数据处理标志
-         NO("0")
+        // 1 本月入账未认证
+        BENRU_WEIREN("1"),
+        // 2 本月入账认证
+        BENRU_BENREN("2"),
+        //3 前月入账未认证
+        QIANRU_WEIREN("3"),
+        //4 前月入账本月认证
+        QIANRU_BENREN("4"),
+        //5 本月认证未入账
+        BENREN_WEIRU("5"),
+        //6 本月认证入账
+        BENREN_BENRU("6"),
+        //7 前月认证未入账
+        QIANREN_WEIRU("7"),
+        //8 前月认证本月入账
+        QIANEN_BENRU("8"),
+        //9 调整原因
+        REASON("9"),
+        //设置容差数据
+        TOLERANCE("10"),
+        // 1 页面展示打√
+        FLAG_TAXATION("1"),
+        // 数据处理标志
+        YES("1"),
+        NO("0")
         ;
         private  String value;
 
@@ -341,4 +386,170 @@ public class InputConstant {
             return value;
         }
     }
+    public enum InvoiceStyle {
+        // 其他
+        NULL(0),
+        // ap蓝
+        BLUE(1),
+        // ap 红
+        RED(2),
+        // po
+        PO(3),
+        // te
+        TE(4),
+        // AP
+        AP(5)
+        ;
+        ;
+        private  int value;
+
+        InvoiceStyle(int value) {
+            this.value = value;
+        }
+        public int getValue() {
+            return value;
+        }
+    }
+    public enum UpdoldState {
+        // 未识别
+        NULL("0"),
+        // 识别失败
+        RECOGNITION_FAILED("1"),
+        // 识别成功
+        PENDING_VERIFICATION("2"),
+        // 重复识别
+        REPEAT("3"),
+        ;
+        private  String value;
+
+        UpdoldState(String value) {
+            this.value = value;
+        }
+        public String getValue() {
+            return value;
+        }
+    }
+
+    // TODO 发票分类
+
+    /**
+     * 发票分类(0:NonPo Related; 1:MKRO; 2:DFU; 3:EDI; 4:R&D_外部; 5:IC_R&D; 6:IC_RRB; 7:IC_非R&D; 8:Red-letter VAT; 9:General)
+     * @param Related
+     */
+    public enum InvoiceClass {
+        /**  NonPo Related */
+        NONPO_RELATED("0"),
+        /** MKRO */
+        MKRO("1"),
+        /** DFU */
+        DFU("2"),
+        //  EDI
+        EDI("3"),
+        // R&D_外部
+        RD_OUT("4"),
+        // IC_RRBIC_RRB
+        IC_RD("5"),
+        // IC_RRB
+        IC_RRB("6"),
+        // IC_非R&D
+        IC_NOTRD("7"),
+        // Red-letter VAT
+        RED_LETTER("8"),
+        // General
+        GENERAL("9"),
+        ;
+        private  String value;
+
+        InvoiceClass(String value) {
+            this.value = value;
+        }
+        public String getValue() {
+            return value;
+        }
+    }
+    /**
+     *    1 增值税专用发票  4 增值税普通发票  10 增值税电子普通发票
+     */
+    public enum InvoiceEntity{
+        SPECIAL("1"),
+        AVERAGE("4"),
+        ELECTRON_AVERAGE("10"),
+        ;
+
+        private  String value;
+
+        InvoiceEntity(String value) {
+            this.value = value;
+        }
+        public String getValue() {
+            return value;
+        }
+    }
+    /**
+     *    1 识别成功  2 已匹配
+     */
+    public enum InvoicePo{
+        REPEAT("0"),
+        SUCCESS("1"),
+        MATCH("2"),
+        ;
+        private  String value;
+        InvoicePo(String value) {
+            this.value = value;
+        }
+        public String getValue() {
+            return value;
+        }
+    }
+    /**
+     * 金税发票状态0 正常，1 失控，2 作废，3 红冲
+     */
+    public enum GoldenTaxStatus{
+        NORMAL("0"),
+        OUT_OF_CONTROL("1"),
+        INVALID("2"),
+        RED_PUNCH("3"),
+        ;
+        private  String value;
+        GoldenTaxStatus(String value) {
+            this.value = value;
+        }
+        public String getValue() {
+            return value;
+        }
+    }
+
+    /**
+     * 通用状态0 否 1 是
+     */
+    public enum YesAndNo{
+        NO("0"),
+        YES("1"),
+        ;
+        private  String value;
+        YesAndNo(String value) {
+            this.value = value;
+        }
+        public String getValue() {
+            return value;
+        }
+    }
+
+    /**
+     * 匹配状态0 否 1 是 2 失败
+     */
+    public enum InvoiceMatch{
+        MATCH_NO("0"),
+        MATCH_YES("1"),
+        MATCH_ERROR("2"),
+        ;
+        private  String value;
+        InvoiceMatch(String value) {
+            this.value = value;
+        }
+        public String getValue() {
+            return value;
+        }
+    }
+
 }

@@ -29,5 +29,27 @@ public interface InputCompanyService extends IService<InputCompanyEntity> {
      * @return
      */
     InputCompanyEntity getByDeptId(Long deptId);
+
+    /**
+     * 统计情况列表
+     */
+    PageUtils list(Map<String, Object> params);
+
+
+    /**
+     * 统计详情列表
+     */
+    PageUtils details(Integer companyId, Map<String, Object> params);
+
+    /**
+     * 统计成功发票列表
+     */
+    PageUtils invoices(Integer companyId, Map<String, Object> params);
+
+    /**
+     * 统计差异发票列表
+     */
+    PageUtils differenceInvoices(Integer companyId, Map<String, Object> params);
+
 }
 

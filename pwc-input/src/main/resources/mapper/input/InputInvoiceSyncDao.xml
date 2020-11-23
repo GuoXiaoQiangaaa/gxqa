@@ -5,7 +5,8 @@
 
     <insert id="insertDetailsBatch">
         insert into input_company_task_details
-        (company_id,type,statistics_month,invoice_type,deduct_invoice_num,deduct_amount,deduct_tax,un_deduct_invoice_num,un_deduct_amount,un_deduct_tax)
+        (company_id,type,statistics_month,invoice_type,deduct_invoice_num,deduct_amount,deduct_tax,
+         un_deduct_invoice_num,un_deduct_amount,un_deduct_tax)
         values
         <foreach collection="details" item="i" index="index" separator=",">
             (#{companyEntity.id},#{companyEntity.applyResult},#{companyEntity.statisticsMonth},
@@ -17,7 +18,8 @@
 
     <insert id="insertDifferenceBatch">
         insert into input_company_task_difference
-        (company_id,type,statistics_month,invoice_type,invoice_code,invoice_number,amount,valid_tax,export_reject_no,invoice_status,manage_status,deduct_type,tax,payment_certificate_no)
+        (company_id,type,statistics_month,invoice_type,invoice_code,invoice_number,amount,valid_tax,
+         export_reject_no,invoice_status,manage_status,deduct_type,tax,payment_certificate_no)
         values
         <foreach collection="differenceInvoices" item="i" index="index" separator=",">
             (#{companyEntity.id},#{companyEntity.applyResult},#{companyEntity.statisticsMonth},

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputInvoiceCustomsDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.pwc.modules.input.entity.InputInvoiceCustomsEntity" id="inputInvoiceCustomsMap">
+        <result property="id" column="id"/>
+        <result property="payNo" column="pay_no"/>
+        <result property="billingDate" column="billing_date"/>
+        <result property="totalTax" column="total_tax"/>
+        <result property="invoiceType" column="invoice_type"/>
+        <result property="purchaserTaxNo" column="purchaser_tax_no"/>
+        <result property="purchaserName" column="purchaser_name"/>
+        <result property="deductible" column="deductible"/>
+        <result property="deductiblePeriod" column="deductible_period"/>
+        <result property="deductibleDate" column="deductible_date"/>
+        <result property="deductibleMode" column="deductible_mode"/>
+        <result property="managementStatus" column="management_status"/>
+        <result property="infoSources" column="info_sources"/>
+        <result property="effectiveTaxAmount" column="effective_tax_amount"/>
+        <result property="overdueCheckMark" column="overdue_check_mark"/>
+        <result property="abnormalType" column="abnormal_type"/>
+        <result property="auditStatus" column="audit_status"/>
+        <result property="resaleCertificateNumber" column="resale_certificate_number"/>
+    </resultMap>
+
+    <select id="getListByShow" resultType="int">
+        SELECT count(1)
+        FROM input_invoice_customs a
+    </select>
+
+    <!--作废(退票)-->
+    <update id="updateByIdReturn">
+        UPDATE input_invoice_customs
+        <set>
+            deductible = '5', return_reason = #{returnReason}, update_by = #{updateBy}, update_time = #{updateTime}
+        </set>
+        WHERE id in
+        <foreach collection="ids" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+    <select id="getCountByVoucherCode" resultType="string">
+        select sum(total_tax)
+        from input_invoice_customs
+        where voucher_code is #{voucherCode}
+    </select>
+
+    <update id="updateByentryState">
+        update input_invoice_customs
+        <set>
+            entry_state = #{entryState}
+        </set>
+        where voucher_code is #{voucherCode}
+    </update>
+
+    <update id="updateByVoucherCode">
+        update input_invoice_customs
+        <set>
+            voucher_code = #{voucherCode}
+        </set>
+        where pay_no in
+        <foreach collection="list" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+</mapper>

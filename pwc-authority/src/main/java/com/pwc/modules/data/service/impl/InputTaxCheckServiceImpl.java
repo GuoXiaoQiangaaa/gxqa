@@ -3,31 +3,26 @@ package com.pwc.modules.data.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
-import com.pwc.common.excel.ImportExcel;
 import com.pwc.common.exception.RRException;
+import com.pwc.common.utils.PageUtils;
+import com.pwc.common.utils.Query;
+import com.pwc.modules.data.dao.InputTaxCheckDao;
+import com.pwc.modules.data.entity.InputTaxCheckEntity;
+import com.pwc.modules.data.service.InputTaxCheckService;
 import com.pwc.modules.sys.shiro.ShiroUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-
-import java.text.NumberFormat;
-import java.util.*;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.pwc.common.utils.PageUtils;
-import com.pwc.common.utils.Query;
-
-import com.pwc.modules.data.dao.InputTaxCheckDao;
-import com.pwc.modules.data.entity.InputTaxCheckEntity;
-import com.pwc.modules.data.service.InputTaxCheckService;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.constraints.NotBlank;
+import java.text.NumberFormat;
+import java.util.*;
 
 /**
  * 进项税率校验服务实现
@@ -150,7 +145,7 @@ public class InputTaxCheckServiceImpl extends ServiceImpl<InputTaxCheckDao, Inpu
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Map<String, Object> importTaxCheck(MultipartFile file) {
+    public Map<String, Object> importTaxCheck(MultipartFile[] files) {
         Map<String, Object> resMap = new HashMap<>();
         // 数据校验正确的集合
         List<InputTaxCheckEntity> entityList = new ArrayList<>();
@@ -160,62 +155,86 @@ public class InputTaxCheckServiceImpl extends ServiceImpl<InputTaxCheckDao, Inpu
         int total = 0;
         // 数据有误条数
         int fail = 0;
+        // 记录excel中的重复数据
+        List<String> repeatDataList = new ArrayList<>();
+        // 记录数据有误的文件
+        StringBuffer sb = new StringBuffer();
         try {
-            ExcelReader reader = ExcelUtil.getReader(file.getInputStream());
-            String[] excelHead = {"货品名称", "税收分类编码", "非法税率"};
-            String [] excelHeadAlias = {"goodsName", "taxTypeCode", "taxRate"};
-            for (int i = 0; i < excelHead.length; i++) {
-                reader.addHeaderAlias(excelHead[i], excelHeadAlias[i]);
-            }
-            List<InputTaxCheckEntity> dataList = reader.read(0, 1, InputTaxCheckEntity.class);
+            for (MultipartFile file : files) {
+                String filename = file.getOriginalFilename();
+                ExcelReader reader = ExcelUtil.getReader(file.getInputStream());
+                String[] excelHead = {"货品名称", "税收分类编码", "非法税率"};
+                String [] excelHeadAlias = {"goodsName", "taxTypeCode", "taxRate"};
+                for (int i = 0; i < excelHead.length; i++) {
+                    reader.addHeaderAlias(excelHead[i], excelHeadAlias[i]);
+                }
+                List<InputTaxCheckEntity> dataList = reader.read(0, 1, InputTaxCheckEntity.class);
 
-            if(CollectionUtils.isEmpty(dataList)){
-                log.error("上传的Excel为空,请重新上传");
-                throw new RRException("上传的Excel为空,请重新上传");
-            }
-            total = dataList.size();
-            List<String> repeatDataList = new ArrayList<>();
-            for (InputTaxCheckEntity taxCheckEntity : dataList) {
-                // 参数校验
-                if(1 == checkExcel(taxCheckEntity)){
-                    // 参数有误
-                    fail += 1;
-                }else {
-                    // 税率获取到的为小数类型,转为百分数
-                    String taxRate = taxCheckEntity.getTaxRate();
-                    NumberFormat nf = NumberFormat.getPercentInstance();
-                    taxCheckEntity.setTaxRate(nf.format(Double.valueOf(taxRate)));
-                    // 去除Excel中重复数据
-                    String repeatData = taxCheckEntity.getGoodsName() + taxCheckEntity.getTaxTypeCode() + taxCheckEntity.getTaxRate();
-                    if(CollectionUtil.contains(repeatDataList, repeatData)){
+                if(CollectionUtils.isEmpty(dataList)){
+                    log.error("上传的{}Excel为空,请重新上传", filename);
+//                    throw new RRException("上传的Excel为空,请重新上传");
+                    continue;
+                }
+                total += dataList.size();
+                int count = 1;
+                for (InputTaxCheckEntity taxCheckEntity : dataList) {
+                    count++;
+                    // 参数校验
+                    if(1 == checkExcel(taxCheckEntity)){
+                        // 参数有误
                         fail += 1;
-                        continue;
-                    }
-                    repeatDataList.add(repeatData);
-
-                    // 验重
-                    InputTaxCheckEntity duplicate = super.getOne(
-                            new QueryWrapper<InputTaxCheckEntity>()
-                                    .eq("goods_name", taxCheckEntity.getGoodsName())
-                                    .eq("tax_type_code", taxCheckEntity.getTaxTypeCode())
-                                    .eq("tax_rate", taxCheckEntity.getTaxRate())
-                    );
-                    if(null != duplicate){
-                        duplicate.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
-                        duplicate.setUpdateTime(new Date());
-                        duplicateList.add(duplicate);
+                        if(!StringUtils.contains(sb.toString(), filename)){
+                            sb.append("文件" + filename + "的错误行号为:");
+                        }
+                        sb.append(count + ",");
                     }else {
-                        // 添加校验正确的实体
-                        taxCheckEntity.setDelFlag("1");
-                        taxCheckEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
-                        taxCheckEntity.setCreateTime(new Date());
-                        entityList.add(taxCheckEntity);
+                        // 税率获取到的为小数类型,转为百分数
+                        String taxRate = taxCheckEntity.getTaxRate();
+                        NumberFormat nf = NumberFormat.getPercentInstance();
+                        taxCheckEntity.setTaxRate(nf.format(Double.valueOf(taxRate)));
+                        // 去除Excel中重复数据
+                        String repeatData = taxCheckEntity.getGoodsName() + taxCheckEntity.getTaxTypeCode() + taxCheckEntity.getTaxRate();
+                        if(CollectionUtil.contains(repeatDataList, repeatData)){
+                            fail += 1;
+                            if(!StringUtils.contains(sb.toString(), filename)){
+                                sb.append("文件" + filename + "的错误行号为:");
+                            }
+                            sb.append(count + ",");
+                            continue;
+                        }
+                        repeatDataList.add(repeatData);
+
+                        // 验重
+                        InputTaxCheckEntity duplicate = super.getOne(
+                                new QueryWrapper<InputTaxCheckEntity>()
+                                        .eq("goods_name", taxCheckEntity.getGoodsName())
+                                        .eq("tax_type_code", taxCheckEntity.getTaxTypeCode())
+                                        .eq("tax_rate", taxCheckEntity.getTaxRate())
+                        );
+                        if(null != duplicate){
+                            duplicate.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
+                            duplicate.setUpdateTime(new Date());
+                            duplicateList.add(duplicate);
+                        }else {
+                            // 添加校验正确的实体
+                            taxCheckEntity.setDelFlag("1");
+                            taxCheckEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
+                            taxCheckEntity.setCreateTime(new Date());
+                            entityList.add(taxCheckEntity);
+                        }
                     }
                 }
+                if(sb.toString().endsWith(",")){
+                    sb.deleteCharAt(sb.lastIndexOf(",")).append(";");
+                }
+            }
+            if(sb.toString().endsWith(";")){
+                sb.deleteCharAt(sb.lastIndexOf(";")).append("。");
             }
             resMap.put("total", total);
             resMap.put("success", duplicateList.size() + entityList.size());
             resMap.put("fail", fail);
+            resMap.put("failDetail", sb.toString());
 
             if(CollectionUtil.isNotEmpty(duplicateList)){
                 super.updateBatchById(duplicateList);
@@ -249,6 +268,19 @@ public class InputTaxCheckServiceImpl extends ServiceImpl<InputTaxCheckDao, Inpu
             return 1;
         }
         return 0;
+    }
+    /**
+     * 根据商品名称查询正常数据
+     */
+    @Override
+    public InputTaxCheckEntity findGoodsName(String name){
+        InputTaxCheckEntity checkEntity = super.getOne(
+                new QueryWrapper<InputTaxCheckEntity>()
+                        .eq("goods_name", name)
+                .eq("del_flag",1)
+        );
+        return checkEntity;
+
     }
 
 }

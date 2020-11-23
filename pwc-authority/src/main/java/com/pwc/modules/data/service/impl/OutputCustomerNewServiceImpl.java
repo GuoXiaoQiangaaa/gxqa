@@ -3,26 +3,24 @@ package com.pwc.modules.data.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
-import com.pwc.common.excel.ImportExcel;
-import com.pwc.common.exception.RRException;
-import com.pwc.modules.sys.shiro.ShiroUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-
-import java.util.*;
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.pwc.common.exception.RRException;
 import com.pwc.common.utils.PageUtils;
 import com.pwc.common.utils.Query;
-
 import com.pwc.modules.data.dao.OutputCustomerNewDao;
 import com.pwc.modules.data.entity.OutputCustomerNewEntity;
 import com.pwc.modules.data.service.OutputCustomerNewService;
+import com.pwc.modules.sys.shiro.ShiroUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.*;
 
 /**
  * 客户信息服务实现
@@ -31,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
  * @date 2020/8/24
  */
 @Service("outputCustomerNewService")
+@Slf4j
 public class OutputCustomerNewServiceImpl extends ServiceImpl<OutputCustomerNewDao, OutputCustomerNewEntity> implements OutputCustomerNewService {
 
     @Override
@@ -141,7 +140,7 @@ public class OutputCustomerNewServiceImpl extends ServiceImpl<OutputCustomerNewD
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Map<String, Object> importCustomer(MultipartFile file) {
+    public Map<String, Object> importCustomer(MultipartFile[] files) {
         Map<String, Object> resMap = new HashMap<>();
         // 数据校验正确的集合
         List<OutputCustomerNewEntity> entityList = new ArrayList<>();
@@ -151,66 +150,90 @@ public class OutputCustomerNewServiceImpl extends ServiceImpl<OutputCustomerNewD
         int total = 0;
         // 数据有误条数
         int fail = 0;
+        // 记录excel中的重复数据
+        List<String> repeatDataList = new ArrayList<>();
+        // 记录数据有误的文件
+        StringBuffer sb = new StringBuffer();
         try {
-            ExcelReader reader = ExcelUtil.getReader(file.getInputStream());
-            String[] excelHead = {"客户SAP代码（必填）", "公司代码", "英文客户名称", "中文客户名称（必填）",
-                    "纳税人识别号（必填）", "地址（必填）", "电话号码（必填）", "开户行", "银行账号", "客户邮箱"};
-            String [] excelHeadAlias = {"sapCode", "deptCode", "name", "nameCn", "taxCode", "address", "contact",
-                    "bank", "bankAccount", "email"};
-            for (int i = 0; i < excelHead.length; i++) {
-                reader.addHeaderAlias(excelHead[i], excelHeadAlias[i]);
-            }
-            List<OutputCustomerNewEntity> dataList = reader.read(0, 1, OutputCustomerNewEntity.class);
+            for (MultipartFile file : files) {
+                String filename = file.getOriginalFilename();
+                ExcelReader reader = ExcelUtil.getReader(file.getInputStream());
+                String[] excelHead = {"客户SAP代码（必填）", "公司代码", "英文客户名称", "中文客户名称（必填）",
+                        "纳税人识别号（必填）", "地址（必填）", "电话号码（必填）", "开户行", "银行账号", "客户邮箱"};
+                String [] excelHeadAlias = {"sapCode", "deptCode", "name", "nameCn", "taxCode", "address", "contact",
+                        "bank", "bankAccount", "email"};
+                for (int i = 0; i < excelHead.length; i++) {
+                    reader.addHeaderAlias(excelHead[i], excelHeadAlias[i]);
+                }
+                List<OutputCustomerNewEntity> dataList = reader.read(0, 1, OutputCustomerNewEntity.class);
 
-            if(CollectionUtils.isEmpty(dataList)){
-                log.error("上传的Excel为空,请重新上传");
-                throw new RRException("上传的Excel为空,请重新上传");
-            }
-            total = dataList.size();
-            List<String> repeatDataList = new ArrayList<>();
-            for (OutputCustomerNewEntity customerEntity : dataList) {
-                // 参数校验
-                if(1 == checkExcel(customerEntity)){
-                    // 参数有误
-                    fail += 1;
-                }else {
-                    // 去除Excel中重复数据
-                    String repeatData = customerEntity.getSapCode() + customerEntity.getTaxCode();
-                    if(CollectionUtil.contains(repeatDataList, repeatData)){
+                if(CollectionUtils.isEmpty(dataList)){
+                    log.error("上传的{}Excel为空,请重新上传", filename);
+//                    throw new RRException("上传的Excel为空,请重新上传");
+                    continue;
+                }
+                total += dataList.size();
+                int count = 1;
+                for (OutputCustomerNewEntity customerEntity : dataList) {
+                    count++;
+                    // 参数校验
+                    if(1 == checkExcel(customerEntity)){
+                        // 参数有误
                         fail += 1;
-                        continue;
-                    }
-                    repeatDataList.add(repeatData);
-                    // 验重
-                    OutputCustomerNewEntity duplicate = super.getOne(
-                            new QueryWrapper<OutputCustomerNewEntity>()
-                                    .eq("sap_code", customerEntity.getSapCode())
-                                    .eq("tax_code", customerEntity.getTaxCode())
-                    );
-                    if(null != duplicate){
-                        duplicate.setDeptCode(customerEntity.getDeptCode());
-                        duplicate.setName(customerEntity.getName());
-                        duplicate.setNameCn(customerEntity.getNameCn());
-                        duplicate.setAddress(customerEntity.getAddress());
-                        duplicate.setContact(customerEntity.getContact());
-                        duplicate.setBank(customerEntity.getBank());
-                        duplicate.setBankAccount(customerEntity.getBankAccount());
-                        duplicate.setEmail(customerEntity.getEmail());
-                        duplicate.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
-                        duplicate.setUpdateTime(new Date());
-                        duplicateList.add(duplicate);
+                        if(!StringUtils.contains(sb.toString(), filename)){
+                            sb.append("文件" + filename + "的错误行号为:");
+                        }
+                        sb.append(count + ",");
                     }else {
-                        // 添加校验正确的实体
-                        customerEntity.setDelFlag("1");
-                        customerEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
-                        customerEntity.setCreateTime(new Date());
-                        entityList.add(customerEntity);
+                        // 去除Excel中重复数据
+                        String repeatData = customerEntity.getSapCode() + customerEntity.getTaxCode();
+                        if(CollectionUtil.contains(repeatDataList, repeatData)){
+                            fail += 1;
+                            if(!StringUtils.contains(sb.toString(), filename)){
+                                sb.append("文件" + filename + "的错误行号为:");
+                            }
+                            sb.append(count + ",");
+                            continue;
+                        }
+                        repeatDataList.add(repeatData);
+                        // 验重
+                        OutputCustomerNewEntity duplicate = super.getOne(
+                                new QueryWrapper<OutputCustomerNewEntity>()
+                                        .eq("sap_code", customerEntity.getSapCode())
+                                        .eq("tax_code", customerEntity.getTaxCode())
+                        );
+                        if(null != duplicate){
+                            duplicate.setDeptCode(customerEntity.getDeptCode());
+                            duplicate.setName(customerEntity.getName());
+                            duplicate.setNameCn(customerEntity.getNameCn());
+                            duplicate.setAddress(customerEntity.getAddress());
+                            duplicate.setContact(customerEntity.getContact());
+                            duplicate.setBank(customerEntity.getBank());
+                            duplicate.setBankAccount(customerEntity.getBankAccount());
+                            duplicate.setEmail(customerEntity.getEmail());
+                            duplicate.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
+                            duplicate.setUpdateTime(new Date());
+                            duplicateList.add(duplicate);
+                        }else {
+                            // 添加校验正确的实体
+                            customerEntity.setDelFlag("1");
+                            customerEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
+                            customerEntity.setCreateTime(new Date());
+                            entityList.add(customerEntity);
+                        }
                     }
                 }
+                if(sb.toString().endsWith(",")){
+                    sb.deleteCharAt(sb.lastIndexOf(",")).append(";");
+                }
+            }
+            if(sb.toString().endsWith(";")){
+                sb.deleteCharAt(sb.lastIndexOf(";")).append("。");
             }
             resMap.put("total", total);
             resMap.put("success", duplicateList.size() + entityList.size());
             resMap.put("fail", fail);
+            resMap.put("failDetail", sb.toString());
 
             if(CollectionUtil.isNotEmpty(duplicateList)){
                 super.updateBatchById(duplicateList);
@@ -218,7 +241,6 @@ public class OutputCustomerNewServiceImpl extends ServiceImpl<OutputCustomerNewD
             if(CollectionUtil.isNotEmpty(entityList)){
                 super.saveBatch(entityList);
             }
-
 
             return resMap;
         } catch (RRException e){

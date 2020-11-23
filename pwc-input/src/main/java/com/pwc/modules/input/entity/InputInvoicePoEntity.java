@@ -1,7 +1,10 @@
 package com.pwc.modules.input.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.pwc.common.utils.excel.annotation.ExcelField;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -15,14 +18,64 @@ import java.util.Date;
 @Data
 @TableName("input_invoice_po")
 public class InputInvoicePoEntity implements Serializable {
-
+    /**
+     *  poid
+     */
     @TableId
-    private Integer poid;  // poid
-    private String poNumber; // po号码
-    private String invoiceNumber; // 发票号码
-    private Date createTime; // 创建日期
-    private Date updateTime; // 操作日期
-    private String createBy; // 创建人
-    private String updateBy; // 操作人
-    private String deptId; // 所属公司
+    private Integer poId;
+    /**
+     * po号码
+     */
+    @ExcelField(title="po号码", align=1, sort=20)
+    private String poNumber;
+    /**
+     * 发票号码
+     */
+    @ExcelField(title="发票号码", align=1, sort=30)
+    private String invoiceNumber;
+    /**
+     * 购方名称
+     */
+    @ExcelField(title="购方名称", align=1, sort=10)
+    private String  companyName;
+    /**
+     * 票据地址
+     */
+    private String  invoiceImage;
+    /**
+     * 状态 0识别失败 1识别成功 2 已匹配
+     */
+    @ExcelField(title="状态", align=1, sort=40,dictType = "UpdoldState")
+    private String status;
+    /**
+     * 创建日期
+     */
+    @TableField(fill = FieldFill.INSERT)
+    private Date createTime;
+    /**
+     *  操作日期
+     */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Date updateTime;
+    /**
+     *   创建人
+      */
+    @TableField(fill = FieldFill.INSERT)
+    private Integer createBy;
+    /**
+     * 操作人
+     */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Integer updateBy;
+    /**
+     * 所属公司
+     */
+    private Integer deptId;
+    /**
+     * 关联上传id
+     */
+    private Integer uploadId;
+    /**类型*/
+    @TableField(exist = false)
+    private Integer sourceStyle;
 }

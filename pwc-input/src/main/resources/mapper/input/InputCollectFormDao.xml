@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputCollectFormDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.pwc.modules.input.entity.InputCollectFormEntity" id="inputCollectFormMap">
+        <result property="formId" column="form_id"/>
+        <result property="collectType" column="collect_type"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="deptName" column="dept_name"/>
+        <result property="authDate" column="auth_date"/>
+        <result property="itemType" column="item_type"/>
+        <result property="itemCount" column="item_count"/>
+        <result property="taxPrice" column="tax_price"/>
+        <result property="totalPrice" column="total_price"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+
+</mapper>

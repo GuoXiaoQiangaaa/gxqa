@@ -87,7 +87,7 @@
 
     <select id="getListAndCreateName" resultType="com.pwc.modules.input.entity.InputInvoiceEntity">
         SELECT
-        <include refid="invoiceColumns"/>,b.username AS "createUserName"
+        a.*,b.username AS "createUserName"
         FROM input_invoice a
         LEFT JOIN sys_user b on a.create_by = b.user_id
         WHERE a.id in
@@ -932,7 +932,7 @@
     <select id="getOAInvoiceList" resultType="Integer">
         select count(*)
         from input_invoice
-    where invoice_number=#{invoiceNumber} and invoice_code=#{invoiceCode} and (invoice_return ="0" or invoice_delete = "0")
+    where invoice_number=#{invoiceNumber} and invoice_code=#{invoiceCode} and invoice_return ="0" and invoice_delete = "0" and invoice_status !="-7" and repeat_bill ="0"
     </select>
     <update id="updateRepeat">
         update input_invoice
@@ -1233,6 +1233,12 @@
 
     <select id="getLastSeq"  parameterType="java.lang.String" resultType="java.lang.String" >
         select max(invoice_seq) as seq FROM input_invoice  where invoice_seq like concat('%',#{invoiceSeq},'%')
+    </select>
+
+    <select id="getCountByVoucherCode" resultType="string">
+        select sum(invoice_tax_price)
+        from input_invoice
+        where entry_success_code is #{voucherCode}
     </select>
 
 </mapper>

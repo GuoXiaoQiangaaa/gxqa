@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputInvoiceUploadDao">
+    <select id="getListAndCreateName" resultType="com.pwc.modules.input.entity.InputInvoiceUploadEntity">
+        SELECT
+        a.* ,b.username AS "createUserName"
+        FROM input_invoice_upload a
+        LEFT JOIN sys_user b on a.create_by = b.user_id
+        WHERE a.upload_id in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{item.uploadId}
+        </foreach>
+        <if test="createUserName != null and createUserName != ''">
+            and b.username =#{createUserName}
+        </if>
+        ORDER BY a.update_time DESC
+    </select>
+
+</mapper>

@@ -34,10 +34,46 @@
 		</if>
 	</select>
 
+	<!-- 根据部门id获取税号 -->
+	<select id="queryTaxCodeById" parameterType="java.lang.Long" resultType="java.lang.String">
+		select tax_code from sys_dept where del_flag = 0 and dept_id = #{deptId}
+	</select>
+
 	<!-- 根据部门id查询拥有全部或个人数据权限的用户名 -->
 	<select id="queryUsernameByDeptId" resultType="java.lang.String">
 		SELECT t1.username FROM sys_user t1 WHERE EXISTS (
 				SELECT t2.user_id FROM sys_user_menu t2 WHERE t1.user_id = t2.user_id AND t2.dept_id = #{deptId} AND t2.just_own = #{justOwn}
 			)
+	</select>
+
+	<!-- 添加企业信息 -->
+	<insert id="saveCompany" parameterType="com.pwc.modules.sys.entity.InputCompanyDto">
+		insert into input_company(company_number, company_name, company_duty_paragraph, company_address_phone,
+		                          company_bank_account, status, dept_id, create_by, create_time)
+		                          values(#{company.companyNumber, jdbcType=VARCHAR}, #{company.companyName, jdbcType=VARCHAR},
+										 #{company.companyDutyParagraph, jdbcType=VARCHAR}, #{company.companyAddressPhone, jdbcType=VARCHAR},
+										 #{company.companyBankAccount, jdbcType=VARCHAR}, #{company.status, jdbcType=VARCHAR},
+		                                 #{company.deptId, jdbcType=BIGINT}, #{company.createBy, jdbcType=VARCHAR},
+		                                 #{company.createTime, jdbcType=TIMESTAMP})
+	</insert>
+
+	<!-- 更新企业信息 -->
+	<update id="updateCompany" parameterType="com.pwc.modules.sys.entity.InputCompanyDto">
+		update input_company set company_number = #{company.companyNumber, jdbcType=VARCHAR},
+								 company_name = #{company.companyName, jdbcType=VARCHAR},
+								 company_duty_paragraph = #{company.companyDutyParagraph, jdbcType=VARCHAR},
+								 company_address_phone = #{company.companyAddressPhone, jdbcType=VARCHAR},
+								 company_bank_account = #{company.companyBankAccount, jdbcType=VARCHAR},
+								 dept_id = #{company.deptId, jdbcType=BIGINT},
+		                         update_by = #{company.updateBy, jdbcType=VARCHAR},
+		                         update_time = #{company.updateTime, jdbcType=TIMESTAMP}
+							  where id = #{company.id, jdbcType=BIGINT}
+	</update>
+
+	<!-- 根据dept_id获取company -->
+	<select id="queryCompanyByDeptId" parameterType="java.lang.Long" resultType="com.pwc.modules.sys.entity.InputCompanyDto">
+		select id, company_number, company_name, company_duty_paragraph, company_address_phone, company_bank_account,
+			   dept_id, create_by, create_time, update_by, update_time
+		from input_company where dept_id = #{deptId, jdbcType=BIGINT}
 	</select>
 </mapper>

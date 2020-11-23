@@ -41,25 +41,22 @@ public interface InputInvoiceSyncService extends IService<InputInvoiceSyncEntity
 
 
     /**
-     * 统计接口
-     * @param statisticsParamBody
+     * 申请/撤销统计
      */
-    String statistics(StatisticsParamBody statisticsParamBody);
+    void statistics(Map<String, Object> params);
 
     /**
-     * 统计结果
+     * 获取统计结果
      */
     void statisticsResult();
 
     /**
-     * 申请确认
-     * @param confirmParamBody
-     * @return
+     * 确认统计
      */
-    String applyConfirm(ConfirmParamBody confirmParamBody);
+    void applyConfirm(Map<String, Object> params);
 
     /**
-     * 确认结果
+     * 获取确认结果
      */
     void confirmResult();
 
@@ -95,5 +92,13 @@ public interface InputInvoiceSyncService extends IService<InputInvoiceSyncEntity
     void checkInvoice();
 
     CallResult<Page> invoiceCollection(InvoiceCollectionParamBody invoiceCollectionParamBody);
+    void syncInvoice(int page, String startDate, String endDate, String taxNo);
+
+    /**
+     * 根据开票日期查询数据
+     * @param date
+     * @return
+     */
+    List<InputInvoiceSyncEntity>  findByBillingDate(String date);
 }
 

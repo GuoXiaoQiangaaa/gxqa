@@ -18,7 +18,7 @@ public class InvoiceTeVo {
             "发票代码 （左上角）")
     private String invoiceCode; // 发票代码
     @ExcelField(title = "Invoice number\n" +
-            "发票号码（右上角）y")
+            "发票号码（右上角）")
     private String invoiceNumber; // 发票号码
     @ExcelField(title = "invoice amount without VAT\n" +
             "发票不含税金额")

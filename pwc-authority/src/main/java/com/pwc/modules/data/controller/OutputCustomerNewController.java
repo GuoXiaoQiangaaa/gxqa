@@ -1,26 +1,22 @@
 package com.pwc.modules.data.controller;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Map;
-
 import com.pwc.common.excel.ExportExcel;
 import com.pwc.common.exception.RRException;
 import com.pwc.common.utils.DateUtils;
-import com.pwc.common.validator.ValidatorUtils;
-import com.pwc.modules.sys.shiro.ShiroUtils;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import com.pwc.modules.data.entity.OutputCustomerNewEntity;
-import com.pwc.modules.data.service.OutputCustomerNewService;
 import com.pwc.common.utils.PageUtils;
 import com.pwc.common.utils.R;
+import com.pwc.common.validator.ValidatorUtils;
+import com.pwc.modules.data.entity.OutputCustomerNewEntity;
+import com.pwc.modules.data.service.OutputCustomerNewService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Map;
 
 
 /**
@@ -118,8 +114,8 @@ public class OutputCustomerNewController {
      * 数据导入
      */
     @PostMapping("/importCustomer")
-    public R importCustomer(@RequestParam("file") MultipartFile file){
-        Map<String, Object> resMap = outputCustomerNewService.importCustomer(file);
+    public R importCustomer(@RequestParam("files") MultipartFile[] files){
+        Map<String, Object> resMap = outputCustomerNewService.importCustomer(files);
 
         return R.ok().put("res", resMap);
     }

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.output.dao.OutputInvoiceDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.pwc.modules.output.entity.OutputInvoiceEntity" id="outputInvoiceMap">
+        <result property="invoiceId" column="invoice_id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="orderNumber" column="order_number"/>
+        <result property="orderId" column="order_id"/>
+        <result property="invoiceCode" column="invoice_code"/>
+        <result property="invoiceNumber" column="invoice_number"/>
+        <result property="excludingTaxAmount" column="excluding_tax_amount"/>
+        <result property="taxRate" column="tax_rate"/>
+        <result property="taxAmount" column="tax_amount"/>
+        <result property="excludingTaxDiscountAmount" column="excluding_tax_discount_amount"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="businessType" column="business_type"/>
+        <result property="invoicingMethod" column="invoicing_method"/>
+        <result property="invoicingTime" column="invoicing_time"/>
+        <result property="invoiceEntity" column="invoice_entity"/>
+        <result property="invoiceType" column="invoice_type"/>
+        <result property="purchaseName" column="purchase_name"/>
+        <result property="purchaseTaxCode" column="purchase_tax_code"/>
+        <result property="purchaseAddress" column="purchase_address"/>
+        <result property="purchaseContact" column="purchase_contact"/>
+        <result property="purchaseBankAccount" column="purchase_bank_account"/>
+        <result property="purchaseBank" column="purchase_bank"/>
+        <result property="sellerName" column="seller_name"/>
+        <result property="sellerTaxCode" column="seller_tax_code"/>
+        <result property="sellerAddress" column="seller_address"/>
+        <result property="sellerContact" column="seller_contact"/>
+        <result property="sellerBankAccount" column="seller_bank_account"/>
+        <result property="sellerBank" column="seller_bank"/>
+        <result property="invoiceStatus" column="invoice_status"/>
+        <result property="contractNumber" column="contract_number"/>
+        <result property="accountingVouchers" column="accounting_vouchers"/>
+        <result property="accountingDocument" column="accounting_document"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="preformedInvoice" column="preformed_invoice"/>
+        <result property="rejectSuggestion" column="reject_suggestion"/>
+        <result property="applyId" column="apply_id"/>
+        <result property="applyNumber" column="apply_number"/>
+        <result property="applyUser" column="apply_user"/>
+        <result property="applyUserId" column="apply_user_id"/>
+        <result property="applyTime" column="apply_time"/>
+        <result property="applyType" column="apply_type"/>
+        <result property="writeOff" column="write_off"/>
+        <result property="payee" column="payee"/>
+        <result property="reviewer" column="reviewer"/>
+        <result property="drawer" column="drawer"/>
+        <result property="invalidReason" column="invalid_reason"/>
+    </resultMap>
+
+
+</mapper>

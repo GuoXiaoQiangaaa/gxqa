@@ -3,26 +3,24 @@ package com.pwc.modules.data.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
-import com.pwc.common.excel.ImportExcel;
-import com.pwc.common.exception.RRException;
-import com.pwc.modules.sys.shiro.ShiroUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-
-import java.util.*;
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.pwc.common.exception.RRException;
 import com.pwc.common.utils.PageUtils;
 import com.pwc.common.utils.Query;
-
 import com.pwc.modules.data.dao.OutputItemListDao;
 import com.pwc.modules.data.entity.OutputItemListEntity;
 import com.pwc.modules.data.service.OutputItemListService;
+import com.pwc.modules.sys.shiro.ShiroUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.*;
 
 /**
  * 科目清单服务实现
@@ -31,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
  * @date 2020/8/27
  */
 @Service("outputItemListService")
+@Slf4j
 public class OutputItemListServiceImpl extends ServiceImpl<OutputItemListDao, OutputItemListEntity> implements OutputItemListService {
 
     @Override
@@ -124,7 +123,7 @@ public class OutputItemListServiceImpl extends ServiceImpl<OutputItemListDao, Ou
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Map<String, Object> importItem(MultipartFile file) {
+    public Map<String, Object> importItem(MultipartFile[] files) {
         Map<String, Object> resMap = new HashMap<>();
         // 数据校验正确的集合
         List<OutputItemListEntity> entityList = new ArrayList<>();
@@ -134,57 +133,82 @@ public class OutputItemListServiceImpl extends ServiceImpl<OutputItemListDao, Ou
         int total = 0;
         // 数据有误条数
         int fail = 0;
+        // 记录excel中的重复数据
+        List<String> repeatDataList = new ArrayList<>();
+        // 记录数据有误的文件
+        StringBuffer sb = new StringBuffer();
         try {
-            ExcelReader reader = ExcelUtil.getReader(file.getInputStream());
-            String[] excelHead = {"科目编码", "科目类型", "科目描述"};
-            String [] excelHeadAlias = {"itemCode", "itemType", "description"};
-            for (int i = 0; i < excelHead.length; i++) {
-                reader.addHeaderAlias(excelHead[i], excelHeadAlias[i]);
-            }
-            List<OutputItemListEntity> dataList = reader.read(0, 1, OutputItemListEntity.class);
+            for (MultipartFile file : files) {
+                String filename = file.getOriginalFilename();
+                ExcelReader reader = ExcelUtil.getReader(file.getInputStream());
+                String[] excelHead = {"科目编码", "科目类型", "科目描述"};
+                String [] excelHeadAlias = {"itemCode", "itemType", "description"};
+                for (int i = 0; i < excelHead.length; i++) {
+                    reader.addHeaderAlias(excelHead[i], excelHeadAlias[i]);
+                }
+                List<OutputItemListEntity> dataList = reader.read(0, 1, OutputItemListEntity.class);
 
-            if(CollectionUtils.isEmpty(dataList)){
-                log.error("上传的Excel为空,请重新上传");
-                throw new RRException("上传的Excel为空,请重新上传");
-            }
-            total = dataList.size();
-            List<String> repeatDataList = new ArrayList<>();
-            for (OutputItemListEntity itemEntity : dataList) {
-                // 参数校验
-                if(1 == checkExcel(itemEntity)){
-                    // 参数有误
-                    fail += 1;
-                }else {
-                    // 去除Excel中重复数据
-                    String repeatData = itemEntity.getItemCode();
-                    if(CollectionUtil.contains(repeatDataList, repeatData)){
+                if(CollectionUtils.isEmpty(dataList)){
+                    log.error("上传的{}Excel为空,请重新上传", filename);
+//                    throw new RRException("上传的Excel为空,请重新上传");
+                    continue;
+                }
+                total += dataList.size();
+                int count = 1;
+                for (OutputItemListEntity itemEntity : dataList) {
+                    count++;
+                    // 参数校验
+                    if(1 == checkExcel(itemEntity)){
+                        // 参数有误
                         fail += 1;
-                        continue;
-                    }
-                    repeatDataList.add(repeatData);
-                    // 验重
-                    OutputItemListEntity duplicate = super.getOne(
-                            new QueryWrapper<OutputItemListEntity>()
-                                    .eq("item_code", itemEntity.getItemCode())
-                    );
-                    if(null != duplicate){
-                        duplicate.setItemType(itemEntity.getItemType());
-                        duplicate.setDescription(itemEntity.getDescription());
-                        duplicate.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
-                        duplicate.setUpdateTime(new Date());
-                        duplicateList.add(duplicate);
+                        if(!StringUtils.contains(sb.toString(), filename)){
+                            sb.append("文件" + filename + "的错误行号为:");
+                        }
+                        sb.append(count + ",");
                     }else {
-                        // 添加校验正确的实体
-                        itemEntity.setDelFlag("1");
-                        itemEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
-                        itemEntity.setCreateTime(new Date());
-                        entityList.add(itemEntity);
+                        // 去除Excel中重复数据
+                        String repeatData = itemEntity.getItemCode();
+                        if(CollectionUtil.contains(repeatDataList, repeatData)){
+                            fail += 1;
+                            if(!StringUtils.contains(sb.toString(), filename)){
+                                sb.append("文件" + filename + "的错误行号为:");
+                            }
+                            sb.append(count + ",");
+                            continue;
+                        }
+                        repeatDataList.add(repeatData);
+                        // 验重
+                        OutputItemListEntity duplicate = super.getOne(
+                                new QueryWrapper<OutputItemListEntity>()
+                                        .eq("item_code", itemEntity.getItemCode())
+                        );
+                        if(null != duplicate){
+                            duplicate.setItemType(itemEntity.getItemType());
+                            duplicate.setDescription(itemEntity.getDescription());
+                            duplicate.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
+                            duplicate.setUpdateTime(new Date());
+                            duplicateList.add(duplicate);
+                        }else {
+                            // 添加校验正确的实体
+                            itemEntity.setDelFlag("1");
+                            itemEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
+                            itemEntity.setCreateTime(new Date());
+                            entityList.add(itemEntity);
+                        }
                     }
                 }
+                if(sb.toString().endsWith(",")){
+                    sb.deleteCharAt(sb.lastIndexOf(",")).append(";");
+                }
             }
+            if(sb.toString().endsWith(";")){
+                sb.deleteCharAt(sb.lastIndexOf(";")).append("。");
+            }
+
             resMap.put("total", total);
             resMap.put("success", duplicateList.size() + entityList.size());
             resMap.put("fail", fail);
+            resMap.put("failDetail", sb.toString());
 
             if(CollectionUtil.isNotEmpty(duplicateList)){
                 super.updateBatchById(duplicateList);

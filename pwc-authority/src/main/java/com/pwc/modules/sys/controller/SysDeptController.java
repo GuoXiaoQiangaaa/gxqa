@@ -2,7 +2,6 @@
 
 package com.pwc.modules.sys.controller;
 
-import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.pwc.common.third.TtkOrgUtil;
 import com.pwc.common.utils.Constant;
@@ -39,7 +38,7 @@ public class SysDeptController extends AbstractController {
 
 
 	/**
-	 * 部门列表
+	 * 部门列表(不含层级,只有子部门数量)
 	 */
 	@GetMapping("/list")
 	@RequiresPermissions("sys:dept:list")
@@ -60,7 +59,7 @@ public class SysDeptController extends AbstractController {
 	}
 
 	/**
-	 * 关键字查询
+	 * 关键字查询(不含层级,只有子部门数量)
 	 */
 	@GetMapping("/search")
 	public R search(@RequestParam Map<String, Object> params){
@@ -80,7 +79,7 @@ public class SysDeptController extends AbstractController {
 	}
 
 	/**
-	 * 列表
+	 * 列表(含层级,部门详细信息)
 	 */
 	@GetMapping("/treeList")
 	@RequiresPermissions("sys:dept:list")
@@ -91,7 +90,7 @@ public class SysDeptController extends AbstractController {
 	}
 
 	/**
-	 * 列表
+	 * 列表(含层级,只有部门名称和id)
 	 */
 	@GetMapping("/treeSelect")
 	@RequiresPermissions("sys:dept:list")
@@ -120,6 +119,7 @@ public class SysDeptController extends AbstractController {
 	}
 
 	/**
+	 * 部门列表(全部部门,不含层级)
 	 * 选择部门(添加、修改菜单)
 	 */
 	@GetMapping("/select")

@@ -8,6 +8,7 @@ import com.pwc.common.utils.excel.annotation.ExcelField;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  *
@@ -65,13 +66,12 @@ public class InputCompanyEntity implements Serializable {
 	private String applyTaskno;
 
 	/**
-	 * 状态0: 未开始1：已获取统计结果 2：已确认统计
-	 * 新状态：0: 未开始,1统计中，2，统计撤销中,3：已获取统计结果 ,4确认中，5确认撤销中6：已确认统计
+	 * 统计状态：0:未统计; 1:申请统计中; 2:申请统计成功; 3:申请统计失败; 4:确认统计中; 5:确认统计成功; 6:确认统计失败; 7:统计撤销中
 	 */
 	private String status;
 
 	/**
-	 * 统计结果任务编码
+	 * 确认任务编码
 	 */
 	private String censusTaskno;
 
@@ -97,6 +97,29 @@ public class InputCompanyEntity implements Serializable {
 	@TableField(exist = false)
 	private String address;
 
+	/**
+	 * 请求唯一id，用于获取统计结果
+	 */
 	private String requestId;
+
+	/**
+	 * 创建人
+	 */
+	private String createBy;
+
+	/**
+	 * 创建时间
+	 */
+	private Date createTime;
+
+	/**
+	 * 更新人
+	 */
+	private String updateBy;
+
+	/**
+	 * 更新时间
+	 */
+	private Date updateTime;
 
 }

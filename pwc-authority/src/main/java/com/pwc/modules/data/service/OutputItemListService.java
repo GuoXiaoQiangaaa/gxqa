@@ -35,6 +35,6 @@ public interface OutputItemListService extends IService<OutputItemListEntity> {
     /**
      * 数据导入
      */
-    Map<String, Object> importItem(MultipartFile file);
+    Map<String, Object> importItem(MultipartFile[] files);
 }
 

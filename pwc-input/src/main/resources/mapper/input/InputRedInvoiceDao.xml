@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputRedInvoiceDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.pwc.modules.input.entity.InputRedInvoiceEntity" id="inputRedInvoiceMap">
+        <result property="redId" column="red_id"/>
+        <result property="redNoticeNumber" column="red_notice_number"/>
+        <result property="writeDate" column="write_date"/>
+        <result property="redStatus" column="red_status"/>
+        <result property="purchaserCompany" column="purchaser_company"/>
+        <result property="purchaserTaxCode" column="purchaser_tax_code"/>
+        <result property="sellCompany" column="sell_company"/>
+        <result property="sellTaxCode" column="sell_tax_code"/>
+        <result property="totalPrice" column="total_price"/>
+        <result property="freePrice" column="free_price"/>
+        <result property="taxPrice" column="tax_price"/>
+        <result property="taxRate" column="tax_rate"/>
+        <result property="blueInvoiceNumber" column="blue_invoice_number"/>
+        <result property="blueInvoiceCode" column="blue_invoice_code"/>
+        <result property="redInvoiceNumber" column="red_invoice_number"/>
+        <result property="redInvoiceCode" column="red_invoice_code"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+    <select id="getSumByTaxPrice" resultType="String">
+        select  sum(tax_price)
+        from input_red_invoice
+        where document_no = #{documentNo}
+    </select>
+
+</mapper>

@@ -3,6 +3,7 @@
 package com.pwc.modules.sys.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.pwc.modules.sys.entity.InputCompanyDto;
 import com.pwc.modules.sys.entity.SysDeptEntity;
 import com.pwc.modules.sys.entity.TreeSelectVo;
 import org.apache.ibatis.annotations.Mapper;
@@ -43,8 +44,28 @@ public interface SysDeptDao extends BaseMapper<SysDeptEntity> {
     List<String> queryTaxCodeByIds(Map<String, Object> params);
 
     /**
+     * 根据部门id获取税号
+     */
+    String queryTaxCodeById(@Param("deptId")Long deptId);
+
+    /**
      * 根据部门id查询拥有全部或个人数据权限的用户名
      */
     List<String> queryUsernameByDeptId(@Param("deptId") Long deptId, @Param("justOwn") int justOwn);
+
+    /**
+     * 新增部门时添加企业信息
+     */
+    void saveCompany(@Param("company")InputCompanyDto company);
+
+    /**
+     * 更新部门时更新企业信息
+     */
+    void updateCompany(@Param("company")InputCompanyDto company);
+
+    /**
+     * 根据dept_id获取company
+     */
+    InputCompanyDto queryCompanyByDeptId(@Param("deptId") Long deptId);
 
 }

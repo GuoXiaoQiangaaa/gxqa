@@ -1,7 +1,6 @@
 package com.pwc.modules.data.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.pwc.common.excel.ExportExcel;
 import com.pwc.common.utils.PageUtils;
 import com.pwc.modules.data.entity.OutputSupplierEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,7 +40,14 @@ public interface OutputSupplierService extends IService<OutputSupplierEntity> {
     /**
      * 数据导入
      */
-    Map<String, Object> importSupplier(MultipartFile file);
+    Map<String, Object> importSupplier(MultipartFile[] files);
+
+    /**
+     * 根据税号查询供应商信息
+     * @param taxCode
+     * @return
+     */
+    OutputSupplierEntity getListByTaxCode(String taxCode);
 
 }
 

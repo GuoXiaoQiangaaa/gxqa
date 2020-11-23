@@ -46,6 +46,51 @@ public class InputInvoiceMaterialEntity implements Serializable {
     @ExcelField(title="状态", align=1, sort=80)
     private String matchStatus;
 
+
+    public String getSpecialPolicySign() {
+        return specialPolicySign;
+    }
+
+    public void setSpecialPolicySign(String specialPolicySign) {
+        this.specialPolicySign = specialPolicySign;
+    }
+
+    public String getRealTaxRate() {
+        return realTaxRate;
+    }
+
+    public void setRealTaxRate(String realTaxRate) {
+        this.realTaxRate = realTaxRate;
+    }
+
+    public String getRealTax() {
+        return realTax;
+    }
+
+    public void setRealTax(String realTax) {
+        this.realTax = realTax;
+    }
+
+    /** 特殊政策标识*/
+    private String specialPolicySign;
+    /** 实际税率*/
+    private String realTaxRate;
+    /** 实际税额*/
+    private String realTax;
+
+    public String getTaxClassyCode() {
+        return taxClassyCode;
+    }
+
+    public void setTaxClassyCode(String taxClassyCode) {
+        this.taxClassyCode = taxClassyCode;
+    }
+
+    private String taxClassyCode;
+
+
+
+
     private String message;
 
     public String getMessage() {

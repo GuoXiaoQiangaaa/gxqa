@@ -17,7 +17,7 @@ public class ParamsMap {
      */
     public static String findMap(Map map, String str ){
         String val =null;
-        if(map.containsKey(str)){
+        if(map.containsKey(str)&&map.get(str)!=null&&!"".equals(map.get(str))){
             val =map.get(str).toString();
         }
         return val;

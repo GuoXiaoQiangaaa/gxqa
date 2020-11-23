@@ -1,14 +1,7 @@
-import org.dom4j.DocumentException;
 import org.junit.Test;
-import org.ofdrw.core.basicStructure.ofd.DocBody;
-import org.ofdrw.core.basicStructure.ofd.OFD;
-import org.ofdrw.core.basicStructure.ofd.docInfo.CT_DocInfo;
-import org.ofdrw.pkg.container.OFDDir;
-import org.ofdrw.reader.OFDReader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class InputTest {
 
@@ -25,4 +18,27 @@ public class InputTest {
 //        CT_DocInfo docInfo = docBody.getDocInfo();
 //        System.out.printf(docInfo.getStringValue());
     }
+
+
+    @Test
+    public void TestReg() {
+
+
+        String str = "PO 1231231231; 12\n PO  1231231232 \n PO:1231231233;123 \n PO：1231231234 -0 \n PO#1231231235 \n PO1234561234";
+//        String REGEX = "^PO(\\s{0,2}|(:)|(：)|(#))\\d{10}$";
+        String REGEX = "PO(\\s{1,2}|(:)|(：)|(#))\\d{10}";
+        Pattern p = Pattern.compile(REGEX);
+        Matcher m = p.matcher(str); // 获取 matcher 对象
+        int count = 0;
+
+        while(m.find()) {
+            count++;
+            System.out.println("Match number "+count);
+            System.out.println("start(): "+m.start());
+            System.out.println("end(): "+m.end());
+            System.out.println("group(): "+m.group());
+        }
+
+    }
 }
+

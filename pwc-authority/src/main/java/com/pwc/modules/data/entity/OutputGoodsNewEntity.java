@@ -1,15 +1,15 @@
 package com.pwc.modules.data.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.pwc.common.excel.annotation.ExcelField;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
-import java.math.BigDecimal;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -125,18 +125,22 @@ public class OutputGoodsNewEntity implements Serializable {
 	/**
 	 * 创建人
 	 */
+	@TableField(fill = FieldFill.DEFAULT)
 	private String createBy;
 	/**
 	 * 创建时间
 	 */
+	@TableField(fill = FieldFill.DEFAULT)
 	private Date createTime;
 	/**
 	 * 修改人
 	 */
+	@TableField(fill = FieldFill.DEFAULT)
 	private String updateBy;
 	/**
 	 * 更新时间
 	 */
+	@TableField(fill = FieldFill.DEFAULT)
 	private Date updateTime;
 
 }

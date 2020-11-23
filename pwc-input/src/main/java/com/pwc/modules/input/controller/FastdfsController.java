@@ -1,6 +1,5 @@
 package com.pwc.modules.input.controller;
 
-import cn.hutool.core.util.ClassUtil;
 import com.github.tobato.fastdfs.domain.MataData;
 import com.github.tobato.fastdfs.domain.StorePath;
 import com.github.tobato.fastdfs.proto.storage.DownloadByteArray;
@@ -12,7 +11,6 @@ import com.pwc.common.utils.UploadFileEntity;
 import com.pwc.common.utils.UploadKitUtil;
 import com.pwc.common.utils.excel.ExportExcel;
 import com.pwc.common.utils.excel.ImportExcel;
-import com.pwc.modules.input.entity.InputInvoiceResponsibleEntity;
 import com.pwc.modules.input.entity.vo.InputInvoiceTaxationVo;
 import com.qiniu.common.QiniuException;
 import com.qiniu.common.Zone;
@@ -23,7 +21,6 @@ import com.qiniu.storage.model.DefaultPutRet;
 import com.qiniu.util.Auth;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -67,7 +64,7 @@ public class FastdfsController extends HttpServlet {
         String filepath = "statics/db/pic/";
 
         UploadFileEntity fileEntity = UploadKitUtil.uploadFile(file,filepath,true, false);
-        return R.ok(fileEntity.getServerPath());
+        return R.ok(fileEntity.getServerPath()).put("fileName",file.getOriginalFilename());
     }
 
     @PostMapping("/uploadOcr")

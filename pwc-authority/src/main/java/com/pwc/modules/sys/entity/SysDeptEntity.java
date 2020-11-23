@@ -2,10 +2,7 @@
 
 package com.pwc.modules.sys.entity;
 
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
@@ -235,15 +232,19 @@ public class SysDeptEntity implements Serializable {
 	private Integer justOwn;
 
 	/** 创建时间 */
+	@TableField(fill = FieldFill.DEFAULT)
 	private Date createTime;
 
 	/** 创建人 */
+	@TableField(fill = FieldFill.DEFAULT)
 	private String createBy;
 
 	/** 更新时间 */
+	@TableField(fill = FieldFill.DEFAULT)
 	private Date updateTime;
 
 	/** 更新人 */
+	@TableField(fill = FieldFill.DEFAULT)
 	private String updateBy;
 
 }

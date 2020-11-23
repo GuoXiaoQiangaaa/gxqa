@@ -25,7 +25,7 @@ public interface InputRedInvoiceService extends IService<InputRedInvoiceEntity> 
     /**
      * 导入红字通知单
      */
-    Map<String, Object> importRedNotice(MultipartFile file);
+    Map<String, Object> importRedNotice(MultipartFile[] files);
 
     /**
      * 接收红字发票并更新红字通知单状态
@@ -41,5 +41,13 @@ public interface InputRedInvoiceService extends IService<InputRedInvoiceEntity> 
      * 关联红字发票
      */
     boolean link(Long redId, Map<String, Object> params);
+
+    InputRedInvoiceEntity findRedNoticeNumber(String redNoticeNumber);
+
+    /**
+     * 手工入账
+     * @param params
+     */
+    void manualEntryByRed(Map<String, Object> params);
 }
 

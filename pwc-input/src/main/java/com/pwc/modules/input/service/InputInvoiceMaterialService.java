@@ -2,6 +2,8 @@ package com.pwc.modules.input.service;
 
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.fapiao.neon.model.in.inspect.item.NormalItem;
+import com.fapiao.neon.model.in.inspect.item.SpecialItem;
 import com.pwc.modules.input.entity.InputInvoiceMaterialEntity;
 
 import java.util.List;
@@ -28,5 +30,9 @@ public interface InputInvoiceMaterialService extends IService<InputInvoiceMateri
     void updateByEnter(List<InputInvoiceMaterialEntity> invoiceMaterialEntityList);
 
     List<InputInvoiceMaterialEntity> getByIds(Integer[] ids);
+
+    void saveMaterialEntityByNormalItem(List<NormalItem> items,Integer invoiceId);
+
+    void saveMaterialEntityBySpecialItem(List<SpecialItem> items, Integer invoiceId);
 
 }

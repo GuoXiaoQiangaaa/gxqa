@@ -3,24 +3,17 @@
 package com.pwc.modules.sys.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.log.Log;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pwc.common.annotation.DataFilter;
 import com.pwc.common.exception.RRException;
-import com.pwc.common.third.TtkOrgUtil;
-import com.pwc.common.third.common.TtkConstants;
-import com.pwc.common.third.request.TaxLoginInfo;
-import com.pwc.common.third.request.TtkOrgRequest;
-import com.pwc.common.third.request.TtkTaxLoginInfoRequest;
-import com.pwc.common.third.response.TtkOrgResponse;
-import com.pwc.common.third.response.TtkResponse;
 import com.pwc.common.utils.Constant;
 import com.pwc.common.utils.PageUtils;
 import com.pwc.common.utils.Query;
 import com.pwc.modules.sys.dao.SysDeptDao;
+import com.pwc.modules.sys.entity.InputCompanyDto;
 import com.pwc.modules.sys.entity.SysDeptEntity;
 import com.pwc.modules.sys.entity.TreeSelectVo;
 import com.pwc.modules.sys.service.FilingThirdCityCodeService;
@@ -29,6 +22,7 @@ import com.pwc.modules.sys.shiro.ShiroUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -81,7 +75,10 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 		String parentId = (String) params.get("parentId");
 		String owner = (String) params.get("owner");
 
-		parentId = StringUtils.isNotBlank(parentId) ? parentId : "0";
+//		parentId = StringUtils.isNotBlank(parentId) ? parentId : "0";
+		if("0".equals(parentId)){
+			parentId = "";
+		}
 		IPage<SysDeptEntity> page = this.page(
 				new Query<SysDeptEntity>().getPage(params),
 				new QueryWrapper<SysDeptEntity>()
@@ -112,7 +109,10 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 		if(StringUtils.isNotBlank(keyWords)){
 			keyWords = keyWords.trim();
 			String parentId = (String) params.get("parentId");
-			parentId = StringUtils.isNotBlank(parentId) ? parentId : "0";
+//			parentId = StringUtils.isNotBlank(parentId) ? parentId : "0";
+			if("0".equals(parentId)){
+				parentId = "";
+			}
 
 			IPage<SysDeptEntity> page = this.page(
 					new Query<SysDeptEntity>().getPage(params),
@@ -130,6 +130,10 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 							.apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
 							.orderByDesc("create_time")
 			);
+			for(SysDeptEntity sysDeptEntity : page.getRecords()){
+				Integer childNum= baseMapper.selectCount(new QueryWrapper<SysDeptEntity>().eq("parent_id", sysDeptEntity.getDeptId()));
+				sysDeptEntity.setChildNum(childNum);
+			}
 			return new PageUtils(page);
 		}else {
 			return this.queryPage(params);
@@ -181,8 +185,16 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 	public SysDeptEntity getByTaxCode(String taxCode) {
 		return super.getOne(new QueryWrapper<SysDeptEntity>().eq("tax_code", taxCode));
 	}
-
 	@Override
+	public SysDeptEntity getByDeptCode(String deptCode) {
+		return super.getOne(new QueryWrapper<SysDeptEntity>().eq("dept_code", deptCode));
+	}
+
+	/**
+	 * 新增部门
+	 */
+	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public boolean saveDept(SysDeptEntity deptEntity) {
 		// 创建企业第三方返回企业ID
 //		TtkOrgRequest createOrgReq = new TtkOrgRequest();
@@ -219,17 +231,36 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 //		}
 		int count = super.count(
 				new QueryWrapper<SysDeptEntity>()
-						.eq("dept_code", deptEntity.getDeptCode())
+						.eq("dept_code", deptEntity.getDeptCode()).or()
+						.eq("tax_code", deptEntity.getTaxCode())
+
 		);
 		if(count > 0){
 			throw new RRException("该数据已存在,请核对后再添加");
 		}
 		deptEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
 		deptEntity.setCreateTime(new Date());
-		return super.save(deptEntity);
+		boolean save = super.save(deptEntity);
+		// 维护input_company表
+		InputCompanyDto company = new InputCompanyDto();
+		company.setCompanyNumber(deptEntity.getDeptCode());
+		company.setCompanyName(deptEntity.getName());
+		company.setCompanyDutyParagraph(deptEntity.getTaxCode());
+		company.setCompanyAddressPhone(deptEntity.getRegistAddress() + deptEntity.getContact());
+		company.setCompanyBankAccount(deptEntity.getBank() + deptEntity.getBankAccount());
+		company.setStatus("0");
+		company.setDeptId(deptEntity.getDeptId());
+		company.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
+		company.setCreateTime(new Date());
+		sysDeptDao.saveCompany(company);
+		return save;
 	}
 
+	/**
+	 * 更新部门
+	 */
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public boolean updateDept(SysDeptEntity deptEntity) {
 		// 修改企业第三方
 //		TtkOrgRequest updateOrgReq = new TtkOrgRequest();
@@ -257,16 +288,47 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 //		log.info("新增企业上传企业网报请求信息："+request.toString());
 //		log.info("新增企业上传企业网报返回信息："+TtkOrgUtil.saveTaxLoginInfo(request).toString());
 		// 验重
-		SysDeptEntity entity = super.getOne(
+		List<SysDeptEntity> entityList = super.list(
 				new QueryWrapper<SysDeptEntity>()
-						.eq("dept_code", deptEntity.getDeptCode())
+						.eq("dept_code", deptEntity.getDeptCode()).or()
+						.eq("tax_code", deptEntity.getTaxCode())
 		);
-		if(null != entity && !deptEntity.getDeptId().equals(entity.getDeptId())){
-			throw new RRException("该数据已存在,请核对后再修改");
+		if(CollectionUtil.isNotEmpty(entityList)){
+			for (SysDeptEntity entity : entityList) {
+				if(!deptEntity.getDeptId().equals(entity.getDeptId())){
+					throw new RRException("该数据已存在,请核对后再修改");
+				}
+			}
 		}
+
 		deptEntity.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
 		deptEntity.setUpdateTime(new Date());
-		return super.updateById(deptEntity);
+		boolean update = super.updateById(deptEntity);
+		// 维护input_company表
+		InputCompanyDto company = sysDeptDao.queryCompanyByDeptId(deptEntity.getDeptId());
+		if(null == company){
+			company = new InputCompanyDto();
+			company.setCompanyNumber(deptEntity.getDeptCode());
+			company.setCompanyName(deptEntity.getName());
+			company.setCompanyDutyParagraph(deptEntity.getTaxCode());
+			company.setCompanyAddressPhone(deptEntity.getRegistAddress() + deptEntity.getContact());
+			company.setCompanyBankAccount(deptEntity.getBank() + deptEntity.getBankAccount());
+			company.setStatus("0");
+			company.setDeptId(deptEntity.getDeptId());
+			company.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
+			company.setCreateTime(new Date());
+			sysDeptDao.saveCompany(company);
+			return update;
+		}
+		company.setCompanyNumber(deptEntity.getDeptCode());
+		company.setCompanyName(deptEntity.getName());
+		company.setCompanyDutyParagraph(deptEntity.getTaxCode());
+		company.setCompanyAddressPhone(deptEntity.getRegistAddress() + deptEntity.getContact());
+		company.setCompanyBankAccount(deptEntity.getBank() + deptEntity.getBankAccount());
+		company.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
+		company.setUpdateTime(new Date());
+		sysDeptDao.updateCompany(company);
+		return update;
 	}
 
 	@Override
@@ -285,6 +347,14 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 	@Override
 	public List<String> getTaxCodeByIds(Map<String, Object> params) {
 		return baseMapper.queryTaxCodeByIds(params);
+	}
+
+	/**
+	 * 根据部门id获取税号
+	 */
+	@Override
+	public String queryTaxCodeById(Long deptId) {
+		return sysDeptDao.queryTaxCodeById(deptId);
 	}
 
 	@Override
@@ -369,4 +439,17 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 			deptIdList.add(deptId);
 		}
 	}
+
+	/**
+	 * 获取当前正常未删除数据
+	 * @return
+	 */
+	@Override
+	public List<SysDeptEntity> getDeptByStatus(){
+		List<SysDeptEntity>  sysDeptEntitys =   this.list(
+				new QueryWrapper<SysDeptEntity>().eq("status",1).eq("del_flag",0)
+		);
+		return  sysDeptEntitys;
+	}
+
 }

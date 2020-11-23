@@ -104,6 +104,11 @@ public interface SysDeptService extends IService<SysDeptEntity> {
 	List<String> getTaxCodeByIds(Map<String, Object> params);
 
 	/**
+	 * 根据部门id获取税号
+	 */
+	String queryTaxCodeById(Long deptId);
+
+	/**
 	 * 分页查询部门列表
 	 * @param params
 	 * @return
@@ -114,4 +119,6 @@ public interface SysDeptService extends IService<SysDeptEntity> {
 	 * 查询详情
 	 */
 	SysDeptEntity queryInfo(Long deptId);
+	SysDeptEntity getByDeptCode(String deptCode);
+	List<SysDeptEntity> getDeptByStatus();
 }

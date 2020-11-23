@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.output.dao.OutputAlarmRulesDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.pwc.modules.output.entity.OutputAlarmRulesEntity" id="outputAlarmRulesMap">
+        <result property="alarmId" column="alarm_id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="inventoryId" column="inventory_id"/>
+        <result property="alarmDesc" column="alarm_desc"/>
+        <result property="quantity" column="quantity"/>
+        <result property="operation" column="operation"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+
+</mapper>

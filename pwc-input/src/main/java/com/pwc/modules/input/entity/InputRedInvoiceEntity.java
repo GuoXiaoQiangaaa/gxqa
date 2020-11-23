@@ -1,5 +1,7 @@
 package com.pwc.modules.input.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.pwc.common.excel.annotation.ExcelField;
@@ -36,8 +38,8 @@ public class InputRedInvoiceEntity implements Serializable {
 	/**
 	 * 填写日期
 	 */
-	@ExcelField(title = "填写日期", align = 1, sort = 1)
-	@NotBlank(message = "填写日期不能为空")
+	@ExcelField(title = "填开日期", align = 1, sort = 1)
+	@NotBlank(message = "填开日期不能为空")
 	private Date writeDate;
 	/**
 	 * 状态(0:红色通知单开具;1:红票已开)
@@ -52,7 +54,7 @@ public class InputRedInvoiceEntity implements Serializable {
 	/**
 	 * 购方纳税人识别号
 	 */
-	@ExcelField(title = "购方纳税人识别号", align = 1, sort = 1)
+	@ExcelField(title = "购方纳税人识别号（税号）", align = 1, sort = 1)
 	@NotBlank(message = "购方纳税人识别号不能为空")
 	private String purchaserTaxCode;
 	/**
@@ -64,25 +66,25 @@ public class InputRedInvoiceEntity implements Serializable {
 	/**
 	 * 销方纳税人识别号
 	 */
-	@ExcelField(title = "销方纳税人识别号", align = 1, sort = 1)
+	@ExcelField(title = "销方纳税人识别号（税号）", align = 1, sort = 1)
 	@NotBlank(message = "销方纳税人识别号不能为空")
 	private String sellTaxCode;
 	/**
 	 * 发票总额
 	 */
-	@ExcelField(title = "发票总额", align = 1, sort = 1)
+	@ExcelField(title = "发票总额（CNY）", align = 1, sort = 1)
 	@NotNull(message = "发票总额不能为空")
 	private BigDecimal totalPrice;
 	/**
 	 * 发票总额(不含税)
 	 */
-	@ExcelField(title = "不含税金额", align = 1, sort = 1)
+	@ExcelField(title = "不含税金额（CNY）", align = 1, sort = 1)
 	@NotNull(message = "不含税金额不能为空")
 	private BigDecimal freePrice;
 	/**
 	 * 税额
 	 */
-	@ExcelField(title = "税额", align = 1, sort = 1)
+	@ExcelField(title = "税额（CNY）", align = 1, sort = 1)
 	@NotNull(message = "税额不能为空")
 	private BigDecimal taxPrice;
 	/**
@@ -114,18 +116,44 @@ public class InputRedInvoiceEntity implements Serializable {
 	/**
 	 * 创建人
 	 */
+	@TableField(fill = FieldFill.DEFAULT)
 	private String createBy;
 	/**
 	 * 创建时间
 	 */
+	@TableField(fill = FieldFill.DEFAULT)
 	private Date createTime;
 	/**
 	 * 修改人
 	 */
+	@TableField(fill = FieldFill.DEFAULT)
 	private String updateBy;
 	/**
 	 * 更新时间
 	 */
+	@TableField(fill = FieldFill.DEFAULT)
 	private Date updateTime;
+
+	/**
+	 * 部门id
+	 */
+	@TableField(fill = FieldFill.DEFAULT)
+	private Long deptId;
+	/**
+	 * 匹配日期
+	 */
+	private String matchDate;
+	/**
+	 * 凭证编号
+	 */
+	private String documentNo;
+	/**
+	 * 入账日期
+	 */
+	private String entryDate;
+	/**
+	 * 入账状态
+	 */
+	private String entryStatus;
 
 }

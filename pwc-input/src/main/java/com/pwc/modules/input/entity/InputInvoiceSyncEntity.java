@@ -4,10 +4,10 @@ import com.alibaba.fastjson.annotation.JSONField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fapiao.neon.model.in.SyncInvoice;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * 
@@ -83,7 +83,6 @@ public class InputInvoiceSyncEntity extends SyncInvoice implements Serializable 
 	/**
 	 * 
 	 */
-	@JsonIgnore
 	@JSONField(name = "purchaserTaxNo")
 	private String purchaserTaxNo;
 	/**
@@ -171,6 +170,12 @@ public class InputInvoiceSyncEntity extends SyncInvoice implements Serializable 
 	 */
 	@JSONField(name = "resaleCertificateNumber")
 	private String resaleCertificateNumber;
-
-
+	/**
+	 * 状态
+	 */
+	private String status;
+	/**
+	 *  插入日期
+	 */
+	private Date createTime;
 }

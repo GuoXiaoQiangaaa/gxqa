@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.output.dao.OutputBillingDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.pwc.modules.output.entity.OutputBillingEntity" id="outputBillingMap">
+        <result property="billId" column="bill_id"/>
+        <result property="billingNo" column="billing_no"/>
+        <result property="deptCode" column="dept_code"/>
+        <result property="accountItem" column="account_item"/>
+        <result property="payType" column="pay_type"/>
+        <result property="documentNo" column="document_no"/>
+        <result property="summary" column="summary"/>
+        <result property="assignment" column="assignment"/>
+        <result property="docDate" column="doc_date"/>
+        <result property="pstngDate" column="pstng_date"/>
+        <result property="taxCode" column="tax_code"/>
+        <result property="amount" column="amount"/>
+        <result property="currencyLocal" column="currency_local"/>
+        <result property="poNo" column="po_no"/>
+        <result property="cancelBy" column="cancel_by"/>
+        <result property="tradingPartner" column="trading_partner"/>
+        <result property="invoiceStatus" column="invoice_status"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+
+</mapper>

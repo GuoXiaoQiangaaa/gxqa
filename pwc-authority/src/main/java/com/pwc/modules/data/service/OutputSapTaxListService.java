@@ -40,6 +40,6 @@ public interface OutputSapTaxListService extends IService<OutputSapTaxListEntity
     /**
      * 数据导入
      */
-    Map<String, Object> importSapTax(MultipartFile file);
+    Map<String, Object> importSapTax(MultipartFile[] files);
 }
 

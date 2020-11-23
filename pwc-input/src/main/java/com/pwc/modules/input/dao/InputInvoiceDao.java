@@ -148,4 +148,5 @@ public interface InputInvoiceDao extends BaseMapper<InputInvoiceEntity> {
      * @return
      */
     String getLastSeq(String invoiceSeq);
+    String getCountByVoucherCode(String voucherCode);
 }

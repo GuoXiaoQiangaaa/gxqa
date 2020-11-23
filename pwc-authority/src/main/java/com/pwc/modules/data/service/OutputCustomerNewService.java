@@ -40,7 +40,7 @@ public interface OutputCustomerNewService extends IService<OutputCustomerNewEnti
     /**
      * 数据导入
      */
-    Map<String, Object> importCustomer(MultipartFile file);
+    Map<String, Object> importCustomer(MultipartFile[] files);
 
 }
 

@@ -87,7 +87,7 @@ public class UnformatInvoiceController {
     public R saveManualInvoice(@RequestBody UnformatManualInputVo unformatInvoice){
         if (unformatInvoice.getInvoiceType().equals("专用发票")||unformatInvoice.getInvoiceType().equals("普通发票")){
             InputInvoiceEntity invoiceEntity = new InputInvoiceEntity();
-            invoiceEntity.setInvoiceExpense(Integer.parseInt(unformatInvoice.getExpenseNo()));
+            invoiceEntity.setInvoiceExpense(unformatInvoice.getExpenseNo());
 //            invoiceEntity.setInvoiceTotalPrice(new BigDecimal(unformatInvoice.getInvoiceTotalPrice()));
             // 不含税金额
             invoiceEntity.setInvoiceFreePrice(new BigDecimal(unformatInvoice.getInvoiceTotalPrice()));

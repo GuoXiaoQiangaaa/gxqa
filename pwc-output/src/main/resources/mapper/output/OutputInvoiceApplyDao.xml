@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.output.dao.OutputInvoiceApplyDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.pwc.modules.output.entity.OutputInvoiceApplyEntity" id="outputInvoiceApplyMap">
+        <result property="applyId" column="apply_id"/>
+        <result property="applyNumber" column="apply_number"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="orderId" column="order_id"/>
+        <result property="orderNumber" column="order_number"/>
+        <result property="taxpayerType" column="taxpayer_type"/>
+        <result property="invoiceType" column="invoice_type"/>
+        <result property="invoiceEntity" column="invoice_entity"/>
+        <result property="invoiceRemark" column="invoice_remark"/>
+        <result property="businessType" column="business_type"/>
+        <result property="creditInvoicing" column="credit_invoicing"/>
+        <result property="showDiscount" column="show_discount"/>
+        <result property="showDiscountRule" column="show_discount_rule"/>
+        <result property="splitMethod" column="split_method"/>
+        <result property="orderAmount" column="order_amount"/>
+        <result property="invoiceAmountLimit" column="invoice_amount_limit"/>
+        <result property="splitInvoiceNumber" column="split_invoice_number"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="applyUser" column="apply_user"/>
+        <result property="applyUserId" column="apply_user_id"/>
+        <result property="applyTime" column="apply_time"/>
+        <result property="purchaseId" column="purchase_id"/>
+        <result property="purchaseName" column="purchase_name"/>
+        <result property="sellerId" column="seller_id"/>
+        <result property="sellerName" column="seller_name"/>
+        <result property="preformedInvoice" column="preformed_invoice"/>
+        <result property="accountingVouchers" column="accounting_vouchers"/>
+        <result property="applyType" column="apply_type"/>
+        <result property="excludingTaxAmount" column="excluding_tax_amount"/>
+        <result property="taxRate" column="tax_rate"/>
+        <result property="taxAmount" column="tax_amount"/>
+        <result property="totalAmount" column="total_amount"/>
+    </resultMap>
+
+
+</mapper>

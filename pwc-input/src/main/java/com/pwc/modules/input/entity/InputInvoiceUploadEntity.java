@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-import org.omg.CORBA.PRIVATE_MEMBER;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -20,18 +19,42 @@ import java.util.Date;
 public class InputInvoiceUploadEntity implements Serializable {
     @TableId
     private Integer uploadId;
-    private String uploadName; // 文件名称
+    /** 文件名称*/
+    private String uploadName;
+    /** 上传日期*/
     @TableField(fill = FieldFill.INSERT)
-    private Date createTime;//上传日期
+    private Date createTime;
+    /** 上传人*/
     @TableField(fill = FieldFill.INSERT)
-    private Integer createBy;//上传人
+    private Integer createBy;
+    /** 操作日期*/
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Date updateTime;//操作日期
+    private Date updateTime;
+    /** 操作人*/
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Integer updateBy;//操作人
+    private Integer updateBy;
     @TableField(fill = FieldFill.INSERT)
     private Integer deptId;
-    private Integer uploadType; // 类型 0 ap 1 po
-    private Integer uploadSource; // 来源
-    private String uploadImage; // 上传路径
+    /** 类型 0  其他 1蓝字发票 2 红字发票 3 Po list 4 TE发票 5 ap发票
+      */
+    private Integer uploadType;
+    /** 来源 1 扫描上传 2 手动上传*/
+    private Integer uploadSource;
+    /** 图片路径*/
+    private String uploadImage;
+    /**状态 0 未识别 1 识别失败 2 识别成功 3重复发票*/
+    private String status;
+    /**上传人 */
+    @TableField(exist = false)
+    private String createUserName;
+    /**批次号*/
+    private String invoiceBatchNumber;
+    /***/
+    private String id; // 关联id
+    /***/
+    @TableField(exist = false)
+    private InputInvoiceEntity invoiceEntity;
+    /***/
+    @TableField(exist = false)
+    private InputInvoicePoEntity poEntity;
 }

@@ -3,11 +3,12 @@ package com.pwc.modules.input.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pwc.common.utils.PageUtils;
 import com.pwc.common.utils.R;
-import com.pwc.modules.input.entity.*;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import com.pwc.modules.input.entity.InputInvoiceEntity;
+import com.pwc.modules.input.entity.InputInvoiceSyncEntity;
+import com.pwc.modules.input.entity.InputInvoiceVo;
+import com.pwc.modules.input.entity.InputInvoiceVoucherEntity;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -191,4 +192,78 @@ public interface InputInvoiceService extends IService<InputInvoiceEntity> {
      */
     String getLastSeq(String invoiceSeq);
     List<String> receiveInvoice(MultipartFile file) throws Exception;
+    InputInvoiceEntity makeUpInvoice(InputInvoiceEntity entity);
+
+    /**
+     * 页面查询
+     * @param params
+     * @return
+     */
+    PageUtils  getPageList(Map<String, Object> params);
+
+    /**
+     * 导出页面数据
+     * @param params
+     * @return
+     */
+    List<InputInvoiceEntity> exportPageList(Map<String, Object> params);
+
+    /**
+     * 根据关联上传id查数据
+     * @param uploadId
+     * @return
+     */
+    InputInvoiceEntity findByuploadId(String uploadId);
+    /**
+     * 更具发票代码查询是否有数据
+     */
+    List<InputInvoiceEntity> findByInvoicNumber(String invoicNumber);
+
+    /**
+     * 3天后自动验真
+     */
+    void VerificationToTwo();
+
+    /**
+     * 多次验真
+     * @param id
+     * @return
+     */
+    InputInvoiceEntity VerificationToMany(String id);
+
+    /**
+     * 认证操作
+     * @param ids
+     * @param type
+     * @return
+     */
+    String getCertification(String  ids,String type);
+
+    /**
+     * 导入认证
+     * @param file
+     * @return
+     * @throws Exception
+     */
+    List<String> ImportByCertification(MultipartFile file) throws Exception;
+
+    /**
+     * 抵账库同步数据
+     */
+    void saveInvoiceBySync();
+    /**特殊页面进入*/
+    PageUtils getPageListBySpecial(Map<String, Object> params);
+
+    /**
+     * 手工入账
+     * @param params
+     */
+    void manualEntryBySap(Map<String, Object> params);
+
+    /**
+     * 主流程
+     * @param invoiceEntity
+     * @return
+     */
+    InputInvoiceEntity mainProcess(InputInvoiceEntity invoiceEntity);
 }

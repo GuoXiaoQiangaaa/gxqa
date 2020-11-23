@@ -1,12 +1,19 @@
 package com.pwc.common.utils;
 
 import cn.hutool.core.util.ClassUtil;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.springframework.stereotype.Service;
 
 import javax.activation.MimetypesFileTypeMap;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -22,7 +29,17 @@ import java.util.Map;
  */
 @Service
 public class HttpUploadFile {
-
+    /**
+     * 可以识别发票 同时也可以识别po
+     */
+    public String findOCRByPo(String url,String fileName){
+        Map<String, String> textMap = new HashMap<String, String>();
+        //设置file的name，路径
+        Map<String, String> fileMap = new HashMap<String, String>();
+        fileMap.put("file",fileName);
+        String ret = discernByOCR("http://81.68.180.156:7070/ocr/", fileMap);
+        return ret;
+    }
     /**
      * 发票上传png图片
      */
@@ -48,6 +65,7 @@ public class HttpUploadFile {
         }*/
         String contentType = "";//image/png
         String ret = formUpload(url, textMap, fileMap, contentType);
+
         System.out.println(ret);
         return ret;
         //{"status":"0","message":"add succeed","baking_url":"group1\/M00\/00\/A8\/CgACJ1Zo-LuAN207AAQA3nlGY5k151.png"}
@@ -136,6 +154,7 @@ public class HttpUploadFile {
                     if (inputValue == null) {
                         continue;
                     }
+
                     File file = new File(ClassUtil.getClassPath() + inputValue);
                     String filename = file.getName();
                     //没有传入文件类型，同时根据文件获取不到类型，默认采用application/octet-stream
@@ -227,4 +246,51 @@ public class HttpUploadFile {
         }
         return res;
     }
+
+
+
+    public  static String discernByOCR(String urlStr,Map<String, String> fileMap ) {
+        // boundary就是request头和上传文件内容的分隔符
+        String BOUNDARY = "---------------------------123821742118716";
+        StringBuffer buffer = new StringBuffer();
+        try {
+            if (fileMap != null) {
+                Iterator iter = fileMap.entrySet().iterator();
+                while (iter.hasNext()) {
+                    Map.Entry entry = (Map.Entry) iter.next();
+                    String inputName = (String) entry.getKey();
+                    String inputValue = (String) entry.getValue();
+                    if (inputValue == null) {
+                        continue;
+                    }
+                    File file = new File(ClassUtil.getClassPath() + inputValue);
+                    System.out.println(file.exists());
+                    MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE, "--------------------" + BOUNDARY, Charset.defaultCharset());
+                    //multipartEntity.addPart("key",new StringBody("123456",Charset.forName("UTF-8")));
+                    //multipartEntity.addPart("from",new StringBody("cw",Charset.forName("UTF-8")));
+                    multipartEntity.addPart("file", new FileBody(file));
+                    HttpPost request = new HttpPost(urlStr);
+                    request.setEntity(multipartEntity);
+                    request.addHeader("Content-Type", "multipart/form-data; boundary=--------------------" + BOUNDARY);
+                    //request.addHeader("Content-Type","image/jpeg");  //视情况而定
+                    DefaultHttpClient httpClient = new DefaultHttpClient();
+                    HttpResponse response = httpClient.execute(request);
+                    InputStream is = response.getEntity().getContent();
+                    BufferedReader in = new BufferedReader(new InputStreamReader(is));
+                    String line = "";
+                    while ((line = in.readLine()) != null) {
+                        buffer.append(line);
+                    }
+                    System.out.println("发送消息收到的返回：" + buffer.toString());
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("发送POST请求出错。" + urlStr);
+            e.printStackTrace();
+        }
+        return buffer.toString();
+    }
+
+
+
 }

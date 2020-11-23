@@ -7,8 +7,6 @@ import com.fapiao.neon.config.Profile;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.annotation.Resource;
-
 @Configuration
 public class NeonConfig {
     @Bean
@@ -73,4 +71,6 @@ public class NeonConfig {
     public CollectWholeClient collectWholeClient(){
         return new CollectWholeClientImpl(neonConfiguration());
     }
+    @Bean
+    public CollectCustomsClient collectCustomsClient(){return new CollectCustomsClientImpl(neonConfiguration());}
 }

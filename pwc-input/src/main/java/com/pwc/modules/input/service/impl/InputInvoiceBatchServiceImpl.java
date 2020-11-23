@@ -1,7 +1,6 @@
 package com.pwc.modules.input.service.impl;
 
 import cn.hutool.core.util.StrUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pwc.common.annotation.DataFilter;
 import com.pwc.common.utils.Constant;
@@ -9,17 +8,13 @@ import com.pwc.common.utils.InputConstant;
 import com.pwc.common.utils.PageUtils;
 import com.pwc.common.utils.R;
 import com.pwc.modules.input.dao.InputInvoiceBatchDao;
-import com.pwc.modules.input.dao.InputCompanyDao;
 import com.pwc.modules.input.entity.*;
 import com.pwc.modules.input.service.*;
-import com.pwc.modules.sys.entity.SysUserEntity;
 import com.pwc.modules.sys.service.SysDeptService;
-import com.pwc.modules.sys.shiro.ShiroUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -520,9 +515,9 @@ public class InputInvoiceBatchServiceImpl extends ServiceImpl<InputInvoiceBatchD
                 }
             }
             //      后修改采购单状态。
-            InputInvoiceBatchEntity invoiceBatchEntity = invoiceBatchService.getById(batchId);
-            invoiceBatchEntity.setInvoiceBatchStatus(invoiceStatus+"");
-            return invoiceBatchService.updateById(invoiceBatchEntity);
+//            InputInvoiceBatchEntity invoiceBatchEntity = invoiceBatchService.getById(batchId);
+//            invoiceBatchEntity.setInvoiceBatchStatus(invoiceStatus+"");
+//            return invoiceBatchService.updateById(invoiceBatchEntity);
         }
         return false;
     }

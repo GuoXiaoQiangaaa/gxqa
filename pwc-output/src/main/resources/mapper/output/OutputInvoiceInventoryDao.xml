@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.output.dao.OutputInvoiceInventoryDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.pwc.modules.output.entity.OutputInvoiceInventoryEntity" id="outputInvoiceInventoryMap">
+        <result property="inventoryId" column="inventory_id"/>
+        <result property="invoiceType" column="invoice_type"/>
+        <result property="inputNum" column="input_num"/>
+        <result property="outputNum" column="output_num"/>
+        <result property="inventory" column="inventory"/>
+        <result property="status" column="status"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="invoiceCodeBegin" column="invoice_code_begin"/>
+        <result property="invoiceCodeEnd" column="invoice_code_end"/>
+        <result property="invoiceNumBegin" column="invoice_num_begin"/>
+        <result property="invoiceNumEnd" column="invoice_num_end"/>
+    </resultMap>
+
+
+</mapper>
