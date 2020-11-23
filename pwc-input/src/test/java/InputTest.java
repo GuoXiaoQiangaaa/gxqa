@@ -1,4 +1,5 @@
 import org.junit.Test;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,12 +32,13 @@ public class InputTest {
         Matcher m = p.matcher(str); // 获取 matcher 对象
         int count = 0;
 
-        while(m.find()) {
+        while (m.find()) {
             count++;
-            System.out.println("Match number "+count);
-            System.out.println("start(): "+m.start());
-            System.out.println("end(): "+m.end());
-            System.out.println("group(): "+m.group());
+            System.out.println("Match number " + count);
+            System.out.println("start(): " + m.start());
+            System.out.println("end(): " + m.end());
+            String findStr = m.group().substring(m.group().length() - 10, m.group().length());
+            System.out.println("group(): " + findStr);
         }
 
     }

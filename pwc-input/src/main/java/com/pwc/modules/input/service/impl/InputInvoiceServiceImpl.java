@@ -3495,9 +3495,11 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                 invoiceEntity.setInvoiceRemarks(invoiceCheckEntity.getRemarks());
 
                 // 获取发票备注栏，通过正则表达式 获取备注栏的po列表 按照 "/"分割
-                String poNumberList = getPoNumberList(invoiceCheckEntity.getRemarks());
-                invoiceEntity.setPoNumber(poNumberList);
 
+                if (!invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.DIFFERENCE.getValue())) {
+                    String poNumberList = getPoNumberList(invoiceCheckEntity.getRemarks());
+                    invoiceEntity.setPoNumber(poNumberList);
+                }
 
                 invoiceEntity.setInvoiceRecognition(invoiceCheckEntity.getState());
                 invoiceEntity.setInvoiceEntity(InputConstant.InvoiceEntity.SPECIAL.getValue());
@@ -3523,8 +3525,10 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                 invoiceEntity.setInvoiceTaxPrice(new BigDecimal(invoiceCheckEntity.getTotalTax()));
                 invoiceEntity.setInvoiceRemarks(invoiceCheckEntity.getRemarks());
                 // 获取发票备注栏，通过正则表达式 获取备注栏的po列表 按照 "/"分割
-                String poNumberList = getPoNumberList(invoiceCheckEntity.getRemarks());
-                invoiceEntity.setPoNumber(poNumberList);
+                if (!invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.DIFFERENCE.getValue())) {
+                    String poNumberList = getPoNumberList(invoiceCheckEntity.getRemarks());
+                    invoiceEntity.setPoNumber(poNumberList);
+                }
 
                 invoiceEntity.setInvoiceRecognition(invoiceCheckEntity.getState());
                 invoiceEntity.setInvoiceEntity(InputConstant.InvoiceEntity.ELECTRON_AVERAGE.getValue());
@@ -3549,8 +3553,10 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                 invoiceEntity.setInvoiceTaxPrice(new BigDecimal(invoiceCheckEntity.getTotalTax()));
                 invoiceEntity.setInvoiceRemarks(invoiceCheckEntity.getRemarks());
                 // 获取发票备注栏，通过正则表达式 获取备注栏的po列表 按照 "/"分割
-                String poNumberList = getPoNumberList(invoiceCheckEntity.getRemarks());
-                invoiceEntity.setPoNumber(poNumberList);
+                if (!invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.DIFFERENCE.getValue())) {
+                    String poNumberList = getPoNumberList(invoiceCheckEntity.getRemarks());
+                    invoiceEntity.setPoNumber(poNumberList);
+                }
 
                 invoiceEntity.setInvoiceRecognition(invoiceCheckEntity.getState());
                 invoiceEntity.setInvoiceEntity(InputConstant.InvoiceEntity.AVERAGE.getValue());
@@ -3570,11 +3576,12 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
         Matcher m = p.matcher(remarks); // 获取 matcher 对象
 
         while (m.find()) {
+            String findStr = m.group().substring(m.group().length() - 10, m.group().length());
             if ("".equals(result)) {
-                result = m.group();
+                result = findStr;
             } else {
                 result += "/";
-                result += m.group();
+                result += findStr;
             }
         }
 
@@ -3717,6 +3724,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                     }
                 }
                 if (invoiceCheck.getData() != null) {
+                    // set 验真返回数据
                     setInvoiceCheckEntity(invoiceCheck, invoiceEntity);
                 }
                 msg = "验真成功";
@@ -4020,7 +4028,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
         }
         if (invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.REPEAT.getValue())
                 || invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.PENDING_VERIFICATION.getValue())) {
-            getRepeat(invoiceEntity);//验重
+            getRepeat(invoiceEntity);  //验重
         }
         if (invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.PENDING_VERIFICATION.getValue())
                 || invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue())) {
@@ -4267,37 +4275,11 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
 
     //  NonPo related”类发票对应的vendor list
     public InputInvoiceEntity getVendorList(InputInvoiceEntity invoiceEntity) {
-        OutputSupplierEntity supplierEntity = outputSupplierService.getListByTaxCode(invoiceEntity.getInvoiceSellParagraph()); // 供应商
-        //InputPoListEntity   poList= inputPoListService.getPoListByCode(invoiceEntity.getInvoiceSellParagraph()); // po发票信息
-        InputInvoicePoEntity PoEntity = inputInvoicePoService.getByNumber(invoiceEntity.getInvoiceNumber());
-
-        if (supplierEntity != null) {
-            // TODO type in 0, 2, 3 skip the validation
-            if ("0".equals(supplierEntity.getInvoiceType())
-                    || "2".equals(supplierEntity.getInvoiceType())
-                    || "3".equals(supplierEntity.getInvoiceType())) {
-                invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_MATCHED.getValue());
-            } else {
-                if (PoEntity != null) {
-                    invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_MATCHED.getValue());
-                } else {
-                    invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.DIFFERENCE.getValue());
-                }
-            }
+        if (invoiceEntity.getPoNumber() != null || "023".contains(invoiceEntity.getInvoiceClass())) {
+            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_MATCHED.getValue());
         } else {
-            if (PoEntity != null) {
-                invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_MATCHED.getValue());
-            } else {
-                invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.DIFFERENCE.getValue());
-            }
+            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.DIFFERENCE.getValue());
         }
-
-
-//        if (supplierEntity == null && PoEntity == null) {
-//            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.DIFFERENCE.getValue());
-//        } else {
-//            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_MATCHED.getValue());
-//        }
 
         return invoiceEntity;
     }
