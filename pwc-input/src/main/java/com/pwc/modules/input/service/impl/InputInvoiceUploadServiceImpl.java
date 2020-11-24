@@ -50,7 +50,8 @@ public class InputInvoiceUploadServiceImpl extends ServiceImpl<InputInvoiceUploa
                     .apply(StringUtils.isNotBlank(createTime),"date_format(create_time,'%Y-%m-%d')>={0}",!StringUtils.isNotBlank(createTime) ? "":createTime.split(",")[0])
                     .apply(StringUtils.isNotBlank(createTime),"date_format(create_time,'%Y-%m-%d')<={0}",!StringUtils.isNotBlank(createTime) ? "":createTime.split(",")[1])
                     .eq(StringUtils.isNotBlank(createUserName),"create_by",userId)
-                    .apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))
+                    //临时去掉验证
+                    /*.apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))*/
     );
     return new PageUtils(page);
 

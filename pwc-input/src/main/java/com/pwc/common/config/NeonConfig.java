@@ -28,8 +28,11 @@ public class NeonConfig {
 
         // 永和大王
         configuration.setProfile(Profile.PRODUCT);
-        configuration.setClientId("G6GEq88i");
-        configuration.setClientSecret("4b1b92b168c24a2f82e8f88912b81158");
+//        configuration.setClientId("G6GEq88i");
+//        configuration.setClientSecret("4b1b92b168c24a2f82e8f88912b81158");
+
+        configuration.setClientId("um41Ukjt");
+        configuration.setClientSecret("0998ba2a63d6481e8432203995ef9990");
 
         return configuration;
     }
