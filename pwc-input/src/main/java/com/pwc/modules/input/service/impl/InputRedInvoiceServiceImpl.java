@@ -389,6 +389,10 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
             entity.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
             entity.setUpdateTime(new Date());
             super.updateById(entity);
+
+            //更新发票红字通知单号信息
+            invoiceEntity.setRedNoticeNumber(redInvoiceNumber);
+            inputInvoiceService.updateById(invoiceEntity);
         } catch (RRException e) {
             throw e;
         } catch (Exception e) {
