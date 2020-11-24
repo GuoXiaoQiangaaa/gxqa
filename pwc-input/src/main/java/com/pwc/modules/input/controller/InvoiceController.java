@@ -576,7 +576,6 @@ public class InvoiceController {
      * @return
      */
     @RequestMapping("/saveScanning")
-//    @RequiresPermissions("input:invoice:saveScanning")
     public R saveScanning(@RequestParam Map<String, Object> params, HttpServletRequest request) {
         MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
         MultipartFile file = multipartRequest.getFile("file");

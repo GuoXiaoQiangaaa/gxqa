@@ -14,6 +14,7 @@ import java.util.Map;
 
 /**
  * 票据上传Service
+ *
  * @author cj
  * @version 2018-12-05
  */
@@ -25,7 +26,7 @@ public interface InputInvoiceService extends IService<InputInvoiceEntity> {
 
     void setBatchNumber(List<InputInvoiceEntity> invoiceEntities);
 
-    PageUtils findBillList(Map<String, Object> params,InputInvoiceEntity invoiceEntity);
+    PageUtils findBillList(Map<String, Object> params, InputInvoiceEntity invoiceEntity);
 
     List<InputInvoiceEntity> getListByBatchId(InputInvoiceEntity invoiceEntity);
 
@@ -36,6 +37,7 @@ public interface InputInvoiceService extends IService<InputInvoiceEntity> {
 
     /**
      * 根据发票代码和发票号码查询发票是否重复
+     *
      * @param invoiceCode
      * @param invoiceNumber
      * @return
@@ -44,6 +46,7 @@ public interface InputInvoiceService extends IService<InputInvoiceEntity> {
 
     /**
      * 根据发票代码和发票号码更新重复发票状态
+     *
      * @param invoiceCode
      * @param invoiceNumber
      */
@@ -56,6 +59,7 @@ public interface InputInvoiceService extends IService<InputInvoiceEntity> {
 
     /**
      * 验真
+     *
      * @param invoiceEntity
      * @return
      */
@@ -63,6 +67,7 @@ public interface InputInvoiceService extends IService<InputInvoiceEntity> {
 
     /**
      * 强制验真
+     *
      * @param invoiceEntity
      * @return
      */
@@ -75,6 +80,7 @@ public interface InputInvoiceService extends IService<InputInvoiceEntity> {
 
     /**
      * 传入识别成功的发票与当前批次号进行分组
+     *
      * @param invoiceEntityList
      * @param invoiceVoucherEntity
      * @return
@@ -119,23 +125,24 @@ public interface InputInvoiceService extends IService<InputInvoiceEntity> {
 
     List<InputInvoiceVo> getVoListById(InputInvoiceVo invoiceVo);
 
-    PageUtils findListByInvoiceIds(Map<String, Object> params,List<Integer> ids);
+    PageUtils findListByInvoiceIds(Map<String, Object> params, List<Integer> ids);
 
 
     R getApplyResule(String nsrsbh, String businessType, String taskNo);
 
     void updateApply(InputInvoiceEntity invoiceEntity);
 
-    R getApply(String nsrsbh,String businessType);
+    R getApply(String nsrsbh, String businessType);
 
-    R getCensusResult(String nsrsbh,String statisticsTime);
+    R getCensusResult(String nsrsbh, String statisticsTime);
 
-    R getAffirmCensus(String nsrsbh,String statisticsTime);
+    R getAffirmCensus(String nsrsbh, String statisticsTime);
 
     List<InputInvoiceEntity> getByInvoiceIds(List<Integer> ids);
 
     /**
      * 根据指定id获取发票集合
+     *
      * @param invoiceEntity
      * @return
      */
@@ -152,6 +159,7 @@ public interface InputInvoiceService extends IService<InputInvoiceEntity> {
 
     /**
      * 发票关联采购单并修改采购单状态
+     *
      * @param invoiceIds
      * @param batchId
      */
@@ -159,24 +167,29 @@ public interface InputInvoiceService extends IService<InputInvoiceEntity> {
 
     /**
      * 人工入账
+     *
      * @param invoiceIds
      */
     void manualEntry(String invoiceIds);
 
     /**
      * 手动三单匹配
+     *
      * @param invoiceIds
      */
     void manualMatch(String invoiceIds);
 
     /**
      * 勾选只改了状态
+     *
      * @param invoiceEntity
      * @return
      */
     boolean functionVerfy(InputInvoiceEntity invoiceEntity);
+
     /**
      * 根据发票状态
+     *
      * @param status
      * @return
      */
@@ -187,22 +200,27 @@ public interface InputInvoiceService extends IService<InputInvoiceEntity> {
 
     /**
      * 获取上一个seq
+     *
      * @param invoiceSeq
      * @return
      */
     String getLastSeq(String invoiceSeq);
+
     List<String> receiveInvoice(MultipartFile file) throws Exception;
+
     InputInvoiceEntity makeUpInvoice(InputInvoiceEntity entity);
 
     /**
      * 页面查询
+     *
      * @param params
      * @return
      */
-    PageUtils  getPageList(Map<String, Object> params);
+    PageUtils getPageList(Map<String, Object> params);
 
     /**
      * 导出页面数据
+     *
      * @param params
      * @return
      */
@@ -210,10 +228,12 @@ public interface InputInvoiceService extends IService<InputInvoiceEntity> {
 
     /**
      * 根据关联上传id查数据
+     *
      * @param uploadId
      * @return
      */
     InputInvoiceEntity findByuploadId(String uploadId);
+
     /**
      * 更具发票代码查询是否有数据
      */
@@ -226,6 +246,7 @@ public interface InputInvoiceService extends IService<InputInvoiceEntity> {
 
     /**
      * 多次验真
+     *
      * @param id
      * @return
      */
@@ -233,14 +254,16 @@ public interface InputInvoiceService extends IService<InputInvoiceEntity> {
 
     /**
      * 认证操作
+     *
      * @param ids
      * @param type
      * @return
      */
-    String getCertification(String  ids,String type);
+    String getCertification(String ids, String type);
 
     /**
      * 导入认证
+     *
      * @param file
      * @return
      * @throws Exception
@@ -251,19 +274,29 @@ public interface InputInvoiceService extends IService<InputInvoiceEntity> {
      * 抵账库同步数据
      */
     void saveInvoiceBySync();
-    /**特殊页面进入*/
+
+    /**
+     * 特殊页面进入
+     */
     PageUtils getPageListBySpecial(Map<String, Object> params);
 
     /**
      * 手工入账
+     *
      * @param params
      */
     void manualEntryBySap(Map<String, Object> params);
 
     /**
      * 主流程
+     *
      * @param invoiceEntity
      * @return
      */
     InputInvoiceEntity mainProcess(InputInvoiceEntity invoiceEntity);
+
+    /**
+     *
+     */
+    InputInvoiceEntity savePO(InputInvoiceEntity invoiceEntity);
 }

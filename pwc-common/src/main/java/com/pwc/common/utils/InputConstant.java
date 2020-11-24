@@ -319,7 +319,7 @@ public class InputConstant {
          *   购方信息错误
          */
         CHARGE_AGAINST("-4"),
-        /**ii
+        /**
          * PO信息缺失
          */
         DIFFERENCE("-5"),

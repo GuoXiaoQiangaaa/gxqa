@@ -3958,15 +3958,22 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
      */
     @Override
     public InputInvoiceEntity makeUpInvoice(InputInvoiceEntity entity) {
+        InputInvoiceEntity inputInvoiceEntity = null;
         entity.setInvoiceStyle(InputConstant.InvoiceStyle.AP.getValue());
-        entity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_VERIFICATION.getValue());
         if (entity.getId() != null) {
+            inputInvoiceEntity = getById(entity.getId());
             updateById(entity);
         } else {
             save(entity);
         }
         InputInvoiceUploadEntity uploadEntity = inputInvoiceUploadService.getById(entity.getUploadId());
-        mainProcess(entity);
+
+        if ((inputInvoiceEntity != null) && (isOnlyPOChanged(entity, inputInvoiceEntity))) {
+            savePO(entity);
+        } else {
+            mainProcess(entity);
+        }
+
         if (entity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.REPEAT.getValue())) {
             uploadEntity.setStatus(InputConstant.UpdoldState.REPEAT.getValue());
         } else if (entity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue())) {
@@ -3977,6 +3984,26 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
         uploadEntity.setUploadType(entity.getSourceStyle());
         inputInvoiceUploadService.updateById(uploadEntity);
         return entity;
+    }
+
+    private Boolean isOnlyPOChanged(InputInvoiceEntity updatedEntity, InputInvoiceEntity savedEntity) {
+        return (!updatedEntity.getPoNumber().equals(savedEntity.getPoNumber()))
+                && updatedEntity.getInvoiceNumber().equals(savedEntity.getInvoiceNumber())
+                && updatedEntity.getInvoiceCode().equals(savedEntity.getInvoiceCode())
+                && updatedEntity.getInvoiceCreateDate().equals(savedEntity.getInvoiceCreateDate())
+                && (updatedEntity.getInvoiceStyle() == savedEntity.getInvoiceStyle())
+                && updatedEntity.getInvoiceFreePrice().equals(savedEntity.getInvoiceFreePrice())
+                && isCheckCodeChanged(updatedEntity.getInvoiceCheckCode(), savedEntity.getInvoiceCheckCode());
+    }
+
+    private Boolean isCheckCodeChanged(String updated, String saved) {
+        Boolean result = false;
+        if (updated.length() >= 6 && saved.length() >= 6) {
+            if (updated.substring(updated.length() - 6).equals(saved.substring(saved.length() - 6))) {
+                result = true;
+            }
+        }
+        return result;
     }
 
     @Override
@@ -4038,6 +4065,31 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
         }
         if (invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.PENDING_MATCHED.getValue())
                 || invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.CHARGE_AGAINST.getValue())
+                || invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.DIFFERENCE.getValue())
+                || invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.REVERSE.getValue())
+                || invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.DIFFERENT_MESSAGE.getValue())
+
+        ) {
+            complianceCheck(invoiceEntity); // 合规
+        }
+        if (invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.PENDING_MATCHED.getValue())
+        ) {
+            getClassification(invoiceEntity); // 自动分类
+        }
+        if (InputConstant.InvoiceStyle.RED.equals(invoiceEntity.getSourceStyle())) {
+            relatRed(invoiceEntity); // 红字发票
+        }
+        if (invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.PENDING_MATCHED.getValue()) && (InputConstant.InvoiceEntity.SPECIAL.getValue()).equals(invoiceEntity.getInvoiceEntity())) {
+            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_CERTIFIED.getValue());
+        }
+        updateById(invoiceEntity);
+        return invoiceEntity;
+    }
+
+    // 保存 PO
+    @Override
+    public InputInvoiceEntity savePO(InputInvoiceEntity invoiceEntity) {
+        if (invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.CHARGE_AGAINST.getValue())
                 || invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.DIFFERENCE.getValue())
                 || invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.REVERSE.getValue())
                 || invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.DIFFERENT_MESSAGE.getValue())
@@ -4277,7 +4329,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
 
     //  NonPo related”类发票对应的vendor list
     public InputInvoiceEntity getVendorList(InputInvoiceEntity invoiceEntity) {
-        if (invoiceEntity.getPoNumber() != null || "023".contains(invoiceEntity.getInvoiceClass())) {
+        if (invoiceEntity.getPoNumber() != null || "0238".contains(invoiceEntity.getInvoiceClass())) {
             invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_MATCHED.getValue());
         } else {
             invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.DIFFERENCE.getValue());
