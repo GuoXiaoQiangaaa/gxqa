@@ -89,15 +89,17 @@ public class InvoiceSyncController {
         SimpleDateFormat df = new SimpleDateFormat(
                 "yyyy-MM-dd");//设置日期格式
         String dateString = df.format(date);
-        SyncInvoiceParamBody syncInvoiceParamBody = new SyncInvoiceParamBody();
-        syncInvoiceParamBody.setTaxNo("91310000059352422R");
+        /*SyncInvoiceParamBody syncInvoiceParamBody = new SyncInvoiceParamBody();
+        syncInvoiceParamBody.setTaxNo("911100007693505528");
         syncInvoiceParamBody.setSyncType("1");
-        syncInvoiceParamBody.setStartDate("2020-01-01");
-        syncInvoiceParamBody.setEndDate("2020-04-30");
+        syncInvoiceParamBody.setStartBillingDate("2020-10-01");
+        syncInvoiceParamBody.setEndBillingDate("2020-10-31");
         syncInvoiceParamBody.setPage(1);
-        syncInvoiceParamBody.setPageSize(200);
+        syncInvoiceParamBody.setPageSize(1);
         CallResult<SyncInvoiceInfo> results = invoiceSyncService.invoiceSync(syncInvoiceParamBody);
-        System.out.println(results.getData().getInvoices().toString());
+        System.out.println(results.getData().getInvoices().toString());*/
+        invoiceSyncService.syncInvoice(1, "2020-10-01", "2020-10-31", "911100007693505528");
+
         return R.ok();
     }
 
@@ -229,7 +231,7 @@ public class InvoiceSyncController {
      */
     @RequestMapping("/invoiceSyncAutoPage")
     public R invoiceSyncAutoPage(String taxNo, String startDate, String endDate) {
-         // TODO 缺少接口信息 不能同步抵账库
+         // TODO 缺少接口信息 不能同步底账库
         String[] taxNos = taxNo.split(",");
         List<SysDeptEntity> deptEntitys= sysDeptService.getDeptByStatus();
         SysDeptEntity  deptEntity =sysDeptService.getById(ShiroUtils.getUserEntity().getDeptId());

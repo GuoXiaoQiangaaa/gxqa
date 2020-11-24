@@ -569,7 +569,7 @@ public class InvoiceController {
     }
 
     /**
-     * 扫描上传
+     * 小程序扫描上传
      *
      * @param invoiceEntity
      * @param request
@@ -845,6 +845,8 @@ public class InvoiceController {
         InputInvoiceEntity invoiceEntity = new InputInvoiceEntity();
         PageUtils page = invoiceService.queryPage(params, invoiceEntity);
         List<InputInvoiceEntity> invoiceEntityList = (List<InputInvoiceEntity>) page.getList();
+
+
         if (!invoiceEntityList.isEmpty()) {
             List<InputInvoiceEntity> list = invoiceService.getListAndCreateName(invoiceEntityList, createUserName);
 //            for (InputInvoiceEntity Entity:list){

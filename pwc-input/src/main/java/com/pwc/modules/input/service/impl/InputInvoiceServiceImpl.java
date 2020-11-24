@@ -48,6 +48,7 @@ import com.pwc.modules.sys.service.SysConfigService;
 import com.pwc.modules.sys.service.SysDeptService;
 import com.pwc.modules.sys.service.SysUserService;
 import com.pwc.modules.sys.shiro.ShiroUtils;
+import com.sun.xml.internal.bind.v2.TODO;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.beanutils.ConvertUtils;
@@ -238,7 +239,8 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                         .eq(StringUtils.isNotBlank(invoiceEntity), "invoice_entity", invoiceEntity) // 发票类型
                         .eq(StringUtils.isNotBlank(invoiceMatch), "invoice_match", invoiceMatch)
                         .orderByDesc("invoice_batch_number")
-                        .apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))
+                        //临时去掉验证
+                       /* .apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))*/
         );
         return new PageUtils(page);
     }
@@ -4072,6 +4074,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
         ) {
             complianceCheck(invoiceEntity); // 合规
         }
+        // TODO: 2020/11/23
         if (invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.PENDING_MATCHED.getValue())
         ) {
             getClassification(invoiceEntity); // 自动分类
@@ -4581,17 +4584,21 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                 invoiceEntitys.setInvoiceUploadType(invoiceEntity.getUploadType());
                 updateById(invoiceEntitys);
             } else {
-                if (invoiceEntity.getInvoiceFreePrice().compareTo(BigDecimal.ZERO) == 1) {
-                    type = InputConstant.InvoiceStyle.BLUE.getValue();
-                    invoiceEntity.setSourceStyle(type);
-                } else {
-                    type = InputConstant.InvoiceStyle.RED.getValue();
+                if(invoiceEntity.getInvoiceFreePrice() != null){
+                    if (invoiceEntity.getInvoiceFreePrice().compareTo(BigDecimal.ZERO) == 1) {
+                        type = InputConstant.InvoiceStyle.BLUE.getValue();
+                        invoiceEntity.setSourceStyle(type);
+                    } else {
+                        type = InputConstant.InvoiceStyle.RED.getValue();
+                        invoiceEntity.setSourceStyle(type);
+                    }
+                }else{
+                    type = InputConstant.InvoiceStyle.NULL.getValue();
                     invoiceEntity.setSourceStyle(type);
                 }
                 save(invoiceEntity);
                 mainProcess(invoiceEntity);
             }
-
         }
         if ((invoiceEntity.getInvoiceStatus()).equals(InputConstant.InvoiceStatus.REPEAT.getValue())) {
             uploadEntity.setStatus(InputConstant.UpdoldState.REPEAT.getValue());
