@@ -48,7 +48,7 @@ import com.pwc.modules.sys.service.SysConfigService;
 import com.pwc.modules.sys.service.SysDeptService;
 import com.pwc.modules.sys.service.SysUserService;
 import com.pwc.modules.sys.shiro.ShiroUtils;
-import com.sun.xml.internal.bind.v2.TODO;
+//import com.sun.xml.internal.bind.v2.TODO;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.beanutils.ConvertUtils;
@@ -4065,20 +4065,22 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                 || invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue())) {
             functionCheckTrue(invoiceEntity); // 验真
         }
+
+        // TODO: 2020/11/25 自动分类提前
+        if (invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.PENDING_MATCHED.getValue())
+        ) {
+            getClassification(invoiceEntity); // 自动分类
+        }
+
         if (invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.PENDING_MATCHED.getValue())
                 || invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.CHARGE_AGAINST.getValue())
                 || invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.DIFFERENCE.getValue())
                 || invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.REVERSE.getValue())
                 || invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.DIFFERENT_MESSAGE.getValue())
-
         ) {
             complianceCheck(invoiceEntity); // 合规
         }
-        // TODO: 2020/11/23
-        if (invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.PENDING_MATCHED.getValue())
-        ) {
-            getClassification(invoiceEntity); // 自动分类
-        }
+
         if (InputConstant.InvoiceStyle.RED.equals(invoiceEntity.getSourceStyle())) {
             relatRed(invoiceEntity); // 红字发票
         }
@@ -4343,11 +4345,15 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
 
     //  PO list中的“company code”的信息进行比对
     public InputInvoiceEntity getCompanyCode(InputInvoiceEntity invoiceEntity) {
-        InputPoListEntity poList = inputPoListService.getPoListByCode(invoiceEntity.getInvoicePurchaserParagraph());
-        if (poList == null) {
-            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.DIFFERENT_MESSAGE.getValue());
-        } else {
+        if (invoiceEntity.getPoNumber() != null || "0238".contains(invoiceEntity.getInvoiceClass())) {
             invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_MATCHED.getValue());
+        }else{
+            InputPoListEntity poList = inputPoListService.getPoListByCode(invoiceEntity.getInvoicePurchaserParagraph());
+            if (poList == null) {
+                invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.DIFFERENT_MESSAGE.getValue());
+            } else {
+                invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_MATCHED.getValue());
+            }
         }
         return invoiceEntity;
     }
