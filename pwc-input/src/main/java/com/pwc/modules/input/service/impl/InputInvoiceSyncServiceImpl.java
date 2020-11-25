@@ -634,7 +634,7 @@ public class InputInvoiceSyncServiceImpl extends ServiceImpl<InputInvoiceSyncDao
                 if (result.isSuccess()) {
                     List<DeductResultInfo> deductResultInfoList = result.getData().getInvoices();
                     for (DeductResultInfo deductResultInfo : deductResultInfoList) {
-                        if ("1".equals(deductResultInfo.getDeductibleResult())) {
+                        if ("1".equals(deductResultInfo.getDeductibleResult()) || "4".equals(deductResultInfo.getDeductibleResult())) {
                             // 1 勾选 6 撤销勾选
                             if ("1".equals(deductResultInfo.getDeductType())) {
                                 // 抵扣成功
@@ -643,12 +643,12 @@ public class InputInvoiceSyncServiceImpl extends ServiceImpl<InputInvoiceSyncDao
                                 invoice.setInvoiceAuthDate(deductResultInfo.getDeductibleDate());
                                 invoice.setInvoiceDeductiblePeriod(deductResultInfo.getDeductiblePeriod());
                                 // 认证成功同步到数据库
-//                                inputInvoiceTaxationService.updateTaxation(invoice);
+                                inputInvoiceTaxationService.updateTaxation(invoice);
                             } else if ("6".equals(deductResultInfo.getDeductType())) {
                                 invoice.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_CERTIFIED.getValue());
                                 invoice.setVerfy(Boolean.FALSE);
                             }
-                        } else {
+                        } else if(!"6".equals(deductResultInfo.getDeductibleResult())) {
                             if ("1".equals(deductResultInfo.getDeductType())) {
                                 invoice.setInvoiceStatus(InputConstant.InvoiceStatus.AUTHENTICATION_FAILED.getValue());
                                 invoice.setInvoiceErrorDescription(deductResultInfo.getDeductibleResultMsg());
@@ -692,16 +692,27 @@ public class InputInvoiceSyncServiceImpl extends ServiceImpl<InputInvoiceSyncDao
         String period = sysConfigService.getValue("DEDUCT_PERIOD");
         DeductParamBody deductParamBody = new DeductParamBody();
         deductParamBody.setTaxNo(invoiceEntity.getInvoicePurchaserParagraph());
+        //deductParamBody.setTaxNo("911100007693505528");
         deductParamBody.setDeductType(deductType);
         deductParamBody.setPeriod(period);
+        //deductParamBody.setPeriod("202011");
         DeductInvoice deductInvoice = new DeductInvoice();
         deductInvoice.setInvoiceCode(invoiceEntity.getInvoiceCode());
+        //deductInvoice.setInvoiceCode("4400184130");
         deductInvoice.setInvoiceNumber(invoiceEntity.getInvoiceNumber());
+        //deductInvoice.setInvoiceNumber("27822974");
         deductInvoice.setValidTax(invoiceEntity.getInvoiceTaxPrice().toPlainString());
+        //deductInvoice.setValidTax("256.67");
         List<DeductInvoice> invoices = new ArrayList<>();
         invoices.add(deductInvoice);
         deductParamBody.setInvoices(invoices);
-        CallResult<ApplyDeductResultInfo> results  = null;//deductInvoices(deductParamBody);
+        CallResult<ApplyDeductResultInfo> results  = deductInvoices(deductParamBody);
+
+/*        CommonParamBody commonParamBody = new CommonParamBody();
+        commonParamBody.setRequestId("");
+        CallResult<PaymentCertificateListInfo> result = deductClient.deductPaymentCertificateResult(commonParamBody);
+        System.out.println(result);*/
+
         if (null != results) {
             log.info("勾选结果：" + results.toString());
             if (results.isSuccess()) {
