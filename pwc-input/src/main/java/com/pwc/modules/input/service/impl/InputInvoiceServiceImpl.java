@@ -3973,6 +3973,8 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
         if ((inputInvoiceEntity != null) && (isOnlyPOChanged(entity, inputInvoiceEntity))) {
             savePO(entity);
         } else {
+            entity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_VERIFICATION.getValue());
+            // 由于改动了其他发票信息，所以将发票状态修改成OCR成功，走验重
             mainProcess(entity);
         }
 
@@ -4370,14 +4372,16 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
             NumberFormat nf = NumberFormat.getPercentInstance();
             NumberFormat nfs = NumberFormat.getInstance();
             try {
-                if ((nf.parse(taxCheckEntity.getTaxRate())) != (nfs.parse(taxCheckEntity.getTaxRate()))) {
+                if (!nf.parse(taxCheckEntity.getTaxRate()).equals(nfs.parse(taxCheckEntity.getTaxRate()))) {
                     invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.REVERSE.getValue());
                     invoiceEntity.setInvoiceErrorDescription("商品信息税率不一致");
                     break;
                 }
-            } catch (ParseException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
-                throw new RRException("税率判断失败！");
+                invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.REVERSE.getValue());
+                invoiceEntity.setInvoiceErrorDescription("商品信息税率不一致");
+//                throw new RRException("税率判断失败！");
             }
         }
         return invoiceEntity;
