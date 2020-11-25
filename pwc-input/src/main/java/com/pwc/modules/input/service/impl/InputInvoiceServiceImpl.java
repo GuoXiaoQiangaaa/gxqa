@@ -239,8 +239,8 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                         .eq(StringUtils.isNotBlank(invoiceEntity), "invoice_entity", invoiceEntity) // 发票类型
                         .eq(StringUtils.isNotBlank(invoiceMatch), "invoice_match", invoiceMatch)
                         .orderByDesc("invoice_batch_number")
-                        //临时去掉验证
-                       /* .apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))*/
+                //临时去掉验证
+                /* .apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))*/
         );
         return new PageUtils(page);
     }
@@ -4349,7 +4349,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
     public InputInvoiceEntity getCompanyCode(InputInvoiceEntity invoiceEntity) {
         if (invoiceEntity.getPoNumber() != null || "0238".contains(invoiceEntity.getInvoiceClass())) {
             invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_MATCHED.getValue());
-        }else{
+        } else {
             InputPoListEntity poList = inputPoListService.getPoListByCode(invoiceEntity.getInvoicePurchaserParagraph());
             if (poList == null) {
                 invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.DIFFERENT_MESSAGE.getValue());
@@ -4372,10 +4372,12 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
             NumberFormat nf = NumberFormat.getPercentInstance();
             NumberFormat nfs = NumberFormat.getInstance();
             try {
-                if (!nf.parse(taxCheckEntity.getTaxRate()).equals(nfs.parse(taxCheckEntity.getTaxRate()))) {
+                if (taxCheckEntity != null && nf.parse(taxCheckEntity.getTaxRate()).equals(materialEntit.getSphSlv())) {
                     invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.REVERSE.getValue());
                     invoiceEntity.setInvoiceErrorDescription("商品信息税率不一致");
                     break;
+                }else{
+                    invoiceEntity.setInvoiceErrorDescription("");
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -4594,7 +4596,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                 invoiceEntitys.setInvoiceUploadType(invoiceEntity.getUploadType());
                 updateById(invoiceEntitys);
             } else {
-                if(invoiceEntity.getInvoiceFreePrice() != null){
+                if (invoiceEntity.getInvoiceFreePrice() != null) {
                     if (invoiceEntity.getInvoiceFreePrice().compareTo(BigDecimal.ZERO) == 1) {
                         type = InputConstant.InvoiceStyle.BLUE.getValue();
                         invoiceEntity.setSourceStyle(type);
@@ -4602,7 +4604,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                         type = InputConstant.InvoiceStyle.RED.getValue();
                         invoiceEntity.setSourceStyle(type);
                     }
-                }else{
+                } else {
                     type = InputConstant.InvoiceStyle.NULL.getValue();
                     invoiceEntity.setSourceStyle(type);
                 }
