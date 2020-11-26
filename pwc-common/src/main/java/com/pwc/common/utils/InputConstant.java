@@ -450,7 +450,7 @@ public class InputConstant {
         EDI("3"),
         // R&D_外部
         RD_OUT("4"),
-        // IC_RRBIC_RRB
+        // IC_R&D
         IC_RD("5"),
         // IC_RRB
         IC_RRB("6"),

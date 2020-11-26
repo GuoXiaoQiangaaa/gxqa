@@ -3727,7 +3727,8 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
         if (null != invoiceEntity.getInvoiceFreePrice()) {
             invoiceInspectionParamBody.setTotalAmount(invoiceEntity.getInvoiceFreePrice().toString());
         }
-        invoiceInspectionParamBody.setBillingDate(invoiceEntity.getInvoiceCreateDate());
+        String subDate=invoiceEntity.getInvoiceCreateDate().substring(0,10);
+        invoiceInspectionParamBody.setBillingDate(subDate);
         invoiceInspectionParamBody.setInvoiceNumber(invoiceEntity.getInvoiceNumber());
         invoiceInspectionParamBody.setInvoiceCode(invoiceEntity.getInvoiceCode());
         CallResult<BaseInvoice> invoiceCheck = invoiceSyncService.invoiceCheck(invoiceInspectionParamBody); // 验真接口
@@ -3773,7 +3774,11 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
             }else{
                 invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.FIRST_VERIFICATION_FAILED.getValue());
             }
-            invoiceEntity.setInvoiceErrorDescription("抵账库或验真接口返回信息为空！");
+            if(invoiceCheck!=null && invoiceCheck.getExceptionResult() != null){
+                invoiceEntity.setInvoiceErrorDescription(invoiceCheck.getExceptionResult().getMessage());
+            }else{
+                invoiceEntity.setInvoiceErrorDescription("抵账库或验真接口返回信息为空！");
+            }
             msg = "验真失败";
         }
         updateById(invoiceEntity);
@@ -4452,6 +4457,8 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                             invoiceEntity.setInvoiceClass(InputConstant.InvoiceClass.RD_OUT.getValue());
                         } else if (deptSell != null && deptPur != null) {
                             invoiceEntity.setInvoiceClass(InputConstant.InvoiceClass.IC_RD.getValue());
+                        } else{
+                            invoiceEntity.setInvoiceClass(InputConstant.InvoiceClass.IC_NOTRD.getValue());
                         }
                     }
                 }
@@ -4469,7 +4476,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
         }
         // NonPo
         OutputSupplierEntity supplierEntity = outputSupplierService.getListByTaxCode(invoiceEntity.getInvoiceSellParagraph()); // 供应商
-        if (supplierEntity != null) {
+        if (supplierEntity != null && supplierEntity.getInvoiceType().equals("0")) {
             invoiceEntity.setInvoiceClass(InputConstant.InvoiceClass.NONPO_RELATED.getValue());
         }
         // DFU
