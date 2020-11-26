@@ -4376,7 +4376,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                     invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.REVERSE.getValue());
                     invoiceEntity.setInvoiceErrorDescription("商品信息税率不一致");
                     break;
-                }else{
+                }else if(invoiceEntity.getInvoiceErrorDescription().equals("商品信息税率不一致")){
                     invoiceEntity.setInvoiceErrorDescription("");
                 }
             } catch (Exception e) {
