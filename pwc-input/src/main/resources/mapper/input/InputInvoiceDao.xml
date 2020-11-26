@@ -932,7 +932,7 @@
     <select id="getOAInvoiceList" resultType="Integer">
         select count(*)
         from input_invoice
-    where invoice_number=#{invoiceNumber} and invoice_code=#{invoiceCode} and invoice_return ="0" and invoice_delete = "0" and (invoice_status !="-7" or invoice_status !="-2") and repeat_bill ="0"
+    where invoice_number=#{invoiceNumber} and invoice_code=#{invoiceCode} and invoice_return ="0" and invoice_delete = "0" and invoice_status not in ("-7","-2") and repeat_bill ="0"
     </select>
     <update id="updateRepeat">
         update input_invoice
