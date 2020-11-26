@@ -655,6 +655,7 @@ public class InvoiceController {
             state = new String[]{
                     InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue(),
                     InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue(),
+                    InputConstant.InvoiceStatus.FIRST_VERIFICATION_FAILED.getValue(),
                     InputConstant.InvoiceStatus.DIFFERENT_MESSAGE.getValue(),
                     InputConstant.InvoiceStatus.CHARGE_AGAINST.getValue(),
                     InputConstant.InvoiceStatus.DIFFERENCE.getValue(),
@@ -785,6 +786,7 @@ public class InvoiceController {
                     InputConstant.InvoiceStatus.INVALID.getValue(),
                     InputConstant.InvoiceStatus.REFUND.getValue(),
                     InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue(),
+                    InputConstant.InvoiceStatus.FIRST_VERIFICATION_FAILED.getValue(),
             };
         }
         params.put("invoiceStatus", state);
@@ -830,6 +832,7 @@ public class InvoiceController {
         } else {
             state = new String[]{
                     InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue(),
+                    InputConstant.InvoiceStatus.FIRST_VERIFICATION_FAILED.getValue(),
                     InputConstant.InvoiceStatus.PENDING_MATCHED.getValue(),
 //                    InputConstant.InvoiceStatus.REPEAT.getValue(),
 //                    InputConstant.InvoiceStatus.REFUND.getValue(),
@@ -869,7 +872,7 @@ public class InvoiceController {
         String id = (String) params.get("id");
         if (StringUtils.isNotBlank(id)) {
             InputInvoiceEntity entity = invoiceService.VerificationToMany(id);
-            if (entity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue())) {
+            if (entity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue()) || entity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.FIRST_VERIFICATION_FAILED.getValue())) {
                 return R.error("验证失败");
             } else {
                 return R.ok();
@@ -899,6 +902,7 @@ public class InvoiceController {
             } else {
                 state = new String[]{
                         InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue(),
+                        InputConstant.InvoiceStatus.FIRST_VERIFICATION_FAILED.getValue(),
                         InputConstant.InvoiceStatus.PENDING_MATCHED.getValue(),
                         InputConstant.InvoiceStatus.CHARGE_AGAINST.getValue(),
                         InputConstant.InvoiceStatus.DIFFERENCE.getValue(),

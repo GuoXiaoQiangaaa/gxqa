@@ -408,8 +408,12 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
             }
 
         } else {
-            // 验真失败
-            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue());
+            // 验真失败（判断是否初验）
+            if(invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.FIRST_VERIFICATION_FAILED.getValue())){
+                invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue());
+            }else{
+                invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.FIRST_VERIFICATION_FAILED.getValue());
+            }
             msg = "验真失败";
         }
         update(invoiceEntity);
@@ -634,7 +638,8 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
     public int functionCheckTrue(InputInvoiceEntity invoiceEntity, String flag) {
         int data = 0;
         if (InputConstant.InvoiceStatus.PENDING_VERIFICATION.getValue().equals(invoiceEntity.getInvoiceStatus())
-                || InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue().equals(invoiceEntity.getInvoiceStatus())) {
+                || InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue().equals(invoiceEntity.getInvoiceStatus())
+                || InputConstant.InvoiceStatus.FIRST_VERIFICATION_FAILED.getValue().equals(invoiceEntity.getInvoiceStatus())) {
             Map<String, String> result = invoiceCheck(invoiceEntity);
             try {
                 String value = result.get("response");
@@ -795,7 +800,12 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                         invoiceEntity.setCompanyId(deptEntity.getDeptId().intValue());
                     }
                     if (zfbz.equals("Y")) {
-                        invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue());
+                        // 验真失败（判断是否初验）
+                        if(invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.FIRST_VERIFICATION_FAILED.getValue())){
+                            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue());
+                        }else{
+                            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.FIRST_VERIFICATION_FAILED.getValue());
+                        }
                         invoiceEntity.setInvoiceErrorDescription("查验结果：该发票已作废");
                     }
                     update(invoiceEntity);
@@ -899,18 +909,32 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                                 "CY0023".equals(code) ||
                                 "CY0024".equals(code) ||
                                 "CY0025".equals(code)) {
-                    invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue());
+                    // 验真失败（判断是否初验）
+                    if(invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.FIRST_VERIFICATION_FAILED.getValue())){
+                        invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue());
+                    }else{
+                        invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.FIRST_VERIFICATION_FAILED.getValue());
+                    }
                     invoiceEntity.setInvoiceErrorDescription(msg);
                     invoiceEntity.setInvoiceVerifyTruth(flag);
                     update(invoiceEntity);
                 } else if ("CY0018".equals(code)) {
                     invoiceEntity.setInvoiceErrorDescription("查验失败");
-                    invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue());
+                    // 验真失败（判断是否初验）
+                    if(invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.FIRST_VERIFICATION_FAILED.getValue())){
+                        invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue());
+                    }else{
+                        invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.FIRST_VERIFICATION_FAILED.getValue());
+                    }
                     invoiceEntity.setInvoiceVerifyTruth(flag);
                     update(invoiceEntity);
                 } else {
-                    //验真失败
-                    invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue());
+                    // 验真失败（判断是否初验）
+                    if(invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.FIRST_VERIFICATION_FAILED.getValue())){
+                        invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue());
+                    }else{
+                        invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.FIRST_VERIFICATION_FAILED.getValue());
+                    }
                     //设置自动验真
                     invoiceEntity.setInvoiceVerifyTruth(flag);
                     //设置验真失败原因
@@ -3733,13 +3757,22 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                 }
                 msg = "验真成功";
             } else {
-                invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue());
+                // 验真失败（判断是否初验）
+                if(invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.FIRST_VERIFICATION_FAILED.getValue())){
+                    invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue());
+                }else{
+                    invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.FIRST_VERIFICATION_FAILED.getValue());
+                }
                 invoiceEntity.setInvoiceErrorDescription(invoiceCheck.getExceptionResult().getMessage());
                 msg = "验真失败";
             }
         } else {
-            // 验真失败
-            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue());
+            // 验真失败（判断是否初验）
+            if(invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.FIRST_VERIFICATION_FAILED.getValue())){
+                invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue());
+            }else{
+                invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.FIRST_VERIFICATION_FAILED.getValue());
+            }
             invoiceEntity.setInvoiceErrorDescription("抵账库或验真接口返回信息为空！");
             msg = "验真失败";
         }
@@ -4023,7 +4056,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
      */
     @Override
     public void VerificationToTwo() {
-        List<InputInvoiceEntity> invoiceEntitys = getByStatus(InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue());
+        List<InputInvoiceEntity> invoiceEntitys = getByStatus(InputConstant.InvoiceStatus.FIRST_VERIFICATION_FAILED.getValue());
         for (InputInvoiceEntity invoiceEntity : invoiceEntitys) {
             mainProcess(invoiceEntity);
             if (invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue())) {
@@ -4064,7 +4097,8 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
             getRepeat(invoiceEntity);  //验重
         }
         if (invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.PENDING_VERIFICATION.getValue())
-                || invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue())) {
+                || invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue())
+                || invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.FIRST_VERIFICATION_FAILED.getValue())) {
             functionCheckTrue(invoiceEntity); // 验真
         }
 
@@ -4376,7 +4410,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                     invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.REVERSE.getValue());
                     invoiceEntity.setInvoiceErrorDescription("商品信息税率不一致");
                     break;
-                }else if(invoiceEntity.getInvoiceErrorDescription().equals("商品信息税率不一致")){
+                }else if(taxCheckEntity != null && invoiceEntity.getInvoiceErrorDescription().equals("商品信息税率不一致")){
                     invoiceEntity.setInvoiceErrorDescription("");
                 }
             } catch (Exception e) {
@@ -4531,21 +4565,14 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
             if ("invoice".equals(jo.get("type"))) {
                 JSONObject jos = JSONObject.fromObject(jo.get("scan_result"));
                 System.out.println(jos.get("vat_type"));
-                if ("电子发票".equals(jos.get("vat_type"))) {
-                    invoiceEntity.setInvoiceEntity(InputConstant.InvoiceEntity.ELECTRON_AVERAGE.getValue());
-                    invoiceEntity.setInvoiceType("电子");
-                } else if ("专用发票".equals(jos.get("vat_type"))) {
-                    invoiceEntity.setInvoiceEntity(InputConstant.InvoiceEntity.SPECIAL.getValue());
-                    invoiceEntity.setInvoiceType("纸质");
-                } else if ("普通发票".equals(jos.get("vat_type"))) {
-                    invoiceEntity.setInvoiceType("纸质");
-                    invoiceEntity.setInvoiceEntity(InputConstant.InvoiceEntity.AVERAGE.getValue());
-                }
+
                 invoiceEntity.setInvoicePrintedNumber((String) jos.get("number"));
                 invoiceEntity.setInvoicePrintedCode((String) jos.get("code"));
                 invoiceEntity.setInvoiceNumber((String) jos.get("printed_number"));
                 invoiceEntity.setInvoiceCode((String) jos.get("printed_code"));
                 String createDate = (String) jos.get("date");
+                invoiceEntity.setInvoiceCheckCode((String) jos.get("check_code"));
+                invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue());
                 try {
                     if (FormatUtil.formatDate(createDate)) {
                         invoiceEntity.setInvoiceCreateDate(DateUtil.format(DateUtil.parseDate(createDate), "yyyy-MM-dd"));
@@ -4564,10 +4591,26 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                         }
                     }
                 }
-                invoiceEntity.setInvoiceCheckCode((String) jos.get("check_code"));
-                String invoice_type = null;
-                invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue());
-
+                if ("电子发票".equals(jos.get("vat_type"))) {
+                    invoiceEntity.setInvoiceEntity(InputConstant.InvoiceEntity.ELECTRON_AVERAGE.getValue());
+                    invoiceEntity.setInvoiceType("电子");
+                    //根据四要素判断是否识别成功
+                    if(invoiceEntity.getInvoiceCode() != null && invoiceEntity.getInvoiceNumber() != null && invoiceEntity.getInvoiceCreateDate() != null && invoiceEntity.getInvoiceCheckCode() != null){
+                        invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_VERIFICATION.getValue());
+                    }
+                } else if ("专用发票".equals(jos.get("vat_type"))) {
+                    invoiceEntity.setInvoiceEntity(InputConstant.InvoiceEntity.SPECIAL.getValue());
+                    invoiceEntity.setInvoiceType("纸质");
+                    if(invoiceEntity.getInvoiceCode() != null && invoiceEntity.getInvoiceNumber() != null && invoiceEntity.getInvoiceCreateDate() != null && invoiceEntity.getInvoiceFreePrice() != null){
+                        invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_VERIFICATION.getValue());
+                    }
+                } else if ("普通发票".equals(jos.get("vat_type"))) {
+                    invoiceEntity.setInvoiceType("纸质");
+                    invoiceEntity.setInvoiceEntity(InputConstant.InvoiceEntity.AVERAGE.getValue());
+                    if(invoiceEntity.getInvoiceCode() != null && invoiceEntity.getInvoiceNumber() != null && invoiceEntity.getInvoiceCreateDate() != null && invoiceEntity.getInvoiceCheckCode() != null){
+                        invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_VERIFICATION.getValue());
+                    }
+                }
             } else if ("po".equals(jo.get("type"))) {
                 type = InputConstant.InvoiceStyle.PO.getValue();
                 JSONObject jos = JSONObject.fromObject(jo.get("scan_result"));

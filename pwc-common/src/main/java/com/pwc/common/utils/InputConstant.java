@@ -248,7 +248,7 @@ public class InputConstant {
     public enum InvoiceStatus {
 
         /**
-         * drtu
+         * 识别失败
          */
         RECOGNITION_FAILED("2"),
         /**
@@ -330,8 +330,11 @@ public class InputConstant {
         /**
          * 作废
          */
-        INVALID("-7")
-
+        INVALID("-7"),
+        /**
+         * 初次验真失败
+         */
+        FIRST_VERIFICATION_FAILED("-8")
         ;
 
 
