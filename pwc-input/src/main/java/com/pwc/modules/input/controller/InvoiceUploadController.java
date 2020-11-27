@@ -44,10 +44,12 @@ public class InvoiceUploadController {
                      // po 数据
                     entity.setInvoiceEntity(new InputInvoiceEntity());
                     entity.setPoEntity(inputInvoicePoService.findByuploadId(entity.getUploadId().toString()));
-                }else if((entity.getUploadType()==InputConstant.InvoiceStyle.NULL.getValue())||entity.getUploadType().equals(InputConstant.InvoiceStyle.NULL.getValue())){
+                }
+                /*else if((entity.getUploadType()==InputConstant.InvoiceStyle.NULL.getValue())||entity.getUploadType().equals(InputConstant.InvoiceStyle.NULL.getValue())){
                     entity.setPoEntity(new InputInvoicePoEntity());
                     entity.setInvoiceEntity(new InputInvoiceEntity());
-                }else {
+                }*/
+                else {
                     entity.setPoEntity(new InputInvoicePoEntity());
                     entity.setInvoiceEntity(invoiceService.findByuploadId(entity.getUploadId().toString()));
                 }
@@ -66,7 +68,6 @@ public class InvoiceUploadController {
             invoiceService.makeUpInvoice(uploadEntity.getInvoiceEntity());
         }else if( uploadEntity.getPoEntity()!=null&&uploadEntity.getPoEntity().getUploadId()!=null){
             uploadEntity.setUploadType(InputConstant.InvoiceStyle.PO.getValue());
-
             inputInvoicePoService.uploadPo(uploadEntity.getPoEntity());
         }
 //        if(uploadEntity.getUploadType().equals(InputConstant.InvoiceStyle.BLUE.getValue())){
@@ -86,10 +87,10 @@ public class InvoiceUploadController {
                 // po 数据
                 uploadEntity.setInvoiceEntity(new InputInvoiceEntity());
                 uploadEntity.setPoEntity(inputInvoicePoService.findByuploadId(uploadEntity.getUploadId().toString()));
-            } else if ((uploadEntity.getUploadType() == InputConstant.InvoiceStyle.NULL.getValue()) || uploadEntity.getUploadType().equals(InputConstant.InvoiceStyle.NULL.getValue())) {
+            }/* else if ((uploadEntity.getUploadType() == InputConstant.InvoiceStyle.NULL.getValue()) || uploadEntity.getUploadType().equals(InputConstant.InvoiceStyle.NULL.getValue())) {
                 uploadEntity.setPoEntity(new InputInvoicePoEntity());
                 uploadEntity.setInvoiceEntity(new InputInvoiceEntity());
-            } else {
+            }*/ else {
                 uploadEntity.setPoEntity(new InputInvoicePoEntity());
                 uploadEntity.setInvoiceEntity(invoiceService.findByuploadId(uploadEntity.getUploadId().toString()));
             }
