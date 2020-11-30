@@ -4401,7 +4401,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
             invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_MATCHED.getValue());
         } else {
             InputPoListEntity poList = inputPoListService.getPoListByCode(invoiceEntity.getInvoicePurchaserParagraph());
-            if (poList == null) {
+            if (poList == null && invoiceEntity.getInvoiceStyle() != 4) {
                 invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.DIFFERENT_MESSAGE.getValue());
             } else {
                 invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_MATCHED.getValue());
