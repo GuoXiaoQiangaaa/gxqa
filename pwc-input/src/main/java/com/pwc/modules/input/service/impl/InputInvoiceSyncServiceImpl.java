@@ -609,7 +609,9 @@ public class InputInvoiceSyncServiceImpl extends ServiceImpl<InputInvoiceSyncDao
     public void deductInvoices(String invoiceIds, String deductType) {
         String[] invoiceArray = invoiceIds.split(",");
         for (String invoiceId : invoiceArray) {
+            String period = inputInvoiceService.getPeriodById(invoiceId).getInvoiceDeductiblePeriod();
             InputInvoiceEntity invoiceEntity = invoiceService.getById(invoiceId);
+            invoiceEntity.setInvoiceDeductiblePeriod(period);
             deductInvoices(invoiceEntity,deductType);
         }
     }
@@ -694,7 +696,7 @@ public class InputInvoiceSyncServiceImpl extends ServiceImpl<InputInvoiceSyncDao
         deductParamBody.setTaxNo(invoiceEntity.getInvoicePurchaserParagraph());
         //deductParamBody.setTaxNo("911100007693505528");
         deductParamBody.setDeductType(deductType);
-        deductParamBody.setPeriod(period);
+        deductParamBody.setPeriod(invoiceEntity.getInvoiceDeductiblePeriod());
         //deductParamBody.setPeriod("202011");
         DeductInvoice deductInvoice = new DeductInvoice();
         deductInvoice.setInvoiceCode(invoiceEntity.getInvoiceCode());

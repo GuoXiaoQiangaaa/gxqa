@@ -13,11 +13,14 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fapiao.neon.client.in.BaseClient;
 import com.fapiao.neon.model.CallResult;
+import com.fapiao.neon.model.in.DeclareInfo;
 import com.fapiao.neon.model.in.inspect.BaseInvoice;
 import com.fapiao.neon.model.in.inspect.ENormalInvoiceInfo;
 import com.fapiao.neon.model.in.inspect.NormalInvoiceInfo;
 import com.fapiao.neon.model.in.inspect.SpecialInvoiceInfo;
+import com.fapiao.neon.param.in.DeclareParamBody;
 import com.fapiao.neon.param.in.InvoiceInspectionParamBody;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
@@ -53,11 +56,14 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -76,7 +82,7 @@ import static com.pwc.common.utils.FdfsUtil.createLog;
 
 @Service("invoiceService")
 public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputInvoiceEntity> implements InputInvoiceService {
-
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     private static final String jtnsrsbh = "91310000607378229C";//集团 、 合作伙伴 税号
     //    private static final String jtnsrsbh = "91350000611528672E";//集团 、 合作伙伴 税号
@@ -149,7 +155,8 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
     private SysConfigService sysConfigService;
     @Autowired
     private InputInvoiceCustomsService inputInvoiceCustomsService;
-
+    @Resource
+    private BaseClient baseClient;
     /**
      * 票据总览页面方法
      *
@@ -4633,19 +4640,27 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
             } else if ("po".equals(jo.get("type"))) {
                 type = InputConstant.InvoiceStyle.PO.getValue();
                 JSONObject jos = JSONObject.fromObject(jo.get("scan_result"));
-                PoEntity.setInvoiceNumber((String) jos.get("invoice_number"));
+                if(jos.get("invoice_number") != null && !jos.get("invoice_number").equals("")){
+                    PoEntity.setInvoiceNumber((String) jos.get("invoice_number"));
+                }
                 PoEntity.setPoNumber((String) jos.get("po_number"));
                 PoEntity.setCreateBy(invoiceEntity.getCreateBy());
                 PoEntity.setInvoiceImage(invoiceEntity.getInvoiceImage());
                 PoEntity.setCreateTime(new Date());
                 PoEntity.setDeptId(invoiceEntity.getCompanyId());
                 PoEntity.setUploadId(invoiceEntity.getUploadId());
-                List<InputInvoicePoEntity> poEntitys = inputInvoicePoService.getListByNumber((String) jos.get("invoice_number"));
+                List<InputInvoicePoEntity> poEntitys = inputInvoicePoService.getByPoNumber((String) jos.get("po_number"));
                 if (poEntitys.size() > 0) {
+                    //标记重复
                     PoEntity.setStatus(InputConstant.InvoicePo.REPEAT.getValue());
                     invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.REPEAT.getValue());
+                } else if(PoEntity.getPoNumber().isEmpty() || PoEntity.getInvoiceNumber().isEmpty()) {
+                    //标记识别失败
+                    PoEntity.setStatus(InputConstant.InvoicePo.FAIL.getValue());
+                    invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue());
                 } else {
-                    PoEntity.setStatus(InputConstant.InvoicePo.SUCCESS.getValue());
+                    //标记已匹配
+                    PoEntity.setStatus(InputConstant.InvoicePo.MATCH.getValue());
                     invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_VERIFICATION.getValue());
                 }
                 inputInvoicePoService.save(PoEntity);
@@ -4673,11 +4688,11 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                 save(invoiceEntity);
                 mainProcess(invoiceEntity);
             }
-        } else {
+        }/* else {
             //标记为识别失败
             invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue());
             save(invoiceEntity);
-        }
+        }*/
         if ((invoiceEntity.getInvoiceStatus()).equals(InputConstant.InvoiceStatus.REPEAT.getValue())) {
             uploadEntity.setStatus(InputConstant.UpdoldState.REPEAT.getValue());
         } else if ((invoiceEntity.getInvoiceStatus()).equals(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue())) {
@@ -4712,6 +4727,23 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                         .eq("repeat_bill", 0)
                         .eq("invoice_upload_type", 0)
         );
+    }
+
+    @Override
+    public InputInvoiceEntity getPeriodById(String id) {
+        String taxPeriod="";
+        InputInvoiceEntity byId = getById(id);
+        String taxNo = byId.getInvoicePurchaserParagraph();
+        DeclareParamBody body = new DeclareParamBody();
+        body.setTaxNo(taxNo);
+        CallResult<DeclareInfo> result = baseClient.declareInfo(body);
+        if(result.isSuccess()){
+            taxPeriod = result.getData().getTaxPeriod();
+            byId.setInvoicePurchaserParagraph(taxPeriod);
+        }else {
+            logger.debug("获取企业所属期异常——————"+result.getExceptionResult().getMessage());
+        }
+        return byId;
     }
 
     public InputInvoiceEntity findByInvoiceCodeAndInvoiceNumberAndStatus(String invoiceCode, String invoiceNumber, String[] status) {

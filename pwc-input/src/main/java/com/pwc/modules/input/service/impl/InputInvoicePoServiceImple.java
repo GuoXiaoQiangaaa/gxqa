@@ -130,10 +130,10 @@ public class InputInvoicePoServiceImple extends ServiceImpl<InputInvoicePoDao, I
     }
 
     @Override
-    public InputInvoicePoEntity getByNumber(String invoiceNumber) {
-        return this.getOne(
+    public List<InputInvoicePoEntity> getByPoNumber(String poNumber) {
+        return this.list(
                 new QueryWrapper<InputInvoicePoEntity>()
-                        .eq(StringUtils.isNotBlank(invoiceNumber), "invoice_number", invoiceNumber)
+                        .eq(StringUtils.isNotBlank(poNumber), "po_number", poNumber)
                         .eq("status", InputConstant.InvoicePo.SUCCESS.getValue())
         );
 

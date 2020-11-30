@@ -489,12 +489,13 @@ public class InputConstant {
         }
     }
     /**
-     *    1 识别成功  2 已匹配
+     *    -1识别失败 0识别重复  1识别成功 2匹配成功
      */
     public enum InvoicePo{
+        FAIL("-1"),
         REPEAT("0"),
         SUCCESS("1"),
-        MATCH("2"),
+        MATCH("2")
         ;
         private  String value;
         InvoicePo(String value) {

@@ -3,10 +3,7 @@ package com.pwc.modules.input.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pwc.common.utils.PageUtils;
 import com.pwc.common.utils.R;
-import com.pwc.modules.input.entity.InputInvoiceEntity;
-import com.pwc.modules.input.entity.InputInvoiceSyncEntity;
-import com.pwc.modules.input.entity.InputInvoiceVo;
-import com.pwc.modules.input.entity.InputInvoiceVoucherEntity;
+import com.pwc.modules.input.entity.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -299,4 +296,11 @@ public interface InputInvoiceService extends IService<InputInvoiceEntity> {
      *
      */
     InputInvoiceEntity savePO(InputInvoiceEntity invoiceEntity);
+
+    /**
+     * 根据缴款书id获取所属期
+     * @param id
+     * @return
+     */
+    InputInvoiceEntity getPeriodById(String id);
 }

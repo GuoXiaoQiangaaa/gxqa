@@ -244,7 +244,6 @@ public class InputInvoiceCustomsController {
         for (String id : split) {
             InputInvoiceCustomsEntity byId = inputInvoiceCustomsService.getPeriodById(id);
             list.add(byId);
-
         }
         return R.ok().put("result", list);
     }

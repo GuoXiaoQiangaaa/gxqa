@@ -47,9 +47,9 @@ public interface InputInvoicePoService extends IService<InputInvoicePoEntity> {
     InputInvoicePoEntity findByuploadId(String uploadId);
 
     /**
-     * 根据发票号码查询一条数据
-     * @param invoiceNumber
+     * 根据PO号码查询一条数据
+     * @param poNumber
      * @return
      */
-    InputInvoicePoEntity getByNumber(String invoiceNumber);
+    List<InputInvoicePoEntity> getByPoNumber(String poNumber);
 }

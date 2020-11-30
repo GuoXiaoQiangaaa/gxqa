@@ -24,7 +24,7 @@
 
 
 	<select id="queryVOList" resultType="com.pwc.modules.sys.entity.TreeSelectVo">
-		select d.name title, d.dept_id `key` from sys_dept d where parent_id = #{value} and del_flag = 0 and status = 1
+		select CONCAT(d.dept_code," ",d.name) title, d.dept_id `key` from sys_dept d where parent_id = #{value} and del_flag = 0 and status = 1
 	</select>
 
 	<select id="queryTaxCodeByIds" resultType="java.lang.String">
