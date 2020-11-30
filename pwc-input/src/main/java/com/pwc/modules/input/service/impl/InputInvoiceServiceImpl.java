@@ -4740,7 +4740,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
         CallResult<DeclareInfo> result = baseClient.declareInfo(body);
         if(result.isSuccess()){
             taxPeriod = result.getData().getTaxPeriod();
-            byId.setInvoicePurchaserParagraph(taxPeriod);
+            byId.setInvoiceDeductiblePeriod(taxPeriod);
         }else {
             logger.debug("获取企业所属期异常——————"+result.getExceptionResult().getMessage());
         }

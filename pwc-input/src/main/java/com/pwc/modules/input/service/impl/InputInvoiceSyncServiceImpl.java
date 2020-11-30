@@ -179,7 +179,7 @@ public class InputInvoiceSyncServiceImpl extends ServiceImpl<InputInvoiceSyncDao
             invoiceSyncEntity.setTotalAmount(entity.getTotalAmount());
             invoiceSyncEntity.setTotalTax(entity.getTotalTax());
             invoiceSyncEntity.setValidTax(entity.getEffectiveTaxAmount());
-//            baseMapper.insert(invoiceSyncEntity);
+            baseMapper.insert(invoiceSyncEntity);
         }
         return results;
     }
@@ -792,8 +792,8 @@ public class InputInvoiceSyncServiceImpl extends ServiceImpl<InputInvoiceSyncDao
         SyncInvoiceParamBody syncInvoiceParamBody = new SyncInvoiceParamBody();
         syncInvoiceParamBody.setTaxNo(taxNo);
         syncInvoiceParamBody.setSyncType("1");
-        syncInvoiceParamBody.setStartDate(startDate);
-        syncInvoiceParamBody.setEndDate(endDate);
+        syncInvoiceParamBody.setStartBillingDate(startDate);
+        syncInvoiceParamBody.setEndBillingDate(endDate);
         syncInvoiceParamBody.setPage(page);
         syncInvoiceParamBody.setPageSize(200);
         CallResult<SyncInvoiceInfo> results = this.invoiceSync(syncInvoiceParamBody);

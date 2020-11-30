@@ -98,8 +98,7 @@ public class InvoiceSyncController {
         syncInvoiceParamBody.setPageSize(1);
         CallResult<SyncInvoiceInfo> results = invoiceSyncService.invoiceSync(syncInvoiceParamBody);
         System.out.println(results.getData().getInvoices().toString());*/
-        invoiceSyncService.syncInvoice(1, "2020-10-01", "2020-10-31", "911100007693505528");
-
+        invoiceSyncService.syncInvoice(1, "2020-07-01", "2020-07-31", "911100007693505528");
         return R.ok();
     }
 
