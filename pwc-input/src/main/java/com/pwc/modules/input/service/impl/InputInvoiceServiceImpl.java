@@ -3531,7 +3531,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
 
                 // 获取发票备注栏，通过正则表达式 获取备注栏的po列表 按照 "/"分割
 
-                if (!invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.DIFFERENCE.getValue()) && invoiceEntity.getPoNumber().isEmpty()) {
+                if (!invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.DIFFERENCE.getValue()) && invoiceEntity.getPoNumber()!= null && !invoiceEntity.getPoNumber().equals("")) {
                     String poNumberList = getPoNumberList(invoiceCheckEntity.getRemarks());
                     invoiceEntity.setPoNumber(poNumberList);
                 }
@@ -4321,7 +4321,6 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                 redInvoiceEntity.setRedStatus("1");
                 invoiceEntity.setRedNoticeNumber(redInvoiceEntity.getRedNoticeNumber());
                 inputRedInvoiceService.updateById(redInvoiceEntity);
-
             } else {
                 invoiceEntity.setInvoiceErrorDescription("未关联到红字通知单！");
             }
@@ -4388,7 +4387,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
 
     //  NonPo related”类发票对应的vendor list
     public InputInvoiceEntity getVendorList(InputInvoiceEntity invoiceEntity) {
-        if ((invoiceEntity.getPoNumber() != null && !invoiceEntity.getPoNumber().isEmpty()) || "0238".contains(invoiceEntity.getInvoiceClass())) {
+        if ((invoiceEntity.getPoNumber() != null && !invoiceEntity.getPoNumber().isEmpty()) || "0238".contains(invoiceEntity.getInvoiceClass()) || invoiceEntity.getInvoiceStyle() == 4) {
             invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_MATCHED.getValue());
         } else {
             invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.DIFFERENCE.getValue());
