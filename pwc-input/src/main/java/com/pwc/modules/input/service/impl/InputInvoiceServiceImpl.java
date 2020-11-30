@@ -3531,7 +3531,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
 
                 // 获取发票备注栏，通过正则表达式 获取备注栏的po列表 按照 "/"分割
 
-                if (!invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.DIFFERENCE.getValue())) {
+                if (!invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.DIFFERENCE.getValue()) && invoiceEntity.getPoNumber().isEmpty()) {
                     String poNumberList = getPoNumberList(invoiceCheckEntity.getRemarks());
                     invoiceEntity.setPoNumber(poNumberList);
                 }
@@ -4536,6 +4536,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
         uploadEntity.setInvoiceBatchNumber(invoiceEntity.getInvoiceBatchNumber());
         inputInvoiceUploadService.save(uploadEntity);
         invoiceEntity.setUploadId(uploadEntity.getUploadId());
+        invoiceEntity.setUploadCreateTime(new Date());
         saveInvoice(invoiceEntity, uploadEntity);
         return "0";
     }

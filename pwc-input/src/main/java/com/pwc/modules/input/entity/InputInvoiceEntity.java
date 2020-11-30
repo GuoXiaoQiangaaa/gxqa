@@ -202,6 +202,8 @@ public class InputInvoiceEntity implements Serializable {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     @ExcelField(title = "更新日期", align = 1, sort = 180)
     private Date updateTime;
+    @ExcelField(title = "上传时间", align = 1, sort = 180)
+    private Date uploadCreateTime;
     // 公司编码
     private String legalEntity;
     /**
