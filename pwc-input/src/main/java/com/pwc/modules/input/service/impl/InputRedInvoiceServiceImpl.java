@@ -369,7 +369,7 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
             if (null == invoiceEntity) {
                 throw new RRException("未查询到红字发票信息,请核对数据后再关联");
             }
-            String invoiceRemarks = invoiceEntity.getInvoiceRemarks();
+            /*String invoiceRemarks = invoiceEntity.getInvoiceRemarks();
             if (StringUtils.isBlank(invoiceRemarks)) {
                 log.error("红票备注信息为空,无法获取红字通知单编号");
                 throw new RRException("数据有误,请核对数据后再关联");
@@ -382,7 +382,7 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
             if (!entity.getRedNoticeNumber().trim().equals(noticeNumber.trim())) {
                 log.error("发票备注信息: {}与红字通知单编号: {}不一致", noticeNumber, entity.getRedNoticeNumber());
                 throw new RRException("数据有误,请核对数据后再关联");
-            }
+            }*/
             // 更新红字通知单的状态及信息
             entity.setRedInvoiceNumber(redInvoiceNumber);
             entity.setRedInvoiceCode(redInvoiceCode);

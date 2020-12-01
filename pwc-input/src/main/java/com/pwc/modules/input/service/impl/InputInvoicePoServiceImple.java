@@ -77,11 +77,7 @@ public class InputInvoicePoServiceImple extends ServiceImpl<InputInvoicePoDao, I
                 .list(new QueryWrapper<InputInvoiceEntity>()
                         .eq("invoice_number", poEntity.getInvoiceNumber())
                 );
-        if (poEntity.getPoId() != null) {
-            updateById(poEntity);
-        } else {
-            save(poEntity);
-        }
+
         if (poEntitys.size() > 0) {
             poEntity.setStatus(InputConstant.InvoicePo.REPEAT.getValue());
             uploadEntity.setStatus(InputConstant.UpdoldState.REPEAT.getValue());
@@ -92,11 +88,11 @@ public class InputInvoicePoServiceImple extends ServiceImpl<InputInvoicePoDao, I
                 inputInvoiceService.mainProcess(entity);
             }
         }
-//        if (poEntity.getPoId() != null) {
-//            updateById(poEntity);
-//        } else {
-//            save(poEntity);
-//        }
+        if (poEntity.getPoId() != null) {
+            updateById(poEntity);
+        } else {
+            save(poEntity);
+        }
         uploadEntity.setUploadType(InputConstant.InvoiceStyle.PO.getValue());
         inputInvoiceUploadService.updateById(uploadEntity);
         return poEntity;

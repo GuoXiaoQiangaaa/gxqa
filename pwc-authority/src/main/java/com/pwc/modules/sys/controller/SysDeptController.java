@@ -108,7 +108,7 @@ public class SysDeptController extends AbstractController {
 			if (null != sysDeptEntity) {
 				TreeSelectVo treeSelectVo = new TreeSelectVo();
 				treeSelectVo.setKey(sysDeptEntity.getDeptId().toString());
-				treeSelectVo.setTitle(sysDeptEntity.getName());
+				treeSelectVo.setTitle(sysDeptEntity.getDeptCode()+" "+sysDeptEntity.getName());
 				treeSelectVo.setChildren(deptList);
 				resultList.add(treeSelectVo);
 			}
