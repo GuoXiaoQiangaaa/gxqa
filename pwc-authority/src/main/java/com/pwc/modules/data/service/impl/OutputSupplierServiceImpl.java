@@ -333,6 +333,7 @@ public class OutputSupplierServiceImpl extends ServiceImpl<OutputSupplierDao, Ou
         return this.getOne(
                 new QueryWrapper<OutputSupplierEntity>()
                         .eq("tax_code",taxCode)
+                        .eq("del_flag",1)
         );
     }
 
