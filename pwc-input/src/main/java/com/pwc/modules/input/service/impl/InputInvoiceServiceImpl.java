@@ -3895,6 +3895,31 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                 }
                 Entity.setPoNumber(poNumber);
             }
+
+            List<InputInvoiceMaterialEntity> invoiceMaterialEntityList = new ArrayList<>();
+            InputInvoiceMaterialEntity invoiceMaterialEntity = new InputInvoiceMaterialEntity();
+            invoiceMaterialEntity.setInvoiceId(Entity.getId());
+            invoiceMaterialEntityList = invoiceMaterialService.getByInvoiceId(invoiceMaterialEntity);
+            Entity.setManyTax("否");
+            if (invoiceMaterialEntityList.size() > 0) {
+                String tax = invoiceMaterialEntityList.get(0).getSphSlv();
+                for (InputInvoiceMaterialEntity materialEntity : invoiceMaterialEntityList) {
+                    if (materialEntity.getSphSlv().compareTo(tax) == 1) {
+                        Entity.setManyTax("是");
+                        tax = materialEntity.getSphSlv();
+                    }
+                }
+                if (tax.matches("^[-\\\\+]?([0-9]+\\\\.?)?[0-9]+$")) {
+                    Entity.setTax(tax + "%");
+                } else {
+                    Entity.setTax(tax);
+                }
+            } else {
+                if (Entity.getInvoiceFreePrice() != null && Entity.getInvoiceTaxPrice() != null) {
+                    NumberFormat nf = NumberFormat.getPercentInstance();
+                    Entity.setTax(nf.format(Entity.getInvoiceTaxPrice().divide(Entity.getInvoiceFreePrice(), 4)));
+                }
+            }
         }
         return list;
     }

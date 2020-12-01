@@ -189,14 +189,16 @@ public class InputConstant {
         INVOICE_CLASS.put("7","IC_非R&D");
         INVOICE_CLASS.put("8","Red-letter VAT");
         INVOICE_CLASS.put("9","General");
-        ALL.put("invoiceClass",GOLDENTAX_STATUS);
+        ALL.put("invoiceClass",INVOICE_CLASS);
 
-        INVOICE_STYLE.put("0","未识别");
-        INVOICE_STYLE.put("1","识别失败");
-        INVOICE_STYLE.put("2","识别成功");
-        INVOICE_STYLE.put("4","重复识别");
-        INVOICE_STYLE.put("5","重复识别");
+        INVOICE_STYLE.put("0","其他");
+        INVOICE_STYLE.put("1","蓝字发票");
+        INVOICE_STYLE.put("2","红字发票");
+        INVOICE_STYLE.put("3","PO发票");
+        INVOICE_STYLE.put("4","TE发票");
+        INVOICE_STYLE.put("5","AP发票");
         ALL.put("invoiceStyle", INVOICE_STYLE);
+
     }
 
     public static String getValue(String key, String type) {

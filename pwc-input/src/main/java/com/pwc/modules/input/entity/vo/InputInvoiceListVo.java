@@ -51,7 +51,7 @@ public class InputInvoiceListVo {
     private String manyTax;
     /**税率*/
     @ExcelField(title="税率", align=1, sort=130)
-    private String invoiceTax;
+    private String tax;
     /**总金额（含税）*/
     @ExcelField(title="总金额（含税）", align=1, sort=140)
     private BigDecimal invoiceTotalPrice;
