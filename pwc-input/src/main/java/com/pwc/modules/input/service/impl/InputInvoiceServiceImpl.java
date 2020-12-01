@@ -4508,7 +4508,11 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
             }
         }
         //Red-letter VAT
-        if (invoiceEntity.getInvoiceStyle() == InputConstant.InvoiceStyle.RED.getValue()) {
+        /*
+        * 修改判断条件，金额为负数的，一定是RED_LETTER
+        * */
+        //if (invoiceEntity.getInvoiceStyle() == InputConstant.InvoiceStyle.RED.getValue()) {
+        if (invoiceEntity.getInvoiceFreePrice().compareTo(BigDecimal.ZERO) < 0 ) {
             invoiceEntity.setInvoiceClass(InputConstant.InvoiceClass.RED_LETTER.getValue());
         }
         return invoiceEntity;
