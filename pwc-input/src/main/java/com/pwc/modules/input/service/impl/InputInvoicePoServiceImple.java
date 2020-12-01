@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @description: po票据
@@ -33,6 +35,8 @@ public class InputInvoicePoServiceImple extends ServiceImpl<InputInvoicePoDao, I
     private InputInvoiceUploadService inputInvoiceUploadService;
     @Autowired
     private InputInvoiceService inputInvoiceService;
+    @Autowired
+    private InputInvoicePoService inputInvoicePoService;
 
     // OCR识别成功保存
     @Override
@@ -71,21 +75,53 @@ public class InputInvoicePoServiceImple extends ServiceImpl<InputInvoicePoDao, I
 
     @Override
     public InputInvoicePoEntity uploadPo(InputInvoicePoEntity poEntity) {
+        InputInvoicePoEntity poEn = inputInvoicePoService.getById(poEntity);
+        //先清除原来的po关联信息
+        List<InputInvoiceEntity> invoicePoEntities = inputInvoiceService
+                .list(new QueryWrapper<InputInvoiceEntity>()
+                        .eq("po_number", poEn.getPoNumber())
+                );
+        if(invoicePoEntities.size() > 0){
+            for (InputInvoiceEntity entity : invoicePoEntities) {
+                entity.setPoNumber("");
+                inputInvoiceService.updateById(entity);
+            }
+        }
         List<InputInvoicePoEntity> poEntitys = this.getListByNumber(poEntity.getInvoiceNumber());
         InputInvoiceUploadEntity uploadEntity = inputInvoiceUploadService.getById(poEntity.getUploadId());
         List<InputInvoiceEntity> invoiceEntities = inputInvoiceService
                 .list(new QueryWrapper<InputInvoiceEntity>()
                         .eq("invoice_number", poEntity.getInvoiceNumber())
+                        // 是否退票 0:未退票; 1:已退票
+                        .eq("invoice_return", "0")
+                        // 是否失效 0:否; 1:是
+                        .eq("invoice_delete", "0")
                 );
-
-        if (poEntitys.size() > 0) {
+        if (poEntitys.size() > 1) {
             poEntity.setStatus(InputConstant.InvoicePo.REPEAT.getValue());
             uploadEntity.setStatus(InputConstant.UpdoldState.REPEAT.getValue());
+        } else if(poEntity.getPoNumber() == null ||  poEntity.getPoNumber().equals("") || poEntity.getInvoiceNumber() == null || poEntity.getInvoiceNumber().equals("")) {
+            //标记识别失败
+            poEntity.setStatus(InputConstant.InvoicePo.FAIL.getValue());
         } else {
-            poEntity.setStatus(InputConstant.InvoicePo.SUCCESS.getValue());
-            uploadEntity.setStatus(InputConstant.UpdoldState.PENDING_VERIFICATION.getValue());
-            for (InputInvoiceEntity entity : invoiceEntities) {
-                inputInvoiceService.mainProcess(entity);
+            Pattern pattern = Pattern.compile("\\d{8}");
+            Pattern pattern2 = Pattern.compile("\\d{10}");
+            Matcher isInvoiceNum = pattern.matcher(poEntity.getInvoiceNumber());
+            Matcher isPoNum = pattern2.matcher(poEntity.getPoNumber());
+            if(!isInvoiceNum.matches() || !isPoNum.matches()){
+                poEntity.setStatus(InputConstant.InvoicePo.FAIL.getValue());
+            }else{
+                if(invoiceEntities.size() > 0){
+                    //标记已匹配
+                    poEntity.setStatus(InputConstant.InvoicePo.MATCH.getValue());
+                    for (InputInvoiceEntity entity : invoiceEntities) {
+                        entity.setPoNumber(poEntity.getPoNumber());
+                        inputInvoiceService.mainProcess(entity);
+                    }
+                }else{
+                    //标记识别成功
+                    poEntity.setStatus(InputConstant.InvoicePo.SUCCESS.getValue());
+                }
             }
         }
         if (poEntity.getPoId() != null) {

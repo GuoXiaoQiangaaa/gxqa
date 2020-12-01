@@ -4693,9 +4693,32 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                     PoEntity.setStatus(InputConstant.InvoicePo.FAIL.getValue());
                     invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue());
                 } else {
-                    //标记已匹配
-                    PoEntity.setStatus(InputConstant.InvoicePo.MATCH.getValue());
-                    invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_VERIFICATION.getValue());
+                    Pattern pattern = Pattern.compile("\\d{8}");
+                    Pattern pattern2 = Pattern.compile("\\d{10}");
+                    Matcher isInvoiceNum = pattern.matcher(PoEntity.getInvoiceNumber());
+                    Matcher isPoNum = pattern2.matcher(PoEntity.getPoNumber());
+                    if(!isInvoiceNum.matches() || !isPoNum.matches()){
+                        PoEntity.setStatus(InputConstant.InvoicePo.FAIL.getValue());
+                        invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue());
+                    }else{
+                        List<InputInvoiceEntity> invoiceList = this.list(
+                                new QueryWrapper<InputInvoiceEntity>()
+                                        .eq("invoice_number", PoEntity.getInvoiceNumber())
+                                        // 是否退票 0:未退票; 1:已退票
+                                        .eq("invoice_return", "0")
+                                        // 是否失效 0:否; 1:是
+                                        .eq("invoice_delete", "0")
+                        );
+                        if(invoiceList.size() > 0){
+                            //标记已匹配
+                            PoEntity.setStatus(InputConstant.InvoicePo.MATCH.getValue());
+                            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_VERIFICATION.getValue());
+                        }else{
+                            //标记识别成功
+                            PoEntity.setStatus(InputConstant.InvoicePo.SUCCESS.getValue());
+                            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_VERIFICATION.getValue());
+                        }
+                    }
                 }
                 inputInvoicePoService.save(PoEntity);
             }
