@@ -31,6 +31,7 @@ import com.pwc.modules.input.service.InputInvoiceSapService;
 import com.pwc.modules.input.service.InputInvoiceVoucherNoService;
 import com.pwc.modules.sys.service.SysConfigService;
 import com.pwc.modules.sys.shiro.ShiroUtils;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -440,7 +441,7 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
         commonParamBody.setRequestId(invoice.getRequestId());
         CallResult<PaymentCertificateListInfo> result = deductClient.deductPaymentCertificateResult(commonParamBody);
         if (null != result) {
-            log.info("获取勾选结果：" + result.toString());
+            log.info("获取勾选结果：" + JSONObject.fromObject(result).toString());
             if (result.isSuccess()) {
                 List<PaymentCertificateResult> deductResultInfoList = result.getData().getPaymentCertificateResults();
                 for (PaymentCertificateResult deductResultInfo : deductResultInfoList) {

@@ -28,6 +28,7 @@ import com.pwc.modules.sys.entity.SysDeptEntity;
 import com.pwc.modules.sys.service.SysConfigService;
 import com.pwc.modules.sys.service.SysDeptService;
 import com.pwc.modules.sys.shiro.ShiroUtils;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -632,7 +633,7 @@ public class InputInvoiceSyncServiceImpl extends ServiceImpl<InputInvoiceSyncDao
             commonParamBody.setRequestId(invoice.getRequestId());
             CallResult<DeductResultListInfo> result = deductClient.deductResult(commonParamBody);
             if (null != result) {
-                log.info("获取勾选结果：{0}" + result.toString());
+                log.info("获取勾选结果：{0}" + JSONObject.fromObject(result).toString());
                 if (result.isSuccess()) {
                     List<DeductResultInfo> deductResultInfoList = result.getData().getInvoices();
                     for (DeductResultInfo deductResultInfo : deductResultInfoList) {
@@ -645,7 +646,7 @@ public class InputInvoiceSyncServiceImpl extends ServiceImpl<InputInvoiceSyncDao
                                 invoice.setInvoiceAuthDate(deductResultInfo.getDeductibleDate());
                                 invoice.setInvoiceDeductiblePeriod(deductResultInfo.getDeductiblePeriod());
                                 // 认证成功同步到数据库
-                                inputInvoiceTaxationService.updateTaxation(invoice);
+                                //inputInvoiceTaxationService.updateTaxation(invoice);
                             } else if ("6".equals(deductResultInfo.getDeductType())) {
                                 invoice.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_CERTIFIED.getValue());
                                 invoice.setVerfy(Boolean.FALSE);

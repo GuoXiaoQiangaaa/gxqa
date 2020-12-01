@@ -392,7 +392,7 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
             super.updateById(entity);
 
             //更新发票红字通知单号信息
-            invoiceEntity.setRedNoticeNumber(redInvoiceNumber);
+            invoiceEntity.setRedNoticeNumber(entity.getRedNoticeNumber());
             inputInvoiceService.updateById(invoiceEntity);
         } catch (RRException e) {
             throw e;

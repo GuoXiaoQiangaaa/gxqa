@@ -3962,14 +3962,16 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                     }
                     save(invoiceEntity);
                     invoiceNumbers.add("发票号码：" + vo.getInvoiceNumber() + " 上传成功！");
-                    getRepeat(invoiceEntity);//验重
+                    /*getRepeat(invoiceEntity);//验重
                     if (!invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.REPEAT.getValue())) {
                         String result = functionCheckTrue(invoiceEntity);
                         if (invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.PENDING_MATCHED.getValue()) && (InputConstant.InvoiceEntity.SPECIAL.getValue()).equals(invoiceEntity.getInvoiceEntity())) {
                             invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_CERTIFIED.getValue());
                         }
                         updateById(invoiceEntity);
-                    }
+                    }*/
+                    //走验证流程接口
+                    mainProcess(invoiceEntity);
                 } else {
                     invoiceNumbers.add("发票号码：" + vo.getInvoiceNumber() + " 抵账库未查询到数据！");
                 }
@@ -4469,7 +4471,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                         ) {
                             if (deptSell == null) {
                                 invoiceEntity.setInvoiceClass(InputConstant.InvoiceClass.RD_OUT.getValue());
-                            } else if (deptSell != null && deptPur != null) {
+                            } else if (deptPur != null) {
                                 invoiceEntity.setInvoiceClass(InputConstant.InvoiceClass.IC_RD.getValue());
                             } else {
                                 invoiceEntity.setInvoiceClass(InputConstant.InvoiceClass.IC_NOTRD.getValue());
