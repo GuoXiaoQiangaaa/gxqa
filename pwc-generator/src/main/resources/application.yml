@@ -9,12 +9,12 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
     #MySQL配置
     driverClassName: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://49.232.64.133:3306/pwc-ericsson-dev?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://81.68.180.156:3306/pwc-ericsson-dev?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
 #    url: jdbc:mysql://localhost:3306/pwc-authority?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
     # 本地库
 #    url: jdbc:mysql://localhost:3306/pwc-ericsson-dev?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
     username: root
-    password: zk123123
+    password: 1234!@#$1qaz
 #    password: root
   jackson:
     time-zone: GMT+8

@@ -3,6 +3,7 @@ package com.pwc.modules.input.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pwc.common.utils.PageUtils;
 import com.pwc.modules.input.entity.InputInvoicePoEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -52,4 +53,6 @@ public interface InputInvoicePoService extends IService<InputInvoicePoEntity> {
      * @return
      */
     List<InputInvoicePoEntity> getByPoNumber(String poNumber);
+
+
 }

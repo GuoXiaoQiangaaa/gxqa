@@ -4169,7 +4169,12 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
         }
 
         //金额为负数则去校验红字通知单
-        if (invoiceEntity.getInvoiceFreePrice().compareTo(BigDecimal.ZERO) < 0) {
+        if (invoiceEntity.getInvoiceFreePrice().compareTo(BigDecimal.ZERO) < 0 ||
+                invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.PENDING_MATCHED.getValue())
+                || invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.CHARGE_AGAINST.getValue())
+                || invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.DIFFERENCE.getValue())
+                || invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.REVERSE.getValue())
+                || invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.DIFFERENT_MESSAGE.getValue())) {
             relatRed(invoiceEntity); // 红字发票
         }
         if (invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.PENDING_MATCHED.getValue()) && (InputConstant.InvoiceEntity.SPECIAL.getValue()).equals(invoiceEntity.getInvoiceEntity())) {
@@ -4191,7 +4196,12 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
             getClassification(invoiceEntity); // 自动分类
             complianceCheck(invoiceEntity); // 合规
         }
-        if (InputConstant.InvoiceStyle.RED.equals(invoiceEntity.getSourceStyle())) {
+        if (invoiceEntity.getInvoiceFreePrice().compareTo(BigDecimal.ZERO) < 0 ||
+                invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.PENDING_MATCHED.getValue())
+                || invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.CHARGE_AGAINST.getValue())
+                || invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.DIFFERENCE.getValue())
+                || invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.REVERSE.getValue())
+                || invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.DIFFERENT_MESSAGE.getValue())) {
             relatRed(invoiceEntity); // 红字发票
         }
         if (invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.PENDING_MATCHED.getValue()) && (InputConstant.InvoiceEntity.SPECIAL.getValue()).equals(invoiceEntity.getInvoiceEntity())) {
@@ -4343,9 +4353,15 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
             Pattern p = Pattern.compile(regEx);
 
             Matcher m = p.matcher(invoiceEntity.getInvoiceRemarks());
-            System.out.println(m.replaceAll("").trim());
+            String redNoticeNumber = null;
+            if(m.replaceAll("").trim().length() >= 16){
+                redNoticeNumber = m.replaceAll("").trim().substring(0,16);
+            }else{
+                redNoticeNumber = m.replaceAll("").trim();
+            }
+            System.out.println(redNoticeNumber);
             // redNoticeNumber
-            InputRedInvoiceEntity redInvoiceEntity = inputRedInvoiceService.findRedNoticeNumber(m.replaceAll("").trim());
+            InputRedInvoiceEntity redInvoiceEntity = inputRedInvoiceService.findRedNoticeNumber(redNoticeNumber);
             if (redInvoiceEntity != null) {
                 redInvoiceEntity.setRedInvoiceCode(invoiceEntity.getInvoiceCode());
                 redInvoiceEntity.setRedInvoiceNumber(invoiceEntity.getInvoiceNumber());
@@ -4692,6 +4708,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                 } else if(PoEntity.getPoNumber() == null ||  PoEntity.getPoNumber().equals("") || PoEntity.getInvoiceNumber() == null || PoEntity.getInvoiceNumber().equals("")) {
                     //标记识别失败
                     PoEntity.setStatus(InputConstant.InvoicePo.FAIL.getValue());
+                    invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue());
                 } else {
                     Pattern pattern = Pattern.compile("\\d{8}");
                     Pattern pattern2 = Pattern.compile("\\d{10}");
@@ -4699,6 +4716,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                     Matcher isPoNum = pattern2.matcher(PoEntity.getPoNumber());
                     if(!isInvoiceNum.matches() || !isPoNum.matches()){
                         PoEntity.setStatus(InputConstant.InvoicePo.FAIL.getValue());
+                        invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue());
                     }else{
                         List<String> status = Arrays.asList("-2", "-7");
                         List<InputInvoiceEntity> invoiceList = this.list(
@@ -4713,6 +4731,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                         if(invoiceList.size() > 0){
                             //标记已匹配
                             PoEntity.setStatus(InputConstant.InvoicePo.MATCH.getValue());
+                            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_VERIFICATION.getValue());
                             for(InputInvoiceEntity invoice:invoiceList){
                                 invoice.setPoNumber(PoEntity.getPoNumber());
                                 //修改发票信息，走主流程
@@ -4721,6 +4740,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                         }else{
                             //标记识别成功
                             PoEntity.setStatus(InputConstant.InvoicePo.SUCCESS.getValue());
+                            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_VERIFICATION.getValue());
                         }
                     }
                 }
@@ -4749,11 +4769,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                 save(invoiceEntity);
                 mainProcess(invoiceEntity);
             }
-        }/* else {
-            //标记为识别失败
-            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue());
-            save(invoiceEntity);
-        }*/
+        }
         if ((invoiceEntity.getInvoiceStatus()).equals(InputConstant.InvoiceStatus.REPEAT.getValue())) {
             uploadEntity.setStatus(InputConstant.UpdoldState.REPEAT.getValue());
         } else if ((invoiceEntity.getInvoiceStatus()).equals(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue())) {

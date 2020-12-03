@@ -4,6 +4,7 @@ import com.pwc.common.utils.PDFUtil;
 import com.pwc.common.utils.PageUtils;
 import com.pwc.common.utils.R;
 import com.pwc.modules.input.entity.InputInvoicePoEntity;
+import com.pwc.modules.input.service.InputInvoicePoSapService;
 import com.pwc.modules.input.service.InputInvoicePoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,8 @@ public class InvoicePoController {
 
     @Autowired
     private InputInvoicePoService inputInvoicePoService;
+    @Autowired
+    private InputInvoicePoSapService inputInvoicePoSapService;
 
     /**
      * po总览
@@ -79,7 +82,7 @@ public class InvoicePoController {
 
     /**
      * 上传PoList
-     * @param poEntity
+     * @param
      * @return
      */
     @RequestMapping("/updatePoList")
@@ -112,5 +115,14 @@ public class InvoicePoController {
         return null;
     }
 
+    /**
+     * SapPo明细导入
+     */
+    @PostMapping("/importData")
+    public R importData(@RequestParam("files") MultipartFile[] files){
+        Map<String, Object> resMap = inputInvoicePoSapService.importSapPoData(files);
+
+        return R.ok().put("res", resMap);
+    }
 
 }
