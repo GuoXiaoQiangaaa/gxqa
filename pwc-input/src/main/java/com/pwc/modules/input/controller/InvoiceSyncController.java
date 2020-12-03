@@ -140,7 +140,7 @@ public class InvoiceSyncController {
 
     /**
      * 确认统计
-     * @param taxNo 企业税号
+     * @param
      * @return
      */
     @RequestMapping("/confirm")
@@ -225,22 +225,15 @@ public class InvoiceSyncController {
     }
 
     /**
-     * 发票同步接口
+     * 底账库发票同步接口
      * @return
      */
     @RequestMapping("/invoiceSyncAutoPage")
     public R invoiceSyncAutoPage(String taxNo, String startDate, String endDate) {
-         // TODO 缺少接口信息 不能同步底账库
         String[] taxNos = taxNo.split(",");
-        List<SysDeptEntity> deptEntitys= sysDeptService.getDeptByStatus();
-        SysDeptEntity  deptEntity =sysDeptService.getById(ShiroUtils.getUserEntity().getDeptId());
-        if(deptEntity.getTaxCode()!=null &&!"".equals(deptEntity.getTaxCode())){
-            invoiceSyncService.syncInvoice(1, startDate, endDate, deptEntity.getTaxCode());
+        for (String tax : taxNos) {
+                invoiceSyncService.syncInvoice(1, startDate, endDate, tax);
         }
-
-//        for (String tax : taxNos) {
-//            this.syncInvoice(1, startDate, endDate, tax);
-//        }
         return R.ok();
     }
 
