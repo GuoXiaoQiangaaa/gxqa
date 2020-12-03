@@ -101,6 +101,8 @@ public class InputInvoicePoSapServiceImpl extends ServiceImpl<InputInvoicePoSapD
                                         .eq("purchasing_document", entity.getPurchasingDocument())
                         );
                         if(null != poSap){
+                            entity.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
+                            entity.setUpdateTime(new Date());
                             duplicateList.add(entity);
                         }else {
                             entity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
