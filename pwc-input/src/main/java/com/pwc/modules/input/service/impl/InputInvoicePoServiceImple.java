@@ -68,7 +68,7 @@ public class InputInvoicePoServiceImple extends ServiceImpl<InputInvoicePoDao, I
                         .like(StringUtils.isNotBlank(poNumber), "po_number", poNumber)
                         .like(StringUtils.isNotBlank(invoiceNumber), "invoice_number", invoiceNumber)
                         .eq(StringUtils.isNotBlank(status), "status", status)
-                        .apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))
+                        //.apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))
         );
         return new PageUtils(page);
     }

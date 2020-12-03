@@ -4168,7 +4168,8 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
             complianceCheck(invoiceEntity); // 合规
         }
 
-        if (InputConstant.InvoiceStyle.RED.equals(invoiceEntity.getSourceStyle())) {
+        //金额为负数则去校验红字通知单
+        if (invoiceEntity.getInvoiceFreePrice().compareTo(BigDecimal.ZERO) < 0) {
             relatRed(invoiceEntity); // 红字发票
         }
         if (invoiceEntity.getInvoiceStatus().equals(InputConstant.InvoiceStatus.PENDING_MATCHED.getValue()) && (InputConstant.InvoiceEntity.SPECIAL.getValue()).equals(invoiceEntity.getInvoiceEntity())) {
@@ -4691,7 +4692,6 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                 } else if(PoEntity.getPoNumber() == null ||  PoEntity.getPoNumber().equals("") || PoEntity.getInvoiceNumber() == null || PoEntity.getInvoiceNumber().equals("")) {
                     //标记识别失败
                     PoEntity.setStatus(InputConstant.InvoicePo.FAIL.getValue());
-                    invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue());
                 } else {
                     Pattern pattern = Pattern.compile("\\d{8}");
                     Pattern pattern2 = Pattern.compile("\\d{10}");
@@ -4699,8 +4699,8 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                     Matcher isPoNum = pattern2.matcher(PoEntity.getPoNumber());
                     if(!isInvoiceNum.matches() || !isPoNum.matches()){
                         PoEntity.setStatus(InputConstant.InvoicePo.FAIL.getValue());
-                        invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue());
                     }else{
+                        List<String> status = Arrays.asList("-2", "-7");
                         List<InputInvoiceEntity> invoiceList = this.list(
                                 new QueryWrapper<InputInvoiceEntity>()
                                         .eq("invoice_number", PoEntity.getInvoiceNumber())
@@ -4708,15 +4708,19 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                                         .eq("invoice_return", "0")
                                         // 是否失效 0:否; 1:是
                                         .eq("invoice_delete", "0")
+                                        .notIn("invoice_status", status)
                         );
                         if(invoiceList.size() > 0){
                             //标记已匹配
                             PoEntity.setStatus(InputConstant.InvoicePo.MATCH.getValue());
-                            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_VERIFICATION.getValue());
+                            for(InputInvoiceEntity invoice:invoiceList){
+                                invoice.setPoNumber(PoEntity.getPoNumber());
+                                //修改发票信息，走主流程
+                                mainProcess(invoice);
+                            }
                         }else{
                             //标记识别成功
                             PoEntity.setStatus(InputConstant.InvoicePo.SUCCESS.getValue());
-                            invoiceEntity.setInvoiceStatus(InputConstant.InvoiceStatus.PENDING_VERIFICATION.getValue());
                         }
                     }
                 }

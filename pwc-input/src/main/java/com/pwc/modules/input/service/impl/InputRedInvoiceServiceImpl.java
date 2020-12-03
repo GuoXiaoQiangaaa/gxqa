@@ -208,12 +208,31 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
                                         .eq("blue_invoice_number", redInvoiceEntity.getBlueInvoiceNumber())
                                         .eq("blue_invoice_code", redInvoiceEntity.getBlueInvoiceCode())*/
                         );
+
+                        //查询是否有关联红字通知单的订单信息，如果有将红字通知单置为红票已开
+                        List<String> status = Arrays.asList("0", "1", "3", "4");
+                        InputInvoiceEntity invoiceEntity = inputInvoiceService.getOne(
+                                new QueryWrapper<InputInvoiceEntity>()
+                                        .like("red_notice_number", redInvoiceEntity.getRedNoticeNumber()).or().like("invoice_remarks", redInvoiceEntity.getRedNoticeNumber())
+                                        .eq("invoice_return", "0")
+                                        .eq("invoice_delete", "0")
+                                        .notIn("invoice_status", status)
+                        );
                         if (null != duplicate) {
                             duplicate.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
                             duplicate.setUpdateTime(new Date());
-                            duplicateList.add(duplicate);
+                            if(invoiceEntity != null ){
+                                duplicate.setRedStatus("1");
+                                duplicate.setRedInvoiceCode(invoiceEntity.getInvoiceCode());
+                                duplicate.setRedInvoiceNumber(invoiceEntity.getInvoiceNumber());
+                            }
                         } else {
                             redInvoiceEntity.setRedStatus("0");
+                            if(invoiceEntity != null ){
+                                redInvoiceEntity.setRedInvoiceCode(invoiceEntity.getInvoiceCode());
+                                redInvoiceEntity.setRedInvoiceNumber(invoiceEntity.getInvoiceNumber());
+                                redInvoiceEntity.setRedStatus("1");
+                            }
                             redInvoiceEntity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
                             redInvoiceEntity.setCreateTime(new Date());
                             entityList.add(redInvoiceEntity);
