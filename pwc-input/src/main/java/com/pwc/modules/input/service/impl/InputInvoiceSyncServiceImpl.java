@@ -18,10 +18,7 @@ import com.pwc.common.utils.InputConstant;
 import com.pwc.common.utils.PageUtils;
 import com.pwc.common.utils.Query;
 import com.pwc.modules.input.dao.InputInvoiceSyncDao;
-import com.pwc.modules.input.entity.InputCompanyEntity;
-import com.pwc.modules.input.entity.InputInvoiceCustomsEntity;
-import com.pwc.modules.input.entity.InputInvoiceEntity;
-import com.pwc.modules.input.entity.InputInvoiceSyncEntity;
+import com.pwc.modules.input.entity.*;
 import com.pwc.modules.input.enums.AuthCountStatusEnum;
 import com.pwc.modules.input.service.*;
 import com.pwc.modules.sys.entity.SysDeptEntity;
@@ -236,41 +233,49 @@ public class InputInvoiceSyncServiceImpl extends ServiceImpl<InputInvoiceSyncDao
     @Transactional(rollbackFor = Exception.class)
     public void saveInvoice(List<? extends SyncInvoice> invoiceSyncList) {
         for (SyncInvoice entity: invoiceSyncList) {
-            this.remove(new QueryWrapper<InputInvoiceSyncEntity>()
-                    .eq("invoice_code", entity.getInvoiceCode())
-                    .eq("invoice_number", entity.getInvoiceNumber()));
-            InputInvoiceSyncEntity invoiceSyncEntity = new InputInvoiceSyncEntity();
-            invoiceSyncEntity.setAbnormalType(entity.getAbnormalType());
-            invoiceSyncEntity.setAgencyDrawback(entity.getAgencyDrawback());
-            invoiceSyncEntity.setBillingDate(entity.getBillingDate());
-            invoiceSyncEntity.setCheckCode(entity.getCheckCode());
-            invoiceSyncEntity.setCheckDate(entity.getDeductibleDate());
-            invoiceSyncEntity.setDeductible(entity.getDeductible());
-            invoiceSyncEntity.setDeductibleDate(entity.getDeductibleDate());
-            invoiceSyncEntity.setDeductibleMode(entity.getDeductibleMode());
-            invoiceSyncEntity.setDeductiblePeriod(entity.getDeductiblePeriod());
-            invoiceSyncEntity.setDeductibleType(entity.getDeductibleType());
-            invoiceSyncEntity.setCheckStatus(entity.getState());
-            invoiceSyncEntity.setEffectiveTaxAmount(entity.getEffectiveTaxAmount());
-            invoiceSyncEntity.setInfoSources(entity.getInfoSources());
-            invoiceSyncEntity.setInvoiceCode(entity.getInvoiceCode());
-            invoiceSyncEntity.setInvoiceNumber(entity.getInvoiceNumber());
-            invoiceSyncEntity.setInvoiceType(entity.getInvoiceType());
-            invoiceSyncEntity.setManagementStatus(entity.getManagementStatus());
-            invoiceSyncEntity.setOverdueCheckMark(entity.getOverdueCheckMark());
-            invoiceSyncEntity.setPurchaserName(entity.getPurchaserName());
-            invoiceSyncEntity.setPurchaserTaxNo(entity.getPurchaserTaxNo());
-            invoiceSyncEntity.setResaleCertificateNumber(entity.getResaleCertificateNumber());
-            invoiceSyncEntity.setSalesTaxName(entity.getSalesTaxName());
-            invoiceSyncEntity.setSalesTaxNo(entity.getSalesTaxNo());
-            invoiceSyncEntity.setState(entity.getState());
-            invoiceSyncEntity.setTotalAmount(entity.getTotalAmount());
-            invoiceSyncEntity.setTotalTax(entity.getTotalTax());
-            invoiceSyncEntity.setValidTax(entity.getEffectiveTaxAmount());
-            invoiceSyncEntity.setOriginalPeriod(entity.getOriginalPeriod());
-            invoiceSyncEntity.setStatus("1");
-            invoiceSyncEntity.setCreateTime(new Date());
-            baseMapper.insert(invoiceSyncEntity);
+            if(entity.getInvoiceCode()!= null && entity.getInvoiceNumber()!=null){
+                List<InputInvoiceSyncEntity> invoiceSync = this.list(new QueryWrapper<InputInvoiceSyncEntity>()
+                        .eq("invoice_code", entity.getInvoiceCode())
+                        .eq("invoice_number", entity.getInvoiceNumber())
+                );
+                if(invoiceSync.size() > 0){
+                    this.remove(new QueryWrapper<InputInvoiceSyncEntity>()
+                            .eq("invoice_code", entity.getInvoiceCode())
+                            .eq("invoice_number", entity.getInvoiceNumber()));
+                }
+                InputInvoiceSyncEntity invoiceSyncEntity = new InputInvoiceSyncEntity();
+                invoiceSyncEntity.setAbnormalType(entity.getAbnormalType());
+                invoiceSyncEntity.setAgencyDrawback(entity.getAgencyDrawback());
+                invoiceSyncEntity.setBillingDate(entity.getBillingDate());
+                invoiceSyncEntity.setCheckCode(entity.getCheckCode());
+                invoiceSyncEntity.setCheckDate(entity.getDeductibleDate());
+                invoiceSyncEntity.setDeductible(entity.getDeductible());
+                invoiceSyncEntity.setDeductibleDate(entity.getDeductibleDate());
+                invoiceSyncEntity.setDeductibleMode(entity.getDeductibleMode());
+                invoiceSyncEntity.setDeductiblePeriod(entity.getDeductiblePeriod());
+                invoiceSyncEntity.setDeductibleType(entity.getDeductibleType());
+                invoiceSyncEntity.setCheckStatus(entity.getState());
+                invoiceSyncEntity.setEffectiveTaxAmount(entity.getEffectiveTaxAmount());
+                invoiceSyncEntity.setInfoSources(entity.getInfoSources());
+                invoiceSyncEntity.setInvoiceCode(entity.getInvoiceCode());
+                invoiceSyncEntity.setInvoiceNumber(entity.getInvoiceNumber());
+                invoiceSyncEntity.setInvoiceType(entity.getInvoiceType());
+                invoiceSyncEntity.setManagementStatus(entity.getManagementStatus());
+                invoiceSyncEntity.setOverdueCheckMark(entity.getOverdueCheckMark());
+                invoiceSyncEntity.setPurchaserName(entity.getPurchaserName());
+                invoiceSyncEntity.setPurchaserTaxNo(entity.getPurchaserTaxNo());
+                invoiceSyncEntity.setResaleCertificateNumber(entity.getResaleCertificateNumber());
+                invoiceSyncEntity.setSalesTaxName(entity.getSalesTaxName());
+                invoiceSyncEntity.setSalesTaxNo(entity.getSalesTaxNo());
+                invoiceSyncEntity.setState(entity.getState());
+                invoiceSyncEntity.setTotalAmount(entity.getTotalAmount());
+                invoiceSyncEntity.setTotalTax(entity.getTotalTax());
+                invoiceSyncEntity.setValidTax(entity.getEffectiveTaxAmount());
+                invoiceSyncEntity.setOriginalPeriod(entity.getOriginalPeriod());
+                invoiceSyncEntity.setStatus("1");
+                invoiceSyncEntity.setCreateTime(new Date());
+                baseMapper.insert(invoiceSyncEntity);
+            }
         }
     }
 
@@ -797,7 +802,7 @@ public class InputInvoiceSyncServiceImpl extends ServiceImpl<InputInvoiceSyncDao
         syncInvoiceParamBody.setEndBillingDate(endDate);
         syncInvoiceParamBody.setPage(page);
         syncInvoiceParamBody.setPageSize(200);
-        CallResult<SyncInvoiceInfo> results = this.invoiceSync(syncInvoiceParamBody);
+        CallResult<SyncInvoiceInfo> results = collectClient.invoiceSync(syncInvoiceParamBody);
         int currentPage = results.getData().getCurrentPage();
         int totalPage = results.getData().getPages();
         if(results.getData() != null && results.getData().getInvoices() != null) {
