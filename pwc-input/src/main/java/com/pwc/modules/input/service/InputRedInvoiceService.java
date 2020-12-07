@@ -2,6 +2,7 @@ package com.pwc.modules.input.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pwc.common.utils.PageUtils;
+import com.pwc.modules.input.entity.InputInvoiceSapEntity;
 import com.pwc.modules.input.entity.InputRedInvoiceEntity;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -49,5 +50,11 @@ public interface InputRedInvoiceService extends IService<InputRedInvoiceEntity> 
      * @param params
      */
     void manualEntryByRed(Map<String, Object> params);
+
+    /**
+     * 自动入账
+     * @param
+     */
+    int voluntaryEntry(InputInvoiceSapEntity sapEntity);
 }
 

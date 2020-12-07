@@ -76,7 +76,7 @@ public class OutputSupplierEntity implements Serializable {
 	@ExcelField(title = "供应商邮箱", align = 1, sort = 1)
 	private String email;
 	/**
-	 * 发票分类(0:NonPo Related; 1:MKRO; 2:DFU; 3:EDI; 4:R&D_外部; 5:IC_R&D; 6:IC_RRB; 7:IC_非R&D; 8:Red-letter VAT; 9:General)
+	 * 发票分类(0:NonPo Related; 1:MRKO; 2:DFU; 3:EDI; 4:R&D_外部; 5:IC_R&D; 6:IC_RRB; 7:IC_非R&D; 8:Red-letter VAT; 9:General)
 	 */
 	@ExcelField(title = "分类", align = 1, sort = 1)
 	private String invoiceType;

@@ -27,10 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -97,33 +94,49 @@ public class InputInvoicePoServiceImple extends ServiceImpl<InputInvoicePoDao, I
                 inputInvoiceService.updateById(entity);
             }
         }
-        List<InputInvoicePoEntity> poEntitys = this.getListByNumber(poEntity.getInvoiceNumber());
+        List<InputInvoicePoEntity> poEntitys  = inputInvoicePoService.getByPoNumber(poEntity.getPoNumber());
         InputInvoiceUploadEntity uploadEntity = inputInvoiceUploadService.getById(poEntity.getUploadId());
-        List<InputInvoiceEntity> invoiceEntities = inputInvoiceService
-                .list(new QueryWrapper<InputInvoiceEntity>()
-                        .eq("invoice_number", poEntity.getInvoiceNumber())
-                        // 是否退票 0:未退票; 1:已退票
-                        .eq("invoice_return", "0")
-                        // 是否失效 0:否; 1:是
-                        .eq("invoice_delete", "0")
-                );
         if (poEntitys.size() > 1) {
+            //标记识别重复
             poEntity.setStatus(InputConstant.InvoicePo.REPEAT.getValue());
             uploadEntity.setStatus(InputConstant.UpdoldState.REPEAT.getValue());
         } else if(poEntity.getPoNumber() == null ||  poEntity.getPoNumber().equals("") || poEntity.getInvoiceNumber() == null || poEntity.getInvoiceNumber().equals("")) {
             //标记识别失败
             poEntity.setStatus(InputConstant.InvoicePo.FAIL.getValue());
+            uploadEntity.setStatus(InputConstant.UpdoldState.RECOGNITION_FAILED.getValue());
         } else {
+            boolean isPoNum = true;
             Pattern pattern = Pattern.compile("\\d{8}");
             Pattern pattern2 = Pattern.compile("\\d{10}");
+            String[] poNumArray3 = poEntity.getPoNumber().split("/");
+            //验证是否识别成功
+            for (int i = 0; i < poNumArray3.length; i++) {
+                Matcher isPoNum2 = pattern2.matcher(poNumArray3[i]);
+                isPoNum = isPoNum2.matches();
+                if (!isPoNum) {
+                    i = poNumArray3.length;
+                }
+            }
             Matcher isInvoiceNum = pattern.matcher(poEntity.getInvoiceNumber());
-            Matcher isPoNum = pattern2.matcher(poEntity.getPoNumber());
-            if(!isInvoiceNum.matches() || !isPoNum.matches()){
+            if(!isInvoiceNum.matches() || !isPoNum){
+                //正则校验不通过，置为识别失败
                 poEntity.setStatus(InputConstant.InvoicePo.FAIL.getValue());
+                uploadEntity.setStatus(InputConstant.UpdoldState.RECOGNITION_FAILED.getValue());
             }else{
+                List<String> status = Arrays.asList("-2", "-7");
+                List<InputInvoiceEntity> invoiceEntities = inputInvoiceService
+                        .list(new QueryWrapper<InputInvoiceEntity>()
+                                .eq("invoice_number", poEntity.getInvoiceNumber())
+                                // 是否退票 0:未退票; 1:已退票
+                                .eq("invoice_return", "0")
+                                // 是否失效 0:否; 1:是
+                                .eq("invoice_delete", "0")
+                                .notIn("invoice_status", status)
+                        );
                 if(invoiceEntities.size() > 0){
                     //标记已匹配
                     poEntity.setStatus(InputConstant.InvoicePo.MATCH.getValue());
+                    uploadEntity.setStatus(InputConstant.UpdoldState.PENDING_VERIFICATION.getValue());
                     for (InputInvoiceEntity entity : invoiceEntities) {
                         entity.setPoNumber(poEntity.getPoNumber());
                         inputInvoiceService.mainProcess(entity);
@@ -131,6 +144,7 @@ public class InputInvoicePoServiceImple extends ServiceImpl<InputInvoicePoDao, I
                 }else{
                     //标记识别成功
                     poEntity.setStatus(InputConstant.InvoicePo.SUCCESS.getValue());
+                    uploadEntity.setStatus(InputConstant.UpdoldState.PENDING_VERIFICATION.getValue());
                 }
             }
         }

@@ -142,6 +142,7 @@ public class OCRcontroller {
 //                    invoiceEntity.setInvoiceCreateDate(sdf2.format(new Date()));
                     invoiceEntity.setInvoiceUploadDate(sdf2.format(new Date()));
                     invoiceEntity.setInvoiceExpense(expenseNo);
+                    invoiceEntity.setUpdateTime(new Date());
                     invoiceService.save(invoiceEntity);
                     invoiceEntities.add(invoiceEntity);
 

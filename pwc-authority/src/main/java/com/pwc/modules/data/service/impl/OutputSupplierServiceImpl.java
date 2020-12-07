@@ -274,9 +274,9 @@ public class OutputSupplierServiceImpl extends ServiceImpl<OutputSupplierDao, Ou
         }
 
         // 枚举校验
-        /** 0:NonPo Related; 1:MKRO; 2:DFU; 3:EDI; 4:R&D_外部; 5:IC_R&D; 6:IC_RRB; 7:IC_非R&D; 8:Red-letter VAT; 9:General */
+        /** 0:NonPo Related; 1:MRKO; 2:DFU; 3:EDI; 4:R&D_外部; 5:IC_R&D; 6:IC_RRB; 7:IC_非R&D; 8:Red-letter VAT; 9:General */
         if(StringUtils.isNotBlank(entity.getInvoiceType()) && !("NonPo Related".trim().equalsIgnoreCase(entity.getInvoiceType().trim()) ||
-               "MKRO".equalsIgnoreCase(entity.getInvoiceType().trim()) ||
+               "MRKO".equalsIgnoreCase(entity.getInvoiceType().trim()) ||
                 "DFU".equalsIgnoreCase(entity.getInvoiceType().trim()) ||
                 "EDI".equalsIgnoreCase(entity.getInvoiceType().trim()) ||
                 "R&D_外部".equalsIgnoreCase(entity.getInvoiceType().trim()) ||
@@ -299,7 +299,7 @@ public class OutputSupplierServiceImpl extends ServiceImpl<OutputSupplierDao, Ou
         if(StringUtils.isNotBlank(type)){
             if("NonPo Related".trim().equalsIgnoreCase(type.trim())){
                 entity.setInvoiceType("0");
-            }else if("MKRO".equalsIgnoreCase(type)){
+            }else if("MRKO".equalsIgnoreCase(type)){
                 entity.setInvoiceType("1");
             }else if("DFU".equalsIgnoreCase(type)){
                 entity.setInvoiceType("2");

@@ -76,7 +76,7 @@ public interface InputInvoiceSyncService extends IService<InputInvoiceSyncEntity
 
     /**
      * 勾选
-     * @param invoiceList
+     * @param
      * @return
      */
     String deductInvoices(InputInvoiceEntity invoice, String deductType);

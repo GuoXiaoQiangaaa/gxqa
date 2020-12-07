@@ -543,7 +543,7 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
     }
 
     /**
-     * 手工入账
+     * 红字通知单手工入账
      *
      * @param params
      */
@@ -571,6 +571,7 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
      * @param sapEntity
      * @return
      */
+    @Override
     public int voluntaryEntry(InputInvoiceSapEntity sapEntity) {
         String[] numbers = sapEntity.getReference().split("/");
         InputRedInvoiceEntity redInvoiceEntity = new InputRedInvoiceEntity();
@@ -598,8 +599,8 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
         if (totalTax != null && (new BigDecimal(totalTax)).compareTo(BigDecimal.ZERO) == 0) {
             sapEntity.setSapMatch(InputConstant.InvoiceMatch.MATCH_NO.getValue());
             inputInvoiceSapService.updateById(sapEntity);
-        } else if (totalTax != null && ((new BigDecimal(totalTax).subtract(valueTax)).compareTo(new BigDecimal(sapEntity.getAmountInDoc())) == 0
-                || (new BigDecimal(totalTax)).compareTo(new BigDecimal(sapEntity.getAmountInDoc()).subtract(valueTax)) == 0
+        } else if (totalTax != null && ((new BigDecimal(totalTax).subtract(valueTax)).compareTo(sapEntity.getAmountInDoc()) == 0
+                || (new BigDecimal(totalTax)).compareTo(sapEntity.getAmountInDoc().subtract(valueTax)) == 0
         )) {
             sapEntity.setSapMatch(InputConstant.InvoiceMatch.MATCH_YES.getValue());
             inputInvoiceSapService.updateById(sapEntity);

@@ -67,12 +67,12 @@ public class InputExportDetailServiceImpl extends ServiceImpl<InputExportDetailD
             for (MultipartFile file : files) {
                 String filename = file.getOriginalFilename();
                 ExcelReader reader = ExcelUtil.getReader(file.getInputStream());
-                String[] excelHead = {"Company code", "Account", "Reference", "Document No", "Type",
-                        "Doc. Date", "Pstng Date", "Amount in local cur.", "Lcurr", "Amount in doc. curr",
-                        "Curr.", "User name", "Assignment", "Text", "Tx", "Trading Partner"};
+                String[] excelHead = {"Company code", "Account", "Reference", "Document Number", "Document Type",
+                        "Document Date", "Posting Date", "Amount in local currency", "Local Currency", "Amount in doc. curr.",
+                        "Document currency", "User name", "Assignment", "Text", "Tax code", "Trading Partner", "Posting Key", "Year/month", "Document Header Text"};
                 String [] excelHeadAlias = {"companyCode", "account", "reference", "documentNo", "type",
                         "docDate", "pstngDate", "amountLocal", "currencyLocal", "amount", "currency",
-                        "userName", "assignment", "text", "taxRate", "tradingPartner"};
+                        "userName", "assignment", "text", "taxRate", "tradingPartner", "postingKey", "yearMonth", "headerText"};
                 for (int i = 0; i < excelHead.length; i++) {
                     reader.addHeaderAlias(excelHead[i], excelHeadAlias[i]);
                 }
@@ -80,8 +80,7 @@ public class InputExportDetailServiceImpl extends ServiceImpl<InputExportDetailD
 
                 if(CollectionUtils.isEmpty(dataList)){
                     log.error("上传的{}Excel为空,请重新上传", filename);
-//                    throw new RRException("上传的Excel为空,请重新上传");
-                    continue;
+                    throw new RRException("上传的Excel为空,请重新上传");
                 }
                 total += dataList.size();
                 int count = 1;
@@ -96,10 +95,6 @@ public class InputExportDetailServiceImpl extends ServiceImpl<InputExportDetailD
                         }
                         sb.append(count + ",");
                     }else {
-                        // 税率获取到的为小数类型,转为百分数
-                        String taxRate = entity.getTaxRate();
-                        NumberFormat nf = NumberFormat.getPercentInstance();
-                        entity.setTaxRate(nf.format(Double.valueOf(taxRate)));
                         // 去除Excel中重复数据
                         String repeatData = entity.getCompanyCode() + entity.getDocumentNo() + entity.getPstngDate();
                         if(CollectionUtil.contains(repeatDataList, repeatData)){
@@ -122,16 +117,15 @@ public class InputExportDetailServiceImpl extends ServiceImpl<InputExportDetailD
                         if(null != duplicate){
                             duplicate.setAccount(entity.getAccount());
                             duplicate.setReference(entity.getReference());
-                            duplicate.setType(entity.getType());
+                            duplicate.setDocumentType(entity.getDocumentType());
                             duplicate.setDocDate(entity.getDocDate());
-                            duplicate.setAmountLocal(entity.getAmountLocal());
-                            duplicate.setCurrencyLocal(entity.getCurrencyLocal());
-                            duplicate.setAmount(entity.getAmount());
-                            duplicate.setCurrency(entity.getCurrency());
+                            duplicate.setAmountInLocal(entity.getAmountInLocal());
+                            duplicate.setCurr(entity.getCurr());
+                            duplicate.setAmountInLocal(entity.getAmountInLocal());
                             duplicate.setUserName(entity.getUserName());
                             duplicate.setAssignment(entity.getAssignment());
                             duplicate.setText(entity.getText());
-                            duplicate.setTaxRate(entity.getTaxRate());
+                            duplicate.setTx(entity.getTx());
                             duplicate.setTradingPartner(entity.getTradingPartner());
                             duplicateList.add(this.paraphraseParams(duplicate));
                         }else {
@@ -175,11 +169,10 @@ public class InputExportDetailServiceImpl extends ServiceImpl<InputExportDetailD
         // 非空校验
         if(StringUtils.isBlank(entity.getCompanyCode()) || StringUtils.isBlank(entity.getAccount()) ||
                 StringUtils.isBlank(entity.getReference()) || StringUtils.isBlank(entity.getDocumentNo()) ||
-                StringUtils.isBlank(entity.getType()) || StringUtils.isBlank(entity.getDocDate()) ||
-                StringUtils.isBlank(entity.getPstngDate()) || null == entity.getAmountLocal() ||
-                StringUtils.isBlank(entity.getCurrencyLocal()) || null == entity.getAmount() ||
-                StringUtils.isBlank(entity.getCurrency()) || StringUtils.isBlank(entity.getUserName()) ||
-                StringUtils.isBlank(entity.getText()) || StringUtils.isBlank(entity.getTaxRate())){
+                StringUtils.isBlank(entity.getDocumentType()) || StringUtils.isBlank(entity.getDocDate()) ||
+                StringUtils.isBlank(entity.getPstngDate()) || null == entity.getAmountInLocal() ||
+                StringUtils.isBlank(entity.getCurr()) || null == entity.getAmountInLocal() ||
+                StringUtils.isBlank(entity.getText()) || StringUtils.isBlank(entity.getTx())){
             return 1;
         }
 
@@ -190,20 +183,20 @@ public class InputExportDetailServiceImpl extends ServiceImpl<InputExportDetailD
      * 枚举值转义
      */
     private InputExportDetailEntity paraphraseParams(InputExportDetailEntity entity){
-        String type = entity.getType();
-        String currencyLocal = entity.getCurrencyLocal();
-        String currency = entity.getCurrency();
+        String type = entity.getDocumentType();
+        String currencyLocal = entity.getLcurr();
+        String currency = entity.getCurr();
         String reference = entity.getReference();
         String text = entity.getText();
         // 对类型转义
-        entity.setType("0");
+        entity.setDocumentType("0");
         // 对当地币种转义
         if("CNY".equalsIgnoreCase(currencyLocal)){
-            entity.setCurrencyLocal("0");
+            entity.setLcurr("0");
         }
         // 对币种转义
         if("CNY".equalsIgnoreCase(currency)){
-            entity.setCurrency("0");
+            entity.setCurr("0");
         }
         // 对转出类型转义 0:红字转出; 1:海关免税转出; 2:福利转出; 3:其他转出
         if(StringUtils.contains(reference, "red invoice")){

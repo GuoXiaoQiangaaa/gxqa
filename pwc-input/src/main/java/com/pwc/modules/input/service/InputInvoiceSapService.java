@@ -13,7 +13,7 @@ import java.util.Map;
  * @create: 2020-09-23 15:07
  **/
 public interface InputInvoiceSapService  extends IService<InputInvoiceSapEntity> {
-    void getImportBySap(MultipartFile file) throws Exception;
+    Map<String, Object> getImportBySap(MultipartFile file) throws Exception;
 
     /**
      * 查询列表页面

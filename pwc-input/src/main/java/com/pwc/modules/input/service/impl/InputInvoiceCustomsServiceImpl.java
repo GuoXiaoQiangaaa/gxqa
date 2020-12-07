@@ -830,19 +830,19 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
         if(totalTax!=null&& (new BigDecimal(totalTax)).compareTo(BigDecimal.ZERO)==0){
             sapEntity.setSapMatch(InputConstant.InvoiceMatch.MATCH_NO.getValue());
             inputInvoiceSapService.updateById(sapEntity);
-            //this.baseMapper.updateByentryState(InputConstant.InvoiceMatch.MATCH_NO.getValue(),documentNo);
-        } else if(totalTax!=null&&((new BigDecimal(totalTax).subtract(valueTax)).compareTo(new BigDecimal(sapEntity.getAmountInDoc()))==0
-                || (new BigDecimal(totalTax)).compareTo(new BigDecimal(sapEntity.getAmountInDoc()).subtract(valueTax))==0
+            this.baseMapper.updateByentryState(InputConstant.InvoiceMatch.MATCH_NO.getValue(),documentNo);
+        } else if(totalTax!=null&&((new BigDecimal(totalTax).subtract(valueTax)).compareTo(sapEntity.getAmountInDoc())==0
+                || (new BigDecimal(totalTax)).compareTo(sapEntity.getAmountInDoc().subtract(valueTax))==0
         )){
             sapEntity.setSapMatch(InputConstant.InvoiceMatch.MATCH_YES.getValue());
             inputInvoiceSapService.updateById(sapEntity);
             type = InputConstant.InvoiceMatch.MATCH_YES.getValue();
-           // this.baseMapper.updateByentryState(InputConstant.InvoiceMatch.MATCH_YES.getValue(),documentNo);
+            this.baseMapper.updateByentryState(InputConstant.InvoiceMatch.MATCH_YES.getValue(),documentNo);
         }else{
             type = InputConstant.InvoiceMatch.MATCH_ERROR.getValue();
             sapEntity.setSapMatch(InputConstant.InvoiceMatch.MATCH_ERROR.getValue());
             inputInvoiceSapService.updateById(sapEntity);
-            //this.baseMapper.updateByentryState(InputConstant.InvoiceMatch.MATCH_ERROR.getValue(),documentNo);
+            this.baseMapper.updateByentryState(InputConstant.InvoiceMatch.MATCH_ERROR.getValue(),documentNo);
         }
         InputInvoiceCustomsEntity customsEntity = new InputInvoiceCustomsEntity();
         customsEntity.setEntryState(type);

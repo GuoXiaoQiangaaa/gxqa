@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.Map;
 
 
@@ -93,6 +94,7 @@ public class UnformatInvoiceController {
             invoiceEntity.setInvoiceFreePrice(new BigDecimal(unformatInvoice.getInvoiceTotalPrice()));
             invoiceEntity.setInvoiceCode(unformatInvoice.getInvoiceCode());
             invoiceEntity.setInvoiceNumber(unformatInvoice.getInvoiceNumber());
+            invoiceEntity.setUpdateTime(new Date());
             invoiceService.save(invoiceEntity);
             invoiceService.functionCheckTrue(invoiceEntity);
             String expenseNo = unformatInvoice.getExpenseNo();

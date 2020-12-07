@@ -27,86 +27,50 @@ public class InputExportDetailEntity implements Serializable {
 	 */
 	@TableId
 	private Long exportId;
-	/**
-	 * 公司代码
-	 */
-	@ExcelField(title = "Company code", align = 1, sort = 1)
+	/**公司代码*/
 	private String companyCode;
-	/**
-	 * 科目
-	 */
-	@ExcelField(title = "Account", align = 1, sort = 1)
+	/**科目*/
 	private String account;
-	/**
-	 * 参考
-	 */
-	@ExcelField(title = "Reference", align = 1, sort = 1)
+	/**参考*/
 	private String reference;
-	/**
-	 * 凭证编号
-	 */
-	@ExcelField(title = "Document No", align = 1, sort = 1)
+	/**凭证编号*/
 	private String documentNo;
-	/**
-	 * 凭证类型
-	 */
-	@ExcelField(title = "Type", align = 1, sort = 1)
-	private String type;
-	/**
-	 * 记账日期
-	 */
-	@ExcelField(title = "Doc. Date", align = 1, sort = 1)
+	/**凭证类型*/
+	private String documentType;
+	/**记账日期*/
 	private String docDate;
-	/**
-	 * 入账日期
-	 */
-	@ExcelField(title = "Pstng Date", align = 1, sort = 1)
+	/**入账日期*/
 	private String pstngDate;
-	/**
-	 * 当地金额
-	 */
-	@ExcelField(title = "Amount in local cur.", align = 1, sort = 1)
-	private BigDecimal amountLocal;
-	/**
-	 * 当地币种(默认CNY)
-	 */
-	@ExcelField(title = "Lcurr", align = 1, sort = 1)
-	private String currencyLocal;
-	/**
-	 * 金额
-	 */
-	@ExcelField(title = "Amount in doc. curr", align = 1, sort = 1)
-	private BigDecimal amount;
-	/**
-	 * 币种(默认CNY)
-	 */
-	@ExcelField(title = "Curr.", align = 1, sort = 1)
-	private String currency;
-	/**
-	 * 用户名
-	 */
-	@ExcelField(title = "User name", align = 1, sort = 1)
+	/**当地金额*/
+	private BigDecimal amountInLocal;
+	/**当地币种*/
+	private String lcurr;
+	/**金额*/
+	private BigDecimal amountInDoc;
+	/**币种*/
+	private String curr;
+	/**用户名*/
 	private String userName;
-	/**
-	 * 分配
-	 */
-	@ExcelField(title = "Assignment", align = 1, sort = 1)
+	/**分配*/
 	private String assignment;
-	/**
-	 * 行文本
-	 */
-	@ExcelField(title = "Text", align = 1, sort = 1)
+	/**行文本*/
 	private String text;
-	/**
-	 * 税率
-	 */
-	@ExcelField(title = "Tx", align = 1, sort = 1)
-	private String taxRate;
-	/**
-	 * 合作伙伴
-	 */
-	@ExcelField(title = "Trading Partner", align = 1, sort = 1)
+	/**税码*/
+	private String tx;
+	/**合作伙伴*/
 	private String tradingPartner;
+	/**
+	 * 记账码
+	 */
+	private String postingKey;
+	/**
+	 * 年月
+	 */
+	private String yearMonth;
+	/**
+	 * 摘要
+	 */
+	private String headerText;
 	/**
 	 * 转出类型: 0:红字转出; 1:海关免税转出; 2:福利转出; 3:其他转出
 	 */

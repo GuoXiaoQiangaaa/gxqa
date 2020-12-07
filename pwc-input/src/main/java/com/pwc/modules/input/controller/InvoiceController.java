@@ -1136,7 +1136,7 @@ public class InvoiceController {
 //    @RequiresPermissions("input:invoice:updateInvoice")
     public R updateInvoice(@RequestParam Map<String, Object> params) {
         // 同步规则
-        invoiceService.saveInvoiceBySync();
+        invoiceService.saveInvoiceBySync(params);
         return R.ok();
     }
 

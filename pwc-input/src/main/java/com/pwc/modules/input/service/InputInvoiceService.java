@@ -270,7 +270,7 @@ public interface InputInvoiceService extends IService<InputInvoiceEntity> {
     /**
      * 抵账库同步数据
      */
-    void saveInvoiceBySync();
+    void saveInvoiceBySync(Map<String, Object> params);
 
     /**
      * 特殊页面进入
@@ -283,6 +283,12 @@ public interface InputInvoiceService extends IService<InputInvoiceEntity> {
      * @param params
      */
     void manualEntryBySap(Map<String, Object> params);
+
+    /**
+     * 自动入账
+     * @param
+     */
+    int voluntaryEntry(InputInvoiceSapEntity sapEntity);
 
     /**
      * 主流程

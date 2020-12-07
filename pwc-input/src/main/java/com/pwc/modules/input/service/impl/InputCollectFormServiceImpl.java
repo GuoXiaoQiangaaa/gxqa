@@ -442,18 +442,18 @@ public class InputCollectFormServiceImpl extends ServiceImpl<InputCollectFormDao
             exportInfo.setItemCount(exportDetailList.size());
 
             for (InputExportDetailEntity exportDetailEntity : exportDetailList) {
-                if(null != exportDetailEntity.getAmount() && StringUtils.isNotBlank(exportDetailEntity.getTaxRate())){
+                if(null != exportDetailEntity.getAmountInDoc() && StringUtils.isNotBlank(exportDetailEntity.getTx())){
                     // 转换税率
                     NumberFormat nf = NumberFormat.getPercentInstance();
-                    Double taxRate = nf.parse(exportDetailEntity.getTaxRate()).doubleValue();
+                    Double taxRate = nf.parse(exportDetailEntity.getTx()).doubleValue();
                     // 计算税额
-                    BigDecimal amount = exportDetailEntity.getAmount();
+                    BigDecimal amount = exportDetailEntity.getAmountInDoc();
                     BigDecimal taxAmount = amount.multiply(BigDecimal.valueOf(taxRate)).setScale(2, BigDecimal.ROUND_HALF_UP);
 
                     taxPrice = taxPrice.add(taxAmount);
                 }
-                if(null != exportDetailEntity.getAmount()){
-                    totalPrice = totalPrice.add(exportDetailEntity.getAmount());
+                if(null != exportDetailEntity.getAmountInDoc()){
+                    totalPrice = totalPrice.add(exportDetailEntity.getAmountInDoc());
                 }
             }
         }

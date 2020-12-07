@@ -180,7 +180,7 @@ public class InputConstant {
         ALL.put("goldenTaxStatus",GOLDENTAX_STATUS);
 
         INVOICE_CLASS.put("0","NonPo Related");
-        INVOICE_CLASS.put("1","MKRO");
+        INVOICE_CLASS.put("1","MRKO");
         INVOICE_CLASS.put("2","DFU");
         INVOICE_CLASS.put("3","EDI");
         INVOICE_CLASS.put("4","R&D_外部");
@@ -438,14 +438,14 @@ public class InputConstant {
     // TODO 发票分类
 
     /**
-     * 发票分类(0:NonPo Related; 1:MKRO; 2:DFU; 3:EDI; 4:R&D_外部; 5:IC_R&D; 6:IC_RRB; 7:IC_非R&D; 8:Red-letter VAT; 9:General)
+     * 发票分类(0:NonPo Related; 1:MRKO; 2:DFU; 3:EDI; 4:R&D_外部; 5:IC_R&D; 6:IC_RRB; 7:IC_非R&D; 8:Red-letter VAT; 9:General)
      * @param Related
      */
     public enum InvoiceClass {
         /**  NonPo Related */
         NONPO_RELATED("0"),
-        /** MKRO */
-        MKRO("1"),
+        /** MRKO */
+        MRKO("1"),
         /** DFU */
         DFU("2"),
         //  EDI

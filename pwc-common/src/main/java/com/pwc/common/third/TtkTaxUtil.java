@@ -38,6 +38,8 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 税务计算
@@ -2002,7 +2004,35 @@ public class TtkTaxUtil {
 //        TtkTaxUtil.getWebUrlForShenBaoBatch();
 //        TtkTaxUtil.getWebUrlForShenBaoBatch();
 
-        System.out.println(DateUtil.beginOfMonth(DateUtil.lastMonth()));
+        String[] poNumArray = "1234567560-569/12345678111/1231234321".split("/");
+        StringBuffer newPoNum = new StringBuffer();
+        for (int i = 0; i < poNumArray.length; i++) {
+            String[] poNumArray2 = poNumArray[i].split("-");
+            if(poNumArray2.length > 1){
+                int poNumEnd = Integer.parseInt(poNumArray2[0].substring(0,7) + poNumArray2[1]);
+                int poNumStart = Integer.parseInt(poNumArray2[0]);
+                for (int k = 0; k < (poNumEnd-poNumStart); k++) {
+                    newPoNum.append(poNumStart+k);
+                    newPoNum.append("/");
+                }
+            }else{
+                newPoNum.append(poNumArray2[0]);
+                newPoNum.append("/");
+            }
+            System.out.println(poNumArray[i]);
+        }
+        boolean isPoNum = true;
+        Pattern pattern2 = Pattern.compile("\\d{10}");
+        String[] poNumArray3 = newPoNum.toString().split("/");
+        for (int i = 0; i < poNumArray3.length; i++) {
+            Matcher isPoNum2 =pattern2.matcher(poNumArray3[i]);
+            isPoNum=isPoNum2.matches();
+            if(!isPoNum){
+                i = poNumArray3.length;
+            }
+        }
+        System.out.println(isPoNum);
+        System.out.println(newPoNum.toString());
     }
 
 
