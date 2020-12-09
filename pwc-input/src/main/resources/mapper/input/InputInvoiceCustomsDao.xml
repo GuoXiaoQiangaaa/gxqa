@@ -3,7 +3,7 @@
 
 <mapper namespace="com.pwc.modules.input.dao.InputInvoiceCustomsDao">
 
-	<!-- 可根据自己的需求，是否要使用 -->
+    <!-- 可根据自己的需求，是否要使用 -->
     <resultMap type="com.pwc.modules.input.entity.InputInvoiceCustomsEntity" id="inputInvoiceCustomsMap">
         <result property="id" column="id"/>
         <result property="payNo" column="pay_no"/>
@@ -45,7 +45,7 @@
     <select id="getCountByVoucherCode" resultType="string">
         select sum(total_tax)
         from input_invoice_customs
-        where voucher_code is #{voucherCode}
+        where voucher_code = #{voucherCode}
     </select>
 
     <update id="updateByentryState">
@@ -53,7 +53,7 @@
         <set>
             entry_state = #{entryState}
         </set>
-        where voucher_code is #{voucherCode}
+        where voucher_code = #{voucherCode}
     </update>
 
     <update id="updateByVoucherCode">
@@ -61,10 +61,11 @@
         <set>
             voucher_code = #{voucherCode}
         </set>
-        where pay_no in
-        <foreach collection="list" index="index" item="item"
-                 open="(" separator="," close=")">
-            #{item}
-        </foreach>
+        where deductible = '1'
+            and  pay_no in
+            <foreach collection="list" index="index" item="item"
+                     open="(" separator="," close=")">
+                #{item}
+            </foreach>
     </update>
 </mapper>

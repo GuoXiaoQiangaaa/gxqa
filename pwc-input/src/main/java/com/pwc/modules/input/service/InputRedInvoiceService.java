@@ -2,10 +2,12 @@ package com.pwc.modules.input.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pwc.common.utils.PageUtils;
+import com.pwc.modules.input.entity.InputInvoiceCustomsEntity;
 import com.pwc.modules.input.entity.InputInvoiceSapEntity;
 import com.pwc.modules.input.entity.InputRedInvoiceEntity;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,7 +19,6 @@ import java.util.Map;
 public interface InputRedInvoiceService extends IService<InputRedInvoiceEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
-
     /**
      * 红字通知单条件查询
      */
@@ -52,9 +53,31 @@ public interface InputRedInvoiceService extends IService<InputRedInvoiceEntity> 
     void manualEntryByRed(Map<String, Object> params);
 
     /**
+     * 作废红字通知单
+     * @param inputRedInvoice
+     */
+    void obsoleteEntryByRed(InputRedInvoiceEntity inputRedInvoice);
+
+    int getListByShow();
+
+    /**
      * 自动入账
      * @param
      */
-    int voluntaryEntry(InputInvoiceSapEntity sapEntity);
+    InputInvoiceSapEntity voluntaryEntry(InputInvoiceSapEntity sapEntity);
+
+    /**
+     * 查询账票匹配成功数据
+     * @param params
+     * @return
+     */
+    PageUtils getListByMatching(Map<String, Object> params);
+
+    /**
+     * 获取查询月份的认证数据
+     * @param params
+     * @return
+     */
+    List<InputRedInvoiceEntity> getCertification(Map<String, Object> params);
 }
 

@@ -474,7 +474,7 @@
         </if>
     </update>
 
-    <update id="update">
+    <update id="updateByEntity">
         UPDATE input_invoice
         <set>
             <if test="invoiceBatchNumber != null and invoiceBatchNumber != ''">
@@ -1238,7 +1238,7 @@
     <select id="getCountByVoucherCode" resultType="string">
         select sum(invoice_tax_price)
         from input_invoice
-        where entry_success_code is #{voucherCode}
+        where entry_success_code = #{voucherCode}
     </select>
 
 </mapper>

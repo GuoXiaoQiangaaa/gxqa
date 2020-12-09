@@ -153,7 +153,7 @@ public interface InputInvoiceCustomsService extends IService<InputInvoiceCustoms
      * 自动入账
      * @param sapEntity
      */
-    void updateByEntry(InputInvoiceSapEntity sapEntity);
+    InputInvoiceSapEntity updateByEntry(InputInvoiceSapEntity sapEntity);
 
     /**
      * 获取查询月份的认证数据

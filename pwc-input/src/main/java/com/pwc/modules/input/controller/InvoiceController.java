@@ -571,7 +571,7 @@ public class InvoiceController {
     /**
      * 小程序扫描上传
      *
-     * @param invoiceEntity
+     * @param params
      * @param request
      * @return
      */
@@ -985,7 +985,7 @@ public class InvoiceController {
     /**
      * 修改分类
      *
-     * @param invoiceEntity
+     * @param params
      * @return
      */
     @RequestMapping("/updateClass")

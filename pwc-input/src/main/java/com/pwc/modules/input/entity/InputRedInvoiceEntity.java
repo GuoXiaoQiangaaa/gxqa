@@ -42,7 +42,7 @@ public class InputRedInvoiceEntity implements Serializable {
 	@NotBlank(message = "填开日期不能为空")
 	private Date writeDate;
 	/**
-	 * 状态(0:红色通知单开具;1:红票已开)
+	 * 状态(0:红色通知单开具;1:红票已开;2作废)
 	 */
 	private String redStatus;
 	/**
@@ -108,10 +108,12 @@ public class InputRedInvoiceEntity implements Serializable {
 	/**
 	 * 红字发票号码
 	 */
+	@ExcelField(title = "红字发票号码", align = 1, sort = 1)
 	private String redInvoiceNumber;
 	/**
 	 * 红字发票代码
 	 */
+	@ExcelField(title = "红字发票代码", align = 1, sort = 1)
 	private String redInvoiceCode;
 	/**
 	 * 创建人
@@ -121,6 +123,7 @@ public class InputRedInvoiceEntity implements Serializable {
 	/**
 	 * 创建时间
 	 */
+	@ExcelField(title = "创建时间", align = 1, sort = 1)
 	@TableField(fill = FieldFill.DEFAULT)
 	private Date createTime;
 	/**
@@ -142,18 +145,42 @@ public class InputRedInvoiceEntity implements Serializable {
 	/**
 	 * 匹配日期
 	 */
+	@ExcelField(title = "匹配日期", align = 1, sort = 1)
 	private String matchDate;
 	/**
 	 * 凭证编号
 	 */
+	@ExcelField(title = "凭证编号", align = 1, sort = 1)
 	private String documentNo;
 	/**
 	 * 入账日期
 	 */
+	@ExcelField(title = "入账日期", align = 1, sort = 1)
 	private String entryDate;
 	/**
 	 * 入账状态
 	 */
 	private String entryStatus;
+	/**
+	 * 年月
+	 */
+	@ExcelField(title = "会计期间", align = 1, sort = 1)
+	private String yearAndMonth;
+
+	/**
+	 * SAP差异原因
+	 */
+	@ExcelField(title = "差异原因", align = 1, sort = 1)
+	private String sapReason;
+	/**
+	 * SAP税额
+	 */
+	@ExcelField(title = "sap税额", align = 1, sort = 1)
+	private String sapTax;
+	/**
+	 * SAP差异额
+	 */
+	@ExcelField(title = "sap差异额", align = 1, sort = 1)
+	private String sapCheckTax;
 
 }

@@ -288,7 +288,7 @@ public interface InputInvoiceService extends IService<InputInvoiceEntity> {
      * 自动入账
      * @param
      */
-    int voluntaryEntry(InputInvoiceSapEntity sapEntity);
+    InputInvoiceSapEntity voluntaryEntry(InputInvoiceSapEntity sapEntity);
 
     /**
      * 主流程
@@ -309,4 +309,11 @@ public interface InputInvoiceService extends IService<InputInvoiceEntity> {
      * @return
      */
     InputInvoiceEntity getPeriodById(String id);
+
+    /**
+     * 获取查询月份的认证数据
+     * @param params
+     * @return
+     */
+    List<InputInvoiceEntity> getCertificationList(Map<String, Object> params);
 }

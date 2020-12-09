@@ -60,7 +60,7 @@ public class InputInvoiceSapEntity implements Serializable {
     /**
      * 年月
      */
-    private String yearMonth;
+    private String yearAndMonth;
     /**
      * 摘要
      */
@@ -73,7 +73,7 @@ public class InputInvoiceSapEntity implements Serializable {
      * 创建人
      */
     @TableField(fill = FieldFill.INSERT)
-    private String createBy;
+    private int createBy;
     /**
      * 创建时间
      */
@@ -83,7 +83,7 @@ public class InputInvoiceSapEntity implements Serializable {
      * 更新人
      */
     @TableField(fill = FieldFill.UPDATE)
-    private String updateBy;
+    private int updateBy;
     /**
      * 更新时间
      */

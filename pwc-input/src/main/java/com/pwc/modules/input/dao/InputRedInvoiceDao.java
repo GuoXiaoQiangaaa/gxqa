@@ -15,5 +15,6 @@ import org.apache.ibatis.annotations.Param;
 public interface InputRedInvoiceDao extends BaseMapper<InputRedInvoiceEntity> {
 
    String getSumByTaxPrice(@Param("documentNo") String documentNo);
+   int getListByShow();
 	
 }

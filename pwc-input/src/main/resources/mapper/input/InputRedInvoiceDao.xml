@@ -32,4 +32,10 @@
         where document_no = #{documentNo}
     </select>
 
+
+    <select id="getListByShow" resultType="int">
+        SELECT count(1)
+        FROM input_red_invoice a
+        where a.red_status != '2'
+    </select>
 </mapper>

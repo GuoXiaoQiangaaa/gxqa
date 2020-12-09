@@ -55,12 +55,12 @@ public class InputInvoiceSapServiceImpl extends ServiceImpl<InputInvoiceSapDao, 
         try {
             String filename = file.getOriginalFilename();
             ExcelReader reader = ExcelUtil.getReader(file.getInputStream());
-            String[] excelHead = {"Company code", "Account", "Reference", "Document Number", "Document Type",
+            String[] excelHead = {"Company Code", "Account", "Reference", "Document Number", "Document Type",
                     "Document Date", "Posting Date", "Amount in local currency", "Local Currency", "Amount in doc. curr.",
                     "Document currency", "User name", "Assignment", "Text", "Tax code", "Trading Partner", "Posting Key", "Year/month", "Document Header Text"};
-            String[] excelHeadAlias = {"companyCode", "account", "reference", "documentNo", "type",
-                    "docDate", "pstngDate", "amountLocal", "currencyLocal", "amount", "currency",
-                    "userName", "assignment", "text", "taxRate", "tradingPartner", "postingKey", "yearMonth", "headerText"};
+            String [] excelHeadAlias = {"companyCode", "account", "reference", "documentNo", "documentType",
+                    "docDate", "pstngDate", "amountInLocal", "lcurr", "amountInDoc", "curr",
+                    "userName", "assignment", "text", "tx", "tradingPartner", "postingKey", "yearAndMonth", "headerText"};
             for (int i = 0; i < excelHead.length; i++) {
                 reader.addHeaderAlias(excelHead[i], excelHeadAlias[i]);
             }
@@ -85,7 +85,6 @@ public class InputInvoiceSapServiceImpl extends ServiceImpl<InputInvoiceSapDao, 
                     continue;
                 }
                 repeatDataList.add(repeatData);
-
                 // 数据库验重
                 InputInvoiceSapEntity duplicate = super.getOne(
                         new QueryWrapper<InputInvoiceSapEntity>()
@@ -101,15 +100,15 @@ public class InputInvoiceSapServiceImpl extends ServiceImpl<InputInvoiceSapDao, 
                     duplicate.setAssignment(entity.getAssignment());
                     duplicate.setText(entity.getText());
                     duplicate.setTradingPartner(entity.getTradingPartner());
-                    duplicate.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
+                    duplicate.setUpdateBy(ShiroUtils.getUserId().intValue());
                     duplicate.setUpdateTime(new Date());
                     this.paraphraseParams(duplicate);
                     super.updateById(duplicate);
                 } else {
-                    entity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
+                    entity.setCreateBy(ShiroUtils.getUserId().intValue());
                     entity.setCreateTime(new Date());
                     this.paraphraseParams(entity);
-                    super.save(duplicate);
+                    super.save(entity);
                 }
             }
             if (buffer.toString().endsWith(",")) {
@@ -139,6 +138,8 @@ public class InputInvoiceSapServiceImpl extends ServiceImpl<InputInvoiceSapDao, 
         String pstngDate = (String) params.get("pstngDate");
         // 凭证编码
         String documentNo = (String) params.get("documentNo");
+        // 匹配类型 1 发票 2 海关 3 红字通知单
+        String matchType = (String) params.get("matchType");
         // 科目
         String account = (String) params.get("account");
         // 参考
@@ -157,6 +158,7 @@ public class InputInvoiceSapServiceImpl extends ServiceImpl<InputInvoiceSapDao, 
                         .le(StringUtils.isNotBlank(pstngDate), "pstng_date", StringUtils.isNotBlank(pstngDate) ? pstngDate.split(",")[1] : "")
                         .eq(StringUtils.isNotBlank(documentNo), "document_no", documentNo)
                         .eq(StringUtils.isNotBlank(account), "account", account)
+                        .eq(StringUtils.isNotBlank(matchType), "match_type", matchType)
                         .like(StringUtils.isNotBlank(reference), "reference", reference)
                         .eq(StringUtils.isNotBlank(assignment), "assignment", assignment)
                         .in(StringUtils.isNotBlank(match), "sap_match", (String[]) params.get("match"))
@@ -224,14 +226,14 @@ public class InputInvoiceSapServiceImpl extends ServiceImpl<InputInvoiceSapDao, 
         }*/
         // 对类型转义 1:发票; 2:海关通知单; 3:红字通知单
         if (org.apache.commons.lang3.StringUtils.contains(accout, "165101") && amountInDoc.compareTo(BigDecimal.ZERO) < 0) {
-            inputRedInvoiceService.voluntaryEntry(entity);
+            entity=inputRedInvoiceService.voluntaryEntry(entity);
             entity.setMatchType("3");
         } else if (org.apache.commons.lang3.StringUtils.contains(accout, "165102")) {
-            inputInvoiceCustomsService.updateByEntry(entity);
+            entity=inputInvoiceCustomsService.updateByEntry(entity);
             entity.setMatchType("2");
         } else if (org.apache.commons.lang3.StringUtils.contains(accout, "165101")) {
             entity.setMatchType("1");
-            inputInvoiceService.voluntaryEntry(entity);
+            entity=inputInvoiceService.voluntaryEntry(entity);
         }
         return entity;
     }

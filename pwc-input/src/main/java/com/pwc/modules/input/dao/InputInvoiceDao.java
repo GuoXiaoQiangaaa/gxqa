@@ -37,7 +37,7 @@ public interface InputInvoiceDao extends BaseMapper<InputInvoiceEntity> {
     InputInvoiceEntity get(InputInvoiceEntity invoiceEntity);
 //    int save(InputInvoiceEntity invoiceEntity);
 //    List<InputInvoiceEntity> getMigrationList();
-    void update(InputInvoiceEntity invoiceEntity);
+    void updateByEntity(InputInvoiceEntity invoiceEntity);
 //    void updateByIdRefund(Integer[] ids);
     void updateByIdArray(Integer[] ids);
 //    void updateByIdPass(Integer[] ids);

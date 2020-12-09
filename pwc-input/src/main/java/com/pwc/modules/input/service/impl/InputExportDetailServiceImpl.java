@@ -13,16 +13,14 @@ import com.pwc.common.utils.Query;
 import com.pwc.modules.input.dao.InputExportDetailDao;
 import com.pwc.modules.input.entity.InputExportDetailEntity;
 import com.pwc.modules.input.service.InputExportDetailService;
+import com.pwc.modules.sys.shiro.ShiroUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 进项转出明细服务实现
@@ -67,12 +65,12 @@ public class InputExportDetailServiceImpl extends ServiceImpl<InputExportDetailD
             for (MultipartFile file : files) {
                 String filename = file.getOriginalFilename();
                 ExcelReader reader = ExcelUtil.getReader(file.getInputStream());
-                String[] excelHead = {"Company code", "Account", "Reference", "Document Number", "Document Type",
+                String[] excelHead = {"Company Code", "Account", "Reference", "Document Number", "Document Type",
                         "Document Date", "Posting Date", "Amount in local currency", "Local Currency", "Amount in doc. curr.",
                         "Document currency", "User name", "Assignment", "Text", "Tax code", "Trading Partner", "Posting Key", "Year/month", "Document Header Text"};
-                String [] excelHeadAlias = {"companyCode", "account", "reference", "documentNo", "type",
-                        "docDate", "pstngDate", "amountLocal", "currencyLocal", "amount", "currency",
-                        "userName", "assignment", "text", "taxRate", "tradingPartner", "postingKey", "yearMonth", "headerText"};
+                String [] excelHeadAlias = {"companyCode", "account", "reference", "documentNo", "documentType",
+                        "docDate", "pstngDate", "amountInLocal", "lcurr", "amountInDoc", "curr",
+                        "userName", "assignment", "text", "tx", "tradingPartner", "postingKey", "yearAndMonth", "headerText"};
                 for (int i = 0; i < excelHead.length; i++) {
                     reader.addHeaderAlias(excelHead[i], excelHeadAlias[i]);
                 }
@@ -129,6 +127,8 @@ public class InputExportDetailServiceImpl extends ServiceImpl<InputExportDetailD
                             duplicate.setTradingPartner(entity.getTradingPartner());
                             duplicateList.add(this.paraphraseParams(duplicate));
                         }else {
+                            entity.setCreateBy(ShiroUtils.getUserId().intValue());
+                            entity.setCreateTime(new Date());
                             entityList.add(this.paraphraseParams(entity));
                         }
                     }

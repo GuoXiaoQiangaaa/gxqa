@@ -341,7 +341,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 
 	@Override
 	public SysDeptEntity getByName(String name) {
-		return this.baseMapper.selectOne(new QueryWrapper<SysDeptEntity>().eq("name", name));
+		return this.baseMapper.selectOne(new QueryWrapper<SysDeptEntity>().eq("name", name).eq("status","1"));
 	}
 
 	@Override

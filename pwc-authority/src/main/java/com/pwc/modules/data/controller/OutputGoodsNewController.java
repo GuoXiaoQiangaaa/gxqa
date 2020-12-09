@@ -116,7 +116,6 @@ public class OutputGoodsNewController {
     @PostMapping("/importGoods")
     public R importGoods(@RequestParam("files") MultipartFile[] files){
         Map<String, Object> resMap = outputGoodsService.importGoods(files);
-
         return R.ok().put("res", resMap);
     }
 

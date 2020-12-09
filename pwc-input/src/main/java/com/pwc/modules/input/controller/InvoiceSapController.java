@@ -55,7 +55,7 @@ public class InvoiceSapController {
     @RequestMapping("/getListByMatch")
     // @RequiresPermissions("input:invoicesap:getListByMatch")
     public R  getListByMatch(Map<String, Object> params){
-        String[] status = {InputConstant.InvoiceMatch.MATCH_NO.getValue(),InputConstant.InvoiceMatch.MATCH_ERROR.getValue()};
+        String[] status = {InputConstant.InvoiceMatch.MATCH_NO.getValue()};
         params.put("match",status);
         PageUtils page=inputInvoiceSapService.getListBySap(params);
         return R.ok().put("page",page);

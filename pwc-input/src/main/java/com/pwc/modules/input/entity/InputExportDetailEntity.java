@@ -66,7 +66,7 @@ public class InputExportDetailEntity implements Serializable {
 	/**
 	 * 年月
 	 */
-	private String yearMonth;
+	private String yearAndMonth;
 	/**
 	 * 摘要
 	 */

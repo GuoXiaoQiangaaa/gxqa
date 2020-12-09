@@ -64,11 +64,11 @@ import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.mail.Flags;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -157,6 +157,10 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
     private InputInvoiceCustomsService inputInvoiceCustomsService;
     @Resource
     private BaseClient baseClient;
+    @Autowired
+    private InputInvoiceDao inputInvoiceDao;
+    @Autowired
+    private InputInvoiceService inputInvoiceService;
 
     /**
      * 票据总览页面方法
@@ -354,7 +358,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
 
     @Override
     public void update(InputInvoiceEntity invoiceEntity) {
-        this.baseMapper.update(invoiceEntity);
+        this.baseMapper.updateByEntity(invoiceEntity);
     }
 
     @Override
@@ -3828,6 +3832,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                 invoiceMaterialEntity.setInvoiceId(Entity.getId());
                 invoiceMaterialEntityList = invoiceMaterialService.getByInvoiceId(invoiceMaterialEntity);
                 Entity.setManyTax(InputConstant.YesAndNo.NO.getValue());
+                StringBuffer sphSpmc = new StringBuffer();
                 if (invoiceMaterialEntityList.size() > 0) {
                     String tax = invoiceMaterialEntityList.get(0).getSphSlv();
                     for (InputInvoiceMaterialEntity materialEntity : invoiceMaterialEntityList) {
@@ -3835,6 +3840,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                             Entity.setManyTax(InputConstant.YesAndNo.YES.getValue());
                             tax = materialEntity.getSphSlv();
                         }
+                        sphSpmc.append(materialEntity.getSphSpmc()+";");
                     }
                     if (tax.matches("^[-\\\\+]?([0-9]+\\\\.?)?[0-9]+$")) {
                         Entity.setTax(tax + "%");
@@ -3848,6 +3854,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                     }
                 }
                 updateById(Entity);
+                Entity.setSphSpmc(sphSpmc.toString());
             }
             page.setList(list);
         }
@@ -4975,11 +4982,12 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
         };
         InputInvoiceEntity invoiceEntity = new InputInvoiceEntity();
         invoiceEntity.setEntrySuccessCode(documentNo);
-        UpdateWrapper<InputInvoiceEntity> updateQueryWrapper = new UpdateWrapper();
+        UpdateWrapper<InputInvoiceEntity> updateQueryWrapper = new UpdateWrapper<>();
         updateQueryWrapper.in("invoice_number", invoicNumbers);
         updateQueryWrapper.in("invoice_class", InvoiceClass);
         updateQueryWrapper.eq("invoice_entity", 1);
         updateQueryWrapper.in("invoice_status", status);
+
         return baseMapper.update(invoiceEntity, updateQueryWrapper);
     }
 
@@ -5000,7 +5008,8 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                 invoiceEntity.setEntrySuccessCode(sapEntity.getDocumentNo());
                 updateById(invoiceEntity);
             }
-            saveEntry(sapEntity);
+            sapEntity = saveEntry(sapEntity);
+            inputInvoiceSapService.updateById(sapEntity);
         } else {
             throw new RRException("未查询到该凭证号数据！");
         }
@@ -5013,27 +5022,41 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
      * @return
      */
     @Override
-    public int voluntaryEntry(InputInvoiceSapEntity sapEntity) {
+    public InputInvoiceSapEntity voluntaryEntry(InputInvoiceSapEntity sapEntity) {
         String[] numbers = sapEntity.getReference().split("/");
-        int count = getInvoiceByNumberAndStatus(sapEntity.getDocumentNo(), numbers);
-        if (count != 0) {
-            saveEntry(sapEntity);
+        if(numbers.length >0){
+            int count = getInvoiceByNumberAndStatus(sapEntity.getDocumentNo(), numbers);
+            if (count != 0) {
+                sapEntity = saveEntry(sapEntity);
+            }
+        }else{
+            sapEntity.setSapMatch("0");
         }
-        return count;
+        return sapEntity;
     }
 
-    public void saveEntry(InputInvoiceSapEntity sapEntity) {
+    public InputInvoiceSapEntity saveEntry(InputInvoiceSapEntity sapEntity) {
+        //获取容差
         String value = sysConfigService.getValue("TOLERANCE_VALUE");
         BigDecimal valueTax = value != null ? new BigDecimal(value) : BigDecimal.ZERO;
-        String documentNo = sapEntity.getDocumentNo();
         String totalTax = baseMapper.getCountByVoucherCode(sapEntity.getDocumentNo());
         String type = InputConstant.InvoiceMatch.MATCH_NO.getValue();
+        //匹配组织是否一致
+        boolean flag = false;
+        InputInvoiceEntity invoiceEntity = inputInvoiceService.getOne(
+                new QueryWrapper<InputInvoiceEntity>()
+                        .eq("entry_success_code", sapEntity.getDocumentNo())
+        );
+        SysDeptEntity sysDept = sysDeptService.getByName(invoiceEntity.getInvoicePurchaserParagraph());
+        if(sysDept != null && sysDept.getDeptCode().equals(sapEntity.getCompanyCode())){
+            flag = true;
+        }
         if (totalTax != null && (new BigDecimal(totalTax)).compareTo(BigDecimal.ZERO) == 0) {
             sapEntity.setSapMatch(InputConstant.InvoiceMatch.MATCH_NO.getValue());
             inputInvoiceSapService.updateById(sapEntity);
         } else if (totalTax != null && ((new BigDecimal(totalTax).subtract(valueTax)).compareTo(sapEntity.getAmountInDoc()) == 0
                 || (new BigDecimal(totalTax)).compareTo(sapEntity.getAmountInDoc().subtract(valueTax)) == 0
-        )) {
+        ) && flag) {
             sapEntity.setSapMatch(InputConstant.InvoiceMatch.MATCH_YES.getValue());
             inputInvoiceSapService.updateById(sapEntity);
             type = InputConstant.InvoiceMatch.MATCH_YES.getValue();
@@ -5042,13 +5065,13 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
             inputInvoiceSapService.updateById(sapEntity);
             type = InputConstant.InvoiceMatch.MATCH_ERROR.getValue();
         }
-        InputInvoiceEntity invoiceEntity = new InputInvoiceEntity();
         invoiceEntity.setInvoiceMatch(type);
         invoiceEntity.setMatchDate(DateUtils.format(new Date()));
         invoiceEntity.setEntryDate(sapEntity.getPstngDate());
-        UpdateWrapper<InputInvoiceEntity> updateQueryWrapper = new UpdateWrapper();
-        updateQueryWrapper.eq("entry_success_code", documentNo);
-        baseMapper.update(invoiceEntity, updateQueryWrapper);
+        invoiceEntity.setYearAndMonth(sapEntity.getYearAndMonth());
+        invoiceEntity.setSapTax(sapEntity.getAmountInLocal().toString());
+        inputInvoiceService.updateById(invoiceEntity);
+        return sapEntity;
     }
 
     // 本月认证
@@ -5105,104 +5128,19 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
         return list;
     }
 
-    // 海关缴款书
-    public MatchResultVo getRedInvoiceVo(Map<String, Object> params) {
-        BigDecimal certificationTax = BigDecimal.ZERO;  // 认证税额
-        BigDecimal monthCertTax = BigDecimal.ZERO;  //本月认证未入账税额
-        BigDecimal monthCertBeforeTax = BigDecimal.ZERO; // 本月认证前月入账
-        BigDecimal creditTax = BigDecimal.ZERO; // 入账税额
-        BigDecimal monthCredTax = BigDecimal.ZERO; //本月入账未认证税额
-        BigDecimal monthCredBeforeTax = BigDecimal.ZERO; // 本月入账前月认证
-        MatchResultVo resultVo = new MatchResultVo();
-        List<InputInvoiceCustomsEntity> customsEntitys = new ArrayList();// inputRedInvoiceService.(params);
-        for (InputInvoiceCustomsEntity customsEntity : customsEntitys) {
-            certificationTax = certificationTax.add(new BigDecimal(customsEntity.getTotalTax()));
-            if ((customsEntity.getEntryState()).equals(InputConstant.InvoiceMatch.MATCH_NO.getValue())) {
-                monthCertTax = monthCertTax.add(new BigDecimal(customsEntity.getTotalTax()));
-            } else {
-                Date date = DateUtils.stringToDate(customsEntity.getEntryDate(), "yyyy-MM-dd");
-                Date dates = DateUtils.stringToDate(((String) params.get("date")).substring(0, 7) + "-01", "yyyy-MM-dd");
-                if (date.before(dates)) {
-                    monthCertBeforeTax = monthCertBeforeTax.add(new BigDecimal(customsEntity.getTotalTax()));
-                }
-            }
-
-        }
-        // 入账
-        List<InputInvoiceSapEntity> sapEntitys = inputInvoiceSapService.getEntityByDateAndStatus(((String) params.get("date")).substring(0, 7), "2");
-        for (InputInvoiceSapEntity sapEntity : sapEntitys) {
-            creditTax = creditTax.add(sapEntity.getAmountInDoc());
-            if (sapEntity.getSapMatch().equals(InputConstant.InvoiceMatch.MATCH_NO.getValue())) {
-                monthCredTax = monthCredTax.add(sapEntity.getAmountInDoc());
-            } else {
-
-            }
-        }
-        resultVo.setMonth((String) params.get("date"));
-        resultVo.setSort("海关缴款书");
-        resultVo.setCreditTax(creditTax.toString());
-        resultVo.setCertificationTax(certificationTax.toString());
-        BigDecimal differenceTax = creditTax.subtract(certificationTax);
-        resultVo.setDifferenceTax(differenceTax.toString());
-        BigDecimal adjustmentTax = (monthCredTax.add(monthCredBeforeTax)).subtract(monthCertTax.add(monthCertBeforeTax));
-        resultVo.setAdjustmentTax(adjustmentTax.toString());
-        resultVo.setCheckTax((differenceTax.subtract(adjustmentTax)).toString());
-        resultVo.setMonthCredTax(monthCredTax.toString());
-        resultVo.setMonthCertTax(monthCertTax.toString());
-        resultVo.setMonthCredBeforeTax(monthCredBeforeTax.toString());
-        resultVo.setMonthCertBeforeTax(monthCertBeforeTax.toString());
-
-        return resultVo;
-    }
-
-    // 海关缴款书
-    public MatchResultVo getCustomsVo(Map<String, Object> params) {
-        BigDecimal certificationTax = BigDecimal.ZERO;  // 认证税额
-        BigDecimal monthCertTax = BigDecimal.ZERO;  //本月认证未入账税额
-        BigDecimal monthCertBeforeTax = BigDecimal.ZERO; // 本月认证前月入账
-        BigDecimal creditTax = BigDecimal.ZERO; // 入账税额
-        BigDecimal monthCredTax = BigDecimal.ZERO; //本月入账未认证税额
-        BigDecimal monthCredBeforeTax = BigDecimal.ZERO; // 本月入账前月认证
-        MatchResultVo resultVo = new MatchResultVo();
-        List<InputInvoiceCustomsEntity> customsEntitys = inputInvoiceCustomsService.getCertification(params);
-        for (InputInvoiceCustomsEntity customsEntity : customsEntitys) {
-            certificationTax = certificationTax.add(new BigDecimal(customsEntity.getTotalTax()));
-            if ((customsEntity.getEntryState()).equals(InputConstant.InvoiceMatch.MATCH_NO.getValue())) {
-                monthCertTax = monthCertTax.add(new BigDecimal(customsEntity.getTotalTax()));
-            } else {
-                Date date = DateUtils.stringToDate(customsEntity.getEntryDate(), "yyyy-MM-dd");
-                Date dates = DateUtils.stringToDate(((String) params.get("date")).substring(0, 7) + "-01", "yyyy-MM-dd");
-                if (date.before(dates)) {
-                    monthCertBeforeTax = monthCertBeforeTax.add(new BigDecimal(customsEntity.getTotalTax()));
-                }
-            }
-
-        }
-        // 入账
-        List<InputInvoiceSapEntity> sapEntitys = inputInvoiceSapService.getEntityByDateAndStatus(((String) params.get("date")).substring(0, 7), "2");
-        for (InputInvoiceSapEntity sapEntity : sapEntitys) {
-            creditTax = creditTax.add(sapEntity.getAmountInDoc());
-            if (sapEntity.getSapMatch().equals(InputConstant.InvoiceMatch.MATCH_NO.getValue())) {
-                monthCredTax = monthCredTax.add(sapEntity.getAmountInDoc());
-            } else {
-
-            }
-        }
-        resultVo.setMonth((String) params.get("date"));
-        resultVo.setSort("海关缴款书");
-        resultVo.setCreditTax(creditTax.toString());
-        resultVo.setCertificationTax(certificationTax.toString());
-        BigDecimal differenceTax = creditTax.subtract(certificationTax);
-        resultVo.setDifferenceTax(differenceTax.toString());
-        BigDecimal adjustmentTax = (monthCredTax.add(monthCredBeforeTax)).subtract(monthCertTax.add(monthCertBeforeTax));
-        resultVo.setAdjustmentTax(adjustmentTax.toString());
-        resultVo.setCheckTax((differenceTax.subtract(adjustmentTax)).toString());
-        resultVo.setMonthCredTax(monthCredTax.toString());
-        resultVo.setMonthCertTax(monthCertTax.toString());
-        resultVo.setMonthCredBeforeTax(monthCredBeforeTax.toString());
-        resultVo.setMonthCertBeforeTax(monthCertBeforeTax.toString());
-
-        return resultVo;
+    /**
+     * 获取查询月份认证完成的数据
+     * @param params
+     * @return
+     */
+    @Override
+    public List<InputInvoiceEntity> getCertificationList(Map<String, Object> params){
+        String date = params.get("queryDate").toString();
+        return  this.list(
+                new QueryWrapper<InputInvoiceEntity>()
+                        .like("deductible_date",date)
+                        .in("deductible",1)
+        );
     }
 
     public static void main(String[] args) {

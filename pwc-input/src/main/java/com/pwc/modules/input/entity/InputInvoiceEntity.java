@@ -113,6 +113,9 @@ public class InputInvoiceEntity implements Serializable {
     List<InputInvoiceMaterialEntity> InvoiceMaterialEntityList;  //所属发票的明细集合
     @TableField(exist = false)
     private List<String> picUrlList;
+    //商品名称
+    @TableField(exist = false)
+    private String sphSpmc;
     private String invoiceAuthType; // 认证方式 1勾选 2 扫描
     private String invoiceAuthPattern; // 认证模式1抵扣 2退税
     private String invoiceElectronicType;  // 电子发票类型：0：普通,1:通行费
@@ -285,6 +288,22 @@ public class InputInvoiceEntity implements Serializable {
      * 入账日期
      */
     private String entryDate;
+    /**
+     * 年月
+     */
+    private String yearAndMonth;
+    /**
+     * SAP差异原因
+     */
+    private String sapReason;
+    /**
+     * SAP税额
+     */
+    private String sapTax;
+    /**
+     * SAP差异额
+     */
+    private String sapCheckTax;
 
     @Override
     public String toString() {

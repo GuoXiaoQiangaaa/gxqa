@@ -29,12 +29,15 @@ import com.pwc.modules.input.service.InputInvoiceCustomsPushService;
 import com.pwc.modules.input.service.InputInvoiceCustomsService;
 import com.pwc.modules.input.service.InputInvoiceSapService;
 import com.pwc.modules.input.service.InputInvoiceVoucherNoService;
+import com.pwc.modules.sys.entity.SysDeptEntity;
 import com.pwc.modules.sys.service.SysConfigService;
+import com.pwc.modules.sys.service.SysDeptService;
 import com.pwc.modules.sys.shiro.ShiroUtils;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,6 +67,8 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
     private InputInvoiceSapService inputInvoiceSapService;
     @Autowired
     private SysConfigService sysConfigService;
+    @Autowired
+    private SysDeptService sysDeptService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -71,6 +76,7 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
         String purchaserName=(String) params.get("purchaserName");
         String taxNo = (String) params.get("taxNo");
         String deductible = (String) params.get("deductible");
+        String entryState = (String) params.get("entryState");
         String statisticsState = (String) params.get("statisticsState");
         String batchNo = (String) params.get("batchNo");
         String deductiblePeriod = (String) params.get("deductiblePeriod");
@@ -89,7 +95,6 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
             deductibleDateEnd = deductibleDateArray.split(",")[1];
         }
 
-
         IPage<InputInvoiceCustomsEntity> page = this.page(
                 new Query<InputInvoiceCustomsEntity>().getPage(params),
                 new QueryWrapper<InputInvoiceCustomsEntity>()
@@ -97,6 +102,7 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
                         .eq(StringUtils.isNotBlank(purchaserName), "purchaser_name", purchaserName)
                         .eq(StringUtils.isNotBlank(taxNo), "purchaser_tax_no", taxNo)
                         .eq(StringUtils.isNotBlank(deductible), "deductible", deductible)
+                        .eq(StringUtils.isNotBlank(entryState), "entry_state", entryState)
                         .eq(StringUtils.isNotBlank(statisticsState), "statistics_state", statisticsState)
                         .eq(StringUtils.isNotBlank(batchNo), "batch_no", batchNo)
                         .eq(StringUtils.isNotBlank(deductiblePeriod), "deductible_period", deductiblePeriod)
@@ -768,19 +774,19 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
     @Override
     public PageUtils getListBySuccess(Map<String, Object> params){
         params.put("deductible","1");
-        params.put("entryState", InputConstant.InvoiceMatch.MATCH_YES);
+        params.put("entryState", InputConstant.InvoiceMatch.MATCH_YES.getValue());
         return  queryPage(params);
     }
     @Override
     public PageUtils getListByNo(Map<String, Object> params){
         params.put("deductible","1");
-        params.put("entryState", InputConstant.InvoiceMatch.MATCH_NO);
+        params.put("entryState", InputConstant.InvoiceMatch.MATCH_NO.getValue());
         return  queryPage(params);
     }
     @Override
     public PageUtils getListByError(Map<String, Object> params){
         params.put("deductible","1");
-        params.put("entryState", InputConstant.InvoiceMatch.MATCH_ERROR);
+        params.put("entryState", InputConstant.InvoiceMatch.MATCH_ERROR.getValue());
         return  queryPage(params);
     }
 
@@ -800,7 +806,8 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
                 customsEntity.setVoucherCode(sapEntity.getDocumentNo());
                 updateById(customsEntity);
             }
-            saveByEntry(sapEntity);
+            sapEntity = saveByEntry(sapEntity);
+            inputInvoiceSapService.updateById(sapEntity);
         }else{
             throw new RRException("未查询到该凭证号数据！");
         }
@@ -811,29 +818,64 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
      * @param sapEntitys
      */
     @Override
-    public void updateByEntry(InputInvoiceSapEntity sapEntitys){
-        String taxt = null;
-        List list = new ArrayList();
-       int a =  this.baseMapper.updateByVoucherCode(sapEntitys.getDocumentNo(),list);
+    public InputInvoiceSapEntity updateByEntry(InputInvoiceSapEntity sapEntitys){
+        int a = 0;
+        if(sapEntitys.getText() != null){
+            List<String> list = disposeText(sapEntitys.getText());
+            if(list.size() > 0){
+                a =  this.baseMapper.updateByVoucherCode(sapEntitys.getDocumentNo(),list);
+            }
+        }
        if(a!=0){
-           saveByEntry(sapEntitys);
+           sapEntitys=saveByEntry(sapEntitys);
+       }else{
+           sapEntitys.setSapMatch("0");
        }
+       return sapEntitys;
+    }
+
+    //导入text格式处理
+    private List<String> disposeText(String text){
+        List<String> list = new ArrayList<String>();
+        String arr[]=text.split(",");
+        if(arr.length > 1){
+            for (int i = 1;i < arr.length;i++){
+                String arr2[]=arr[1].split("-");
+                if(arr[i].length() == 3){
+                    list.add(arr2[0] +"-"+ arr[i]);
+                }else{
+                    list.add(arr[i]);
+                }
+            }
+        }
+        return list;
     }
 
     // 入账
-    public void saveByEntry(InputInvoiceSapEntity sapEntity){
+    public InputInvoiceSapEntity saveByEntry(InputInvoiceSapEntity sapEntity){
+        //获取容差
         String value = sysConfigService.getValue("TOLERANCE_VALUE");
         BigDecimal valueTax = value !=null?new BigDecimal(value):BigDecimal.ZERO;
         String documentNo = sapEntity.getDocumentNo();
         String totalTax= this.baseMapper.getCountByVoucherCode(documentNo);
         String type = InputConstant.InvoiceMatch.MATCH_NO.getValue();
+        //匹配组织是否一致
+        boolean flag = false;
+        InputInvoiceCustomsEntity invoiceEntity = super.getOne(
+                new QueryWrapper<InputInvoiceCustomsEntity>()
+                        .eq("voucher_code", sapEntity.getDocumentNo())
+        );
+        SysDeptEntity sysDept = sysDeptService.getByName(invoiceEntity.getPurchaserName());
+        if(sysDept != null && sysDept.getDeptCode().equals(sapEntity.getCompanyCode())){
+            flag = true;
+        }
         if(totalTax!=null&& (new BigDecimal(totalTax)).compareTo(BigDecimal.ZERO)==0){
             sapEntity.setSapMatch(InputConstant.InvoiceMatch.MATCH_NO.getValue());
             inputInvoiceSapService.updateById(sapEntity);
             this.baseMapper.updateByentryState(InputConstant.InvoiceMatch.MATCH_NO.getValue(),documentNo);
         } else if(totalTax!=null&&((new BigDecimal(totalTax).subtract(valueTax)).compareTo(sapEntity.getAmountInDoc())==0
                 || (new BigDecimal(totalTax)).compareTo(sapEntity.getAmountInDoc().subtract(valueTax))==0
-        )){
+        ) && flag){
             sapEntity.setSapMatch(InputConstant.InvoiceMatch.MATCH_YES.getValue());
             inputInvoiceSapService.updateById(sapEntity);
             type = InputConstant.InvoiceMatch.MATCH_YES.getValue();
@@ -848,9 +890,12 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
         customsEntity.setEntryState(type);
         customsEntity.setMatchDate(DateUtils.format(new Date()));
         customsEntity.setEntryDate(sapEntity.getPstngDate());
+        customsEntity.setYearAndMonth(sapEntity.getYearAndMonth());
+        customsEntity.setSapTax(sapEntity.getAmountInLocal().toString());
         UpdateWrapper<InputInvoiceCustomsEntity> updateQueryWrapper = new UpdateWrapper();
         updateQueryWrapper.eq("voucher_code", documentNo);
         baseMapper.update(customsEntity, updateQueryWrapper);
+        return sapEntity;
     }
 
     /**
@@ -868,5 +913,21 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
         );
     }
 
-
+    public static void main(String[] args) {
+        List<String> list = new ArrayList<String>();
+        String text = "Import,010120201000514950-A01,L02,97500431-00100Xi";
+        String arr[]=text.split(",");
+        if(arr.length > 1){
+            for (int i = 1;i < arr.length;i++){
+                String arr2[]=arr[1].split("-");
+                if(arr[i].length() == 3){
+                    list.add(arr2[0] +"-"+ arr[i]);
+                }else{
+                    list.add(arr[i]);
+                }
+            }
+        }
+        System.out.println(list.toString());
+    }
 }
+

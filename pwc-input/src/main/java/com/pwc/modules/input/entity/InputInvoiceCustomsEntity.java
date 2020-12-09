@@ -1,5 +1,6 @@
 package com.pwc.modules.input.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -202,7 +203,24 @@ public class InputInvoiceCustomsEntity implements Serializable {
 	/**
 	 * 批次号(格式:yyyyMMdd-1)
 	 */
+	@TableField(fill = FieldFill.DEFAULT)
 	private String batchNo;
+	/**
+	 * 年月
+	 */
+	private String yearAndMonth;
+	/**
+	 * SAP差异原因
+	 */
+	private String sapReason;
+	/**
+	 * SAP税额
+	 */
+	private String sapTax;
+	/**
+	 * SAP差异额
+	 */
+	private String sapCheckTax;
 	/**
 	 * 匹配日期
 	 */
