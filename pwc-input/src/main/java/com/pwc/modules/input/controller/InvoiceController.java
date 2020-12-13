@@ -639,7 +639,6 @@ public class InvoiceController {
      * 异常页面展示
      *
      * @param params
-     * @param invoiceEntity
      * @return
      */
     @RequestMapping("/findException")
@@ -1357,8 +1356,8 @@ public class InvoiceController {
     @RequestMapping("/saveByEntry")
 //    @RequiresPermissions("input:invoice:saveByEntry")
     public R saveByEntry(@RequestParam Map<String, Object> params) {
-        invoiceService.manualEntryBySap(params);
-        return R.ok();
+        String sapMatch =invoiceService.manualEntryBySap(params);
+        return R.ok().put("sapMatch",sapMatch);
     }
 
     /**

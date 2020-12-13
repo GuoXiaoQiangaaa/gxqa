@@ -120,5 +120,6 @@ public interface SysDeptService extends IService<SysDeptEntity> {
 	 */
 	SysDeptEntity queryInfo(Long deptId);
 	SysDeptEntity getByDeptCode(String deptCode);
+	SysDeptEntity getBySapDeptCode(String deptCode);
 	List<SysDeptEntity> getDeptByStatus();
 }

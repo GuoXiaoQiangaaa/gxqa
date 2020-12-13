@@ -57,12 +57,18 @@ public class InputConstant {
     private static Map<String, String> INVOICE_CLASS = Maps.newHashMap();
 
     private static Map<String, String> INVOICE_STYLE = Maps.newHashMap();
+    private static Map<String, String> SAP_SORT = Maps.newHashMap();
 
 
     static {
         STATUS_MAP.put("1", "正常");
         STATUS_MAP.put("2", "异常");
         ALL.put("status", STATUS_MAP);
+
+        SAP_SORT.put("0", "发票");
+        SAP_SORT.put("1", "海关通知单");
+        SAP_SORT.put("2", "红字通知单");
+        ALL.put("sapSort", SAP_SORT);
 
         LOOKUP_TYPE_MAP.put("1", "巡查");
         LOOKUP_TYPE_MAP.put("2", "暗查");

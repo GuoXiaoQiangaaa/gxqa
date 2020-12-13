@@ -183,11 +183,15 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 
 	@Override
 	public SysDeptEntity getByTaxCode(String taxCode) {
-		return super.getOne(new QueryWrapper<SysDeptEntity>().eq("tax_code", taxCode));
+		return super.getOne(new QueryWrapper<SysDeptEntity>().eq("tax_code", taxCode).eq("status",1));
 	}
 	@Override
 	public SysDeptEntity getByDeptCode(String deptCode) {
-		return super.getOne(new QueryWrapper<SysDeptEntity>().eq("dept_code", deptCode));
+		return super.getOne(new QueryWrapper<SysDeptEntity>().eq("dept_code", deptCode).eq("status",1));
+	}
+	@Override
+	public SysDeptEntity getBySapDeptCode(String deptCode) {
+		return super.getOne(new QueryWrapper<SysDeptEntity>().eq("sap_dept_code", deptCode).eq("status",1));
 	}
 
 	/**

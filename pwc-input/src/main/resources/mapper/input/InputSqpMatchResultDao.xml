@@ -1,0 +1,503 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputSqpMatchResultDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.pwc.modules.input.entity.InputSapMatchResultEntity" id="inputSqpMatchResultMap">
+        <result property="resultId" column="result_id"/>
+        <result property="yearAndMonth" column="year_and_month"/>
+        <result property="sort" column="sort"/>
+        <result property="credittax" column="creditTax"/>
+        <result property="certificationtax" column="certificationTax"/>
+        <result property="monthcredtax" column="monthCredTax"/>
+        <result property="monthcerttax" column="monthCertTax"/>
+        <result property="monthcredbeforetax" column="monthCredBeforeTax"/>
+        <result property="monthcertbeforetax" column="monthCertBeforeTax"/>
+        <result property="differencetax" column="differenceTax"/>
+        <result property="adjustmenttax" column="adjustmentTax"/>
+        <result property="checktax" column="checkTax"/>
+        <result property="status" column="status"/>
+        <result property="calibration" column="calibration"/>
+        <result property="calibrationExplain" column="calibration_explain"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deptId" column="dept_id"/>
+    </resultMap>
+
+
+    <select id="getDifferenceMatchInvoice" resultType="com.pwc.modules.input.entity.vo.InvoiceDifferenceMatch">
+        SELECT * FROM(
+        SELECT
+        a.sap_id sapId,
+        DATE_FORMAT( a.pstng_date, '%m' ) mouth,
+        a.document_no documentNo,
+        DATE_FORMAT( a.pstng_date, '%Y-%m' ) pstngDate,
+        a.amount_in_local amountInLocal,
+        b.invoice_code invoiceCode,
+        b.invoice_number invoiceNumber,
+        b.invoice_tax_price invoiceTaxPrice,
+        b.invoice_create_date invoiceCreateDate,
+        IFNULL(b.sap_check_tax,0) differenceFee
+        FROM
+        `input_invoice_sap` a
+        LEFT JOIN input_invoice b ON a.document_no LIKE b.entry_success_code
+        WHERE 1=1
+        <if test="yearAndMonth != null and yearAndMonth != ''">
+            AND DATE_FORMAT( a.pstng_date, '%Y-%m' ) = #{yearAndMonth}
+        </if>
+        <if test="deptId != null and deptId != ''">
+            AND a.dept_id = #{deptId}
+        </if>
+        AND (b.invoice_match in ("0","2") or b.invoice_match is null)
+        AND a.match_type = "1"
+        UNION
+        SELECT
+        a.sap_id sapId,
+        DATE_FORMAT( a.pstng_date, '%m' ) mouth,
+        a.document_no documentNo,
+        DATE_FORMAT( a.pstng_date, '%Y-%m' ) pstngDate,
+        a.amount_in_local amountInLocal,
+        b.invoice_code invoiceCode,
+        b.invoice_number invoiceNumber,
+        b.invoice_tax_price invoiceTaxPrice,
+        b.invoice_create_date invoiceCreateDate,
+        IFNULL(b.sap_check_tax,0) differenceFee
+        FROM
+        input_invoice b
+        LEFT JOIN `input_invoice_sap` a ON a.document_no LIKE b.entry_success_code
+        WHERE 1=1
+        <if test="yearAndMonth != null and yearAndMonth != ''">
+            AND DATE_FORMAT( a.pstng_date, '%Y-%m' ) = #{yearAndMonth}
+        </if>
+        <if test="deptId != null and deptId != ''">
+            AND a.dept_id = #{deptId}
+        </if>
+        AND (b.invoice_match in ("0","2") or b.invoice_match is null)
+        AND a.match_type = "1"
+        ) c
+        order by c.pstngDate,c.invoiceCreateDate
+        limit #{offset},#{limit}
+    </select>
+
+    <select id="getRedDifferenceMatchInvoice" resultType="com.pwc.modules.input.entity.vo.RedInvoiceDifferenceMatch">
+        SELECT * FROM(
+        SELECT
+        DATE_FORMAT( a.pstng_date, '%m' ) mouth,
+        a.document_no documentNo,
+        DATE_FORMAT( a.pstng_date, '%Y-%m' ) pstngDate,
+        a.amount_in_local amountInLocal,
+        b.red_notice_number redNoticeNumber,
+        b.blue_invoice_code blueInvoiceCode,
+        b.blue_invoice_number blueInvoiceNumber,
+        b.tax_price taxPrice,
+        b.write_date writeDate,
+        IFNULL(b.sap_check_tax,0) differenceFee
+        FROM
+        `input_invoice_sap` a
+        LEFT JOIN input_red_invoice b ON a.document_no LIKE b.document_no
+        WHERE 1=1
+        <if test="yearAndMonth != null and yearAndMonth != ''">
+            AND DATE_FORMAT( a.pstng_date, '%Y-%m' ) = #{yearAndMonth}
+        </if>
+        <if test="deptId != null and deptId != ''">
+            AND a.dept_id = #{deptId}
+        </if>
+        AND (b.entry_status in ("0","2") or b.entry_status is null)
+        AND a.match_type = "2"
+        UNION
+        SELECT
+        DATE_FORMAT( a.pstng_date, '%m' ) mouth,
+        a.document_no documentNo,
+        DATE_FORMAT( a.pstng_date, '%Y-%m' ) pstngDate,
+        a.amount_in_local amountInLocal,
+        b.red_notice_number redNoticeNumber,
+        b.blue_invoice_code blueInvoiceCode,
+        b.blue_invoice_number blueInvoiceNumber,
+        b.tax_price taxPrice,
+        b.write_date writeDate,
+        IFNULL(b.sap_check_tax,0) differenceFee
+        FROM
+        input_red_invoice b
+        LEFT JOIN  `input_invoice_sap` a ON a.document_no LIKE b.document_no
+        WHERE 1=1
+        <if test="yearAndMonth != null and yearAndMonth != ''">
+            AND DATE_FORMAT( a.pstng_date, '%Y-%m' ) = #{yearAndMonth}
+        </if>
+        <if test="deptId != null and deptId != ''">
+            AND a.dept_id = #{deptId}
+        </if>
+        AND (b.entry_status in ("0","2") or b.entry_status is null)
+        AND a.match_type = "2"
+        ) c
+        order by c.pstngDate,c.writeDate
+        limit #{offset},#{limit}
+    </select>
+    <select id="getCustomsDifferenceMatchResult"
+            resultType="com.pwc.modules.input.entity.vo.InvoiceCustomsDifferenceMatch">
+        SELECT * FROM(
+        SELECT
+        DATE_FORMAT( a.pstng_date, '%m' ) mouth,
+        a.document_no documentNo,
+        DATE_FORMAT( a.pstng_date, '%Y-%m' ) pstngDate,
+        a.amount_in_local amountInLocal,
+        b.pay_no payNo,
+        b.total_tax totalTax,
+        b.billing_date billingDate,
+        b.batch_no batchNo,
+        IFNULL(b.sap_check_tax,0) differenceFee
+        FROM
+        `input_invoice_sap` a
+        LEFT JOIN input_invoice_customs b ON a.document_no LIKE b.voucher_code
+        WHERE 1=1
+        <if test="yearAndMonth != null and yearAndMonth != ''">
+            AND DATE_FORMAT( a.pstng_date, '%Y-%m' ) = #{yearAndMonth}
+        </if>
+        <if test="deptId != null and deptId != ''">
+            AND a.dept_id = #{deptId}
+        </if>
+        AND (b.entry_state in ("0","2") or b.entry_state is null)
+        AND a.match_type = "3"
+        UNION
+        SELECT
+        DATE_FORMAT( a.pstng_date, '%m' ) mouth,
+        a.document_no documentNo,
+        DATE_FORMAT( a.pstng_date, '%Y-%m' ) pstngDate,
+        a.amount_in_local amountInLocal,
+        b.pay_no payNo,
+        b.total_tax totalTax,
+        b.billing_date billingDate,
+        b.batch_no batchNo,
+        IFNULL(b.sap_check_tax,0) differenceFee
+        FROM
+        input_invoice_customs b
+        LEFT JOIN `input_invoice_sap` a ON a.document_no LIKE b.voucher_code
+        WHERE 1=1
+        <if test="yearAndMonth != null and yearAndMonth != ''">
+            AND DATE_FORMAT( a.pstng_date, '%Y-%m' ) = #{yearAndMonth}
+        </if>
+        <if test="deptId != null and deptId != ''">
+            AND a.dept_id = #{deptId}
+        </if>
+        AND (b.entry_state in ("0","2") or b.entry_state is null)
+        AND a.match_type = "3"
+        ) c
+        order by c.pstngDate,c.billingDate
+        limit #{offset},#{limit}
+    </select>
+    <select id="getDifferenceMatchInvoiceCount" resultType="integer">
+        SELECT
+        count(1)
+        FROM(
+        SELECT
+        a.sap_id sapId,
+        DATE_FORMAT( a.pstng_date, '%m' ) mouth,
+        a.document_no documentNo,
+        DATE_FORMAT( a.pstng_date, '%Y-%m' ) pstngDate,
+        a.amount_in_local amountInLocal,
+        b.invoice_code invoiceCode,
+        b.invoice_number invoiceNumber,
+        b.invoice_tax_price invoiceTaxPrice,
+        b.invoice_create_date invoiceCreateDate,
+        IFNULL(b.sap_check_tax,0) differenceFee
+        FROM
+        `input_invoice_sap` a
+        LEFT JOIN input_invoice b ON a.document_no LIKE b.entry_success_code
+        WHERE 1=1
+        <if test="yearAndMonth != null and yearAndMonth != ''">
+            AND DATE_FORMAT( a.pstng_date, '%Y-%m' ) = #{yearAndMonth}
+        </if>
+        <if test="deptId != null and deptId != ''">
+            AND a.dept_id = #{deptId}
+        </if>
+        AND (b.invoice_match in ("0","2") or b.invoice_match is null)
+        AND a.match_type = "1"
+        UNION
+        SELECT
+        a.sap_id sapId,
+        DATE_FORMAT( a.pstng_date, '%m' ) mouth,
+        a.document_no documentNo,
+        DATE_FORMAT( a.pstng_date, '%Y-%m' ) pstngDate,
+        a.amount_in_local amountInLocal,
+        b.invoice_code invoiceCode,
+        b.invoice_number invoiceNumber,
+        b.invoice_tax_price invoiceTaxPrice,
+        b.invoice_create_date invoiceCreateDate,
+        IFNULL(b.sap_check_tax,0) differenceFee
+        FROM
+        input_invoice b
+        LEFT JOIN `input_invoice_sap` a ON a.document_no LIKE b.entry_success_code
+        WHERE 1=1
+        <if test="yearAndMonth != null and yearAndMonth != ''">
+            AND DATE_FORMAT( a.pstng_date, '%Y-%m' ) = #{yearAndMonth}
+        </if>
+        <if test="deptId != null and deptId != ''">
+            AND a.dept_id = #{deptId}
+        </if>
+        AND (b.invoice_match in ("0","2") or b.invoice_match is null)
+        AND a.match_type = "1"
+        ) c
+    </select>
+    <select id="getRedDifferenceMatchInvoiceCount" resultType="integer">
+        SELECT
+        count(1)
+        FROM(
+        SELECT
+        DATE_FORMAT( a.pstng_date, '%m' ) mouth,
+        a.document_no documentNo,
+        DATE_FORMAT( a.pstng_date, '%Y-%m' ) pstngDate,
+        a.amount_in_local amountInLocal,
+        b.red_notice_number redNoticeNumber,
+        b.blue_invoice_code blueInvoiceCode,
+        b.blue_invoice_number blueInvoiceNumber,
+        b.tax_price taxPrice,
+        b.write_date writeDate,
+        IFNULL(b.sap_check_tax,0) differenceFee
+        FROM
+        `input_invoice_sap` a
+        LEFT JOIN input_red_invoice b ON a.document_no LIKE b.document_no
+        WHERE 1=1
+        <if test="yearAndMonth != null and yearAndMonth != ''">
+            AND DATE_FORMAT( a.pstng_date, '%Y-%m' ) = #{yearAndMonth}
+        </if>
+        <if test="deptId != null and deptId != ''">
+            AND a.dept_id = #{deptId}
+        </if>
+        AND (b.entry_status in ("0","2") or b.entry_status is null)
+        AND a.match_type = "2"
+        UNION
+        SELECT
+        DATE_FORMAT( a.pstng_date, '%m' ) mouth,
+        a.document_no documentNo,
+        DATE_FORMAT( a.pstng_date, '%Y-%m' ) pstngDate,
+        a.amount_in_local amountInLocal,
+        b.red_notice_number redNoticeNumber,
+        b.blue_invoice_code blueInvoiceCode,
+        b.blue_invoice_number blueInvoiceNumber,
+        b.tax_price taxPrice,
+        b.write_date writeDate,
+        IFNULL(b.sap_check_tax,0) differenceFee
+        FROM
+        input_red_invoice b
+        LEFT JOIN  `input_invoice_sap` a ON a.document_no LIKE b.document_no
+        WHERE 1=1
+        <if test="yearAndMonth != null and yearAndMonth != ''">
+            AND DATE_FORMAT( a.pstng_date, '%Y-%m' ) = #{yearAndMonth}
+        </if>
+        <if test="deptId != null and deptId != ''">
+            AND a.dept_id = #{deptId}
+        </if>
+        AND (b.entry_status in ("0","2") or b.entry_status is null)
+        AND a.match_type = "2"
+        ) c
+    </select>
+    <select id="getCustomsDifferenceMatchResultCount" resultType="integer">
+        SELECT
+        count(1)
+        FROM(
+        SELECT
+        DATE_FORMAT( a.pstng_date, '%m' ) mouth,
+        a.document_no documentNo,
+        DATE_FORMAT( a.pstng_date, '%Y-%m' ) pstngDate,
+        a.amount_in_local amountInLocal,
+        b.pay_no payNo,
+        b.total_tax totalTax,
+        b.billing_date billingDate,
+        b.batch_no batchNo,
+        IFNULL(b.sap_check_tax,0) differenceFee
+        FROM
+        `input_invoice_sap` a
+        LEFT JOIN input_invoice_customs b ON a.document_no LIKE b.voucher_code
+        WHERE 1=1
+        <if test="yearAndMonth != null and yearAndMonth != ''">
+            AND DATE_FORMAT( a.pstng_date, '%Y-%m' ) = #{yearAndMonth}
+        </if>
+        <if test="deptId != null and deptId != ''">
+            AND a.dept_id = #{deptId}
+        </if>
+        AND (b.entry_state in ("0","2") or b.entry_state is null)
+        AND a.match_type = "3"
+        UNION
+        SELECT
+        DATE_FORMAT( a.pstng_date, '%m' ) mouth,
+        a.document_no documentNo,
+        DATE_FORMAT( a.pstng_date, '%Y-%m' ) pstngDate,
+        a.amount_in_local amountInLocal,
+        b.pay_no payNo,
+        b.total_tax totalTax,
+        b.billing_date billingDate,
+        b.batch_no batchNo,
+        IFNULL(b.sap_check_tax,0) differenceFee
+        FROM
+        input_invoice_customs b
+        LEFT JOIN `input_invoice_sap` a ON a.document_no LIKE b.voucher_code
+        WHERE 1=1
+        <if test="yearAndMonth != null and yearAndMonth != ''">
+            AND DATE_FORMAT( a.pstng_date, '%Y-%m' ) = #{yearAndMonth}
+        </if>
+        <if test="deptId != null and deptId != ''">
+            AND a.dept_id = #{deptId}
+        </if>
+        AND (b.entry_state in ("0","2") or b.entry_state is null)
+        AND a.match_type = "3"
+        ) c
+    </select>
+
+    <select id="getDifferenceMatchInvoiceExcel" resultType="com.pwc.modules.input.entity.vo.InvoiceDifferenceMatch">
+        SELECT * FROM(
+        SELECT
+        DATE_FORMAT( a.pstng_date, '%m' ) mouth,
+        a.document_no documentNo,
+        DATE_FORMAT( a.pstng_date, '%Y-%m' ) pstngDate,
+        a.amount_in_local amountInLocal,
+        b.invoice_code invoiceCode,
+        b.invoice_number invoiceNumber,
+        b.invoice_tax_price invoiceTaxPrice,
+        b.invoice_create_date invoiceCreateDate,
+        IFNULL(b.sap_check_tax,0) differenceFee
+        FROM
+        `input_invoice_sap` a
+        LEFT JOIN input_invoice b ON a.document_no LIKE b.entry_success_code
+        WHERE 1=1
+        <if test="yearAndMonth != null and yearAndMonth != ''">
+            AND DATE_FORMAT( a.pstng_date, '%Y-%m' ) = #{yearAndMonth}
+        </if>
+        <if test="deptId != null and deptId != ''">
+            AND a.dept_id = #{deptId}
+        </if>
+        AND (b.invoice_match in ("0","2") or b.invoice_match is null)
+        AND a.match_type = "1"
+        UNION
+        SELECT
+        DATE_FORMAT( a.pstng_date, '%m' ) mouth,
+        a.document_no documentNo,
+        DATE_FORMAT( a.pstng_date, '%Y-%m' ) pstngDate,
+        a.amount_in_local amountInLocal,
+        b.invoice_code invoiceCode,
+        b.invoice_number invoiceNumber,
+        b.invoice_tax_price invoiceTaxPrice,
+        b.invoice_create_date invoiceCreateDate,
+        IFNULL(b.sap_check_tax,0) differenceFee
+        FROM
+        input_invoice b
+        LEFT JOIN `input_invoice_sap` a ON a.document_no LIKE b.entry_success_code
+        WHERE 1=1
+        <if test="yearAndMonth != null and yearAndMonth != ''">
+            AND DATE_FORMAT( a.pstng_date, '%Y-%m' ) = #{yearAndMonth}
+        </if>
+        <if test="deptId != null and deptId != ''">
+            AND a.dept_id = #{deptId}
+        </if>
+        AND (b.invoice_match in ("0","2") or b.invoice_match is null)
+        AND a.match_type = "1"
+        ) c
+        order by c.pstngDate,c.invoiceCreateDate
+    </select>
+
+    <select id="getRedDifferenceMatchInvoiceExcel"
+            resultType="com.pwc.modules.input.entity.vo.RedInvoiceDifferenceMatch">
+        SELECT * FROM(
+        SELECT
+        DATE_FORMAT( a.pstng_date, '%m' ) mouth,
+        a.document_no documentNo,
+        DATE_FORMAT( a.pstng_date, '%Y-%m' ) pstngDate,
+        a.amount_in_local amountInLocal,
+        b.red_notice_number redNoticeNumber,
+        b.blue_invoice_code blueInvoiceCode,
+        b.blue_invoice_number blueInvoiceNumber,
+        b.tax_price taxPrice,
+        b.write_date writeDate,
+        IFNULL(b.sap_check_tax,0) differenceFee
+        FROM
+        `input_invoice_sap` a
+        LEFT JOIN input_red_invoice b ON a.document_no LIKE b.document_no
+        WHERE 1=1
+        <if test="yearAndMonth != null and yearAndMonth != ''">
+            AND DATE_FORMAT( a.pstng_date, '%Y-%m' ) = #{yearAndMonth}
+        </if>
+        <if test="deptId != null and deptId != ''">
+            AND a.dept_id = #{deptId}
+        </if>
+        AND (b.entry_status in ("0","2") or b.entry_status is null)
+        AND a.match_type = "2"
+        UNION
+        SELECT
+        DATE_FORMAT( a.pstng_date, '%m' ) mouth,
+        a.document_no documentNo,
+        DATE_FORMAT( a.pstng_date, '%Y-%m' ) pstngDate,
+        a.amount_in_local amountInLocal,
+        b.red_notice_number redNoticeNumber,
+        b.blue_invoice_code blueInvoiceCode,
+        b.blue_invoice_number blueInvoiceNumber,
+        b.tax_price taxPrice,
+        b.write_date writeDate,
+        IFNULL(b.sap_check_tax,0) differenceFee
+        FROM
+        input_red_invoice b
+        LEFT JOIN `input_invoice_sap` a ON a.document_no LIKE b.document_no
+        WHERE 1=1
+        <if test="yearAndMonth != null and yearAndMonth != ''">
+            AND DATE_FORMAT( a.pstng_date, '%Y-%m' ) = #{yearAndMonth}
+        </if>
+        <if test="deptId != null and deptId != ''">
+            AND a.dept_id = #{deptId}
+        </if>
+        AND (b.entry_status in ("0","2") or b.entry_status is null)
+        AND a.match_type = "2"
+        ) c
+        order by c.pstngDate,c.writeDate
+    </select>
+    <select id="getCustomsDifferenceMatchResultExcel"
+            resultType="com.pwc.modules.input.entity.vo.InvoiceCustomsDifferenceMatch">
+        SELECT * FROM(
+        SELECT
+        DATE_FORMAT( a.pstng_date, '%m' ) mouth,
+        a.document_no documentNo,
+        DATE_FORMAT( a.pstng_date, '%Y-%m' ) pstngDate,
+        a.amount_in_local amountInLocal,
+        b.pay_no payNo,
+        b.total_tax totalTax,
+        b.billing_date billingDate,
+        b.batch_no batchNo,
+        IFNULL(b.sap_check_tax,0) differenceFee
+        FROM
+        `input_invoice_sap` a
+        LEFT JOIN input_invoice_customs b ON a.document_no LIKE b.voucher_code
+        WHERE 1=1
+        <if test="yearAndMonth != null and yearAndMonth != ''">
+            AND DATE_FORMAT( a.pstng_date, '%Y-%m' ) = #{yearAndMonth}
+        </if>
+        <if test="deptId != null and deptId != ''">
+            AND a.dept_id = #{deptId}
+        </if>
+        AND (b.entry_state in ("0","2") or b.entry_state is null)
+        AND a.match_type = "3"
+        UNION
+        SELECT
+        DATE_FORMAT( a.pstng_date, '%m' ) mouth,
+        a.document_no documentNo,
+        DATE_FORMAT( a.pstng_date, '%Y-%m' ) pstngDate,
+        a.amount_in_local amountInLocal,
+        b.pay_no payNo,
+        b.total_tax totalTax,
+        b.billing_date billingDate,
+        b.batch_no batchNo,
+        IFNULL(b.sap_check_tax,0) differenceFee
+        FROM
+        input_invoice_customs b
+        LEFT JOIN `input_invoice_sap` a ON a.document_no LIKE b.voucher_code
+        WHERE 1=1
+        <if test="yearAndMonth != null and yearAndMonth != ''">
+            AND DATE_FORMAT( a.pstng_date, '%Y-%m' ) = #{yearAndMonth}
+        </if>
+        <if test="deptId != null and deptId != ''">
+            AND a.dept_id = #{deptId}
+        </if>
+        AND (b.entry_state in ("0","2") or b.entry_state is null)
+        AND a.match_type = "3"
+        ) c
+        order by c.pstngDate,c.billingDate
+    </select>
+</mapper>

@@ -4992,26 +4992,44 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
     }
 
     /**
-     * 手工入账
+     * 发票手工入账
      *
      * @param params
      */
     @Override
-    public void manualEntryBySap(Map<String, Object> params) {
-        String[] ids = ((String) params.get("ids")).split(",");
-        String annualAccountant = (String) params.get("annualAccountant");
-        String documentNo = (String) params.get("documentNo");
-        InputInvoiceSapEntity sapEntity = inputInvoiceSapService.getEntityByNo(documentNo);
-        if (sapEntity != null) {
-            for (String id : ids) {
-                InputInvoiceEntity invoiceEntity = getById(id);
-                invoiceEntity.setEntrySuccessCode(sapEntity.getDocumentNo());
-                updateById(invoiceEntity);
+    public String manualEntryBySap(Map<String, Object> params) {
+        String ids =  params.get("ids").toString();
+        String yearAndMonth =  params.get("yearAndMonth").toString();
+        String documentNo = params.get("documentNo").toString();
+
+        //匹配组织是否一致
+        InputInvoiceEntity invoiceEntity = getById(ids);
+        SysDeptEntity sysDept = sysDeptService.getByName(invoiceEntity.getInvoicePurchaserParagraph());
+        boolean flag = true;
+        List<InputInvoiceSapEntity> sapEntityList = new ArrayList<>();
+        String[] documentNoList = documentNo.split("/");
+        if(documentNoList.length >1){
+            //一票多账的情况
+            for(int i = 0;i<documentNoList.length;i++){
+                //匹配组织及信息是否一致
+                InputInvoiceSapEntity sapEntity=inputInvoiceSapService.getEntityByNo(documentNoList[i],yearAndMonth,sysDept.getSapDeptCode());
+                if (sapEntity != null) {
+                    sapEntityList.add(sapEntity);
+                } else {
+                    flag = false;
+                }
             }
-            sapEntity = saveEntry(sapEntity);
-            inputInvoiceSapService.updateById(sapEntity);
+        }else{
+            InputInvoiceSapEntity sapEntity=inputInvoiceSapService.getEntityByNo(documentNo,yearAndMonth,sysDept.getSapDeptCode());
+            sapEntityList.add(sapEntity);
+        }
+        if (flag) {
+            invoiceEntity.setEntrySuccessCode(documentNo);
+            updateById(invoiceEntity);
+            String  type= saveEntry(documentNo,sapEntityList);
+            return  type;
         } else {
-            throw new RRException("未查询到该凭证号数据！");
+            return  "0";
         }
     }
 
@@ -5027,7 +5045,10 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
         if(numbers.length >0){
             int count = getInvoiceByNumberAndStatus(sapEntity.getDocumentNo(), numbers);
             if (count != 0) {
-                sapEntity = saveEntry(sapEntity);
+                List<InputInvoiceSapEntity> sapEntityList = new ArrayList<>();
+                sapEntityList.add(sapEntity);
+                String type  = saveEntry(sapEntity.getDocumentNo(),sapEntityList);
+                sapEntity.setSapMatch(type);
             }
         }else{
             sapEntity.setSapMatch("0");
@@ -5035,43 +5056,51 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
         return sapEntity;
     }
 
-    public InputInvoiceSapEntity saveEntry(InputInvoiceSapEntity sapEntity) {
+    public String saveEntry(String documentNo,List<InputInvoiceSapEntity> sapEntityList) {
         //获取容差
         String value = sysConfigService.getValue("TOLERANCE_VALUE");
         BigDecimal valueTax = value != null ? new BigDecimal(value) : BigDecimal.ZERO;
-        String totalTax = baseMapper.getCountByVoucherCode(sapEntity.getDocumentNo());
-        String type = InputConstant.InvoiceMatch.MATCH_NO.getValue();
-        //匹配组织是否一致
-        boolean flag = false;
-        InputInvoiceEntity invoiceEntity = inputInvoiceService.getOne(
-                new QueryWrapper<InputInvoiceEntity>()
-                        .eq("entry_success_code", sapEntity.getDocumentNo())
-        );
-        SysDeptEntity sysDept = sysDeptService.getByName(invoiceEntity.getInvoicePurchaserParagraph());
-        if(sysDept != null && sysDept.getDeptCode().equals(sapEntity.getCompanyCode())){
-            flag = true;
+        BigDecimal amountInLocal = BigDecimal.ZERO;
+        for(int i = 0;i<sapEntityList.size();i++){
+            amountInLocal = amountInLocal.add(sapEntityList.get(i).getAmountInLocal()) ;
         }
+        String totalTax = baseMapper.getCountByVoucherCode(documentNo);
+        String type = InputConstant.InvoiceMatch.MATCH_NO.getValue();
+        InputInvoiceEntity invoiceEntity = new InputInvoiceEntity();
         if (totalTax != null && (new BigDecimal(totalTax)).compareTo(BigDecimal.ZERO) == 0) {
-            sapEntity.setSapMatch(InputConstant.InvoiceMatch.MATCH_NO.getValue());
-            inputInvoiceSapService.updateById(sapEntity);
-        } else if (totalTax != null && ((new BigDecimal(totalTax).subtract(valueTax)).compareTo(sapEntity.getAmountInDoc()) == 0
-                || (new BigDecimal(totalTax)).compareTo(sapEntity.getAmountInDoc().subtract(valueTax)) == 0
-        ) && flag) {
-            sapEntity.setSapMatch(InputConstant.InvoiceMatch.MATCH_YES.getValue());
-            inputInvoiceSapService.updateById(sapEntity);
+            for(int i = 0;i<sapEntityList.size();i++){
+                InputInvoiceSapEntity sapEntity=sapEntityList.get(i);
+                sapEntity.setSapMatch(InputConstant.InvoiceMatch.MATCH_NO.getValue());
+                inputInvoiceSapService.updateById(sapEntity);
+            }
+        } else if (totalTax != null && ((new BigDecimal(totalTax).subtract(valueTax)).compareTo(amountInLocal) == 0
+                || (new BigDecimal(totalTax)).compareTo(amountInLocal.subtract(valueTax)) == 0
+        )) {
+            for(int i = 0;i<sapEntityList.size();i++){
+                InputInvoiceSapEntity sapEntity=sapEntityList.get(i);
+                sapEntity.setSapMatch(InputConstant.InvoiceMatch.MATCH_YES.getValue());
+                inputInvoiceSapService.updateById(sapEntity);
+            }
             type = InputConstant.InvoiceMatch.MATCH_YES.getValue();
+            invoiceEntity.setSapCheckTax("0");
         } else {
-            sapEntity.setSapMatch(InputConstant.InvoiceMatch.MATCH_ERROR.getValue());
-            inputInvoiceSapService.updateById(sapEntity);
+            for(int i = 0;i<sapEntityList.size();i++){
+                InputInvoiceSapEntity sapEntity=sapEntityList.get(i);
+                sapEntity.setSapMatch(InputConstant.InvoiceMatch.MATCH_ERROR.getValue());
+                inputInvoiceSapService.updateById(sapEntity);
+            }
             type = InputConstant.InvoiceMatch.MATCH_ERROR.getValue();
+            if(totalTax != null){
+                invoiceEntity.setSapCheckTax(((new BigDecimal(totalTax).subtract(valueTax)).subtract(amountInLocal).toString()));
+            }
         }
         invoiceEntity.setInvoiceMatch(type);
         invoiceEntity.setMatchDate(DateUtils.format(new Date()));
-        invoiceEntity.setEntryDate(sapEntity.getPstngDate());
-        invoiceEntity.setYearAndMonth(sapEntity.getYearAndMonth());
-        invoiceEntity.setSapTax(sapEntity.getAmountInLocal().toString());
+        invoiceEntity.setEntryDate(sapEntityList.get(0).getPstngDate());
+        invoiceEntity.setYearAndMonth(sapEntityList.get(0).getYearAndMonth());
+        invoiceEntity.setSapTax(amountInLocal.toString());
         inputInvoiceService.updateById(invoiceEntity);
-        return sapEntity;
+        return type;
     }
 
     // 本月认证
@@ -5135,11 +5164,14 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
      */
     @Override
     public List<InputInvoiceEntity> getCertificationList(Map<String, Object> params){
-        String date = params.get("queryDate").toString();
+        String date = params.get("yearAndMonth").toString();
+        String deptId = params.get("deptId").toString();
+        SysDeptEntity deptEntity = sysDeptService.getById(deptId);
         return  this.list(
                 new QueryWrapper<InputInvoiceEntity>()
-                        .like("deductible_date",date)
-                        .in("deductible",1)
+                        .like("invoice_auth_date",date)
+                        .in("invoice_status",new String[]{"12","14"})
+                        .eq("invoice_purchaser_company",deptEntity.getName())
         );
     }
 

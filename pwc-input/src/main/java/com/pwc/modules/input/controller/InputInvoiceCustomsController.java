@@ -6,10 +6,12 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fapiao.neon.model.CallResult;
 import com.fapiao.neon.model.in.CustomsInvoiceInfo;
+import com.fapiao.neon.model.in.CustomsInvoiceResult;
 import com.fapiao.neon.param.in.SyncInvoiceParamBody;
 import com.pwc.common.exception.RRException;
 import com.pwc.common.utils.DateUtils;
 import com.pwc.common.utils.PageUtils;
+import com.pwc.common.utils.ParamsMap;
 import com.pwc.common.utils.R;
 import com.pwc.common.utils.excel.ExportExcel;
 import com.pwc.common.validator.ValidatorUtils;
@@ -117,8 +119,30 @@ public class InputInvoiceCustomsController {
     //@RequiresPermissions("input:invoicecustoms:list")
     public R list(@RequestParam Map<String, Object> params) {
         PageUtils page = inputInvoiceCustomsService.queryPage(params);
-
         return R.ok().put("page", page);
+    }
+
+    /**
+     * 海关缴款书采集
+     */
+    @PostMapping("/syncApply")
+    public R syncApply(@RequestParam Map<String, Object> params) {
+        String taxNo = ParamsMap.findMap(params, "taxNo");
+        String payNo =ParamsMap.findMap(params, "payNo");
+            String billingDate =ParamsMap.findMap(params, "billingDate");
+        String totalTax =ParamsMap.findMap(params, "totalTax");
+        String requestId = inputInvoiceCustomsService.syncApply(taxNo,payNo,billingDate,totalTax);
+        return R.ok().put("page", requestId);
+    }
+
+    /**
+     * 海关缴款书采集结果获取
+     */
+    @PostMapping("/syncApplyResult")
+    public R syncApplyResult(@RequestParam Map<String, Object> params) {
+        String taxNo = ParamsMap.findMap(params, "requestId");
+        List<CustomsInvoiceResult> list= inputInvoiceCustomsService.syncApplyResult(taxNo);
+        return R.ok().put("page", list);
     }
 
     /**
@@ -551,8 +575,8 @@ public class InputInvoiceCustomsController {
     @RequestMapping("/manualEntry")
     //@RequiresPermissions("input:invoicecustoms:manualEntry")
     public R manualEntry(@RequestParam Map<String, Object> params) {
-        inputInvoiceCustomsService.manualEntry(params);
-        return R.ok();
+        String sapMatch = inputInvoiceCustomsService.manualEntry(params);
+        return R.ok().put("sapMatch",sapMatch);
     }
 
 }

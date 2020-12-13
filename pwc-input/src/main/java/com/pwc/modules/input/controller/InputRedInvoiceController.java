@@ -162,7 +162,7 @@ public class InputRedInvoiceController {
 
 
     /**
-     * 查询账票匹配数据
+     * 查询账票匹配成功数据
      *
      * @param params
      * @return
@@ -175,7 +175,7 @@ public class InputRedInvoiceController {
     }
 
     /**
-     * 查询账票匹配数据(下载)
+     * 查询账票匹配功数据(下载)
      *
      * @param params
      * @return
@@ -214,8 +214,8 @@ public class InputRedInvoiceController {
      */
     @RequestMapping("/manualEntryByRed")
     public R manualEntry(@RequestParam Map<String, Object> params) {
-        inputRedInvoiceService.manualEntryByRed(params);
-        return R.ok();
+        String sapMatch = inputRedInvoiceService.manualEntryByRed(params);
+        return R.ok().put("sapMatch",sapMatch);
     }
 
 }

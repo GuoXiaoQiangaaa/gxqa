@@ -282,7 +282,7 @@ public interface InputInvoiceService extends IService<InputInvoiceEntity> {
      *
      * @param params
      */
-    void manualEntryBySap(Map<String, Object> params);
+    String manualEntryBySap(Map<String, Object> params);
 
     /**
      * 自动入账

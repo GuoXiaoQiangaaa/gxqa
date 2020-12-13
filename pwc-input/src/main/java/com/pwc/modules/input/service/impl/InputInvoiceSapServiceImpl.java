@@ -17,6 +17,8 @@ import com.pwc.modules.input.service.InputInvoiceCustomsService;
 import com.pwc.modules.input.service.InputInvoiceSapService;
 import com.pwc.modules.input.service.InputInvoiceService;
 import com.pwc.modules.input.service.InputRedInvoiceService;
+import com.pwc.modules.sys.entity.SysDeptEntity;
+import com.pwc.modules.sys.service.SysDeptService;
 import com.pwc.modules.sys.shiro.ShiroUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +42,8 @@ public class InputInvoiceSapServiceImpl extends ServiceImpl<InputInvoiceSapDao, 
     public InputInvoiceCustomsService inputInvoiceCustomsService;
     @Autowired
     public InputRedInvoiceService inputRedInvoiceService;
+    @Autowired
+    private SysDeptService sysDeptService;
 
     @Override
     public Map<String, Object> getImportBySap(MultipartFile file) throws Exception {
@@ -58,7 +62,7 @@ public class InputInvoiceSapServiceImpl extends ServiceImpl<InputInvoiceSapDao, 
             String[] excelHead = {"Company Code", "Account", "Reference", "Document Number", "Document Type",
                     "Document Date", "Posting Date", "Amount in local currency", "Local Currency", "Amount in doc. curr.",
                     "Document currency", "User name", "Assignment", "Text", "Tax code", "Trading Partner", "Posting Key", "Year/month", "Document Header Text"};
-            String [] excelHeadAlias = {"companyCode", "account", "reference", "documentNo", "documentType",
+            String[] excelHeadAlias = {"companyCode", "account", "reference", "documentNo", "documentType",
                     "docDate", "pstngDate", "amountInLocal", "lcurr", "amountInDoc", "curr",
                     "userName", "assignment", "text", "tx", "tradingPartner", "postingKey", "yearAndMonth", "headerText"};
             for (int i = 0; i < excelHead.length; i++) {
@@ -133,21 +137,25 @@ public class InputInvoiceSapServiceImpl extends ServiceImpl<InputInvoiceSapDao, 
     @Override
     public PageUtils getListBySap(Map<String, Object> params) {
         // 公司代码
-        String companyCode = (String) params.get("companyCode");
+        String companyCode = ParamsMap.findMap(params, "companyCode");
+        if (companyCode != null) {
+            SysDeptEntity sysDeptEntity = sysDeptService.getById(companyCode);
+            companyCode = sysDeptEntity.getSapDeptCode();
+        }
         // 入账日期
-        String pstngDate = (String) params.get("pstngDate");
+        String pstngDate = ParamsMap.findMap(params, "pstngDate");
         // 凭证编码
-        String documentNo = (String) params.get("documentNo");
+        String documentNo = ParamsMap.findMap(params, "documentNo");
         // 匹配类型 1 发票 2 海关 3 红字通知单
-        String matchType = (String) params.get("matchType");
+        String matchType = ParamsMap.findMap(params, "matchType");
         // 科目
-        String account = (String) params.get("account");
+        String account = ParamsMap.findMap(params, "account");
         // 参考
-        String reference = (String) params.get("reference");
+        String reference = ParamsMap.findMap(params, "reference");
         // 分配
-        String assignment = (String) params.get("assignment");
+        String assignment = ParamsMap.findMap(params, "assignment");
         //摘要
-        String headerText = (String) params.get("headerText");
+        String headerText = ParamsMap.findMap(params, "headerText");
         // 匹配状态
         String match = ParamsMap.findMap(params, "match");
         IPage<InputInvoiceSapEntity> page = this.page(
@@ -161,29 +169,43 @@ public class InputInvoiceSapServiceImpl extends ServiceImpl<InputInvoiceSapDao, 
                         .eq(StringUtils.isNotBlank(matchType), "match_type", matchType)
                         .like(StringUtils.isNotBlank(reference), "reference", reference)
                         .eq(StringUtils.isNotBlank(assignment), "assignment", assignment)
-                        .in(StringUtils.isNotBlank(match), "sap_match", (String[]) params.get("match"))
+                        .in(StringUtils.isNotBlank(match), "sap_match", match)
                         .like(StringUtils.isNotBlank(headerText), "header_text", headerText)
         );
         return new PageUtils(page);
 
     }
 
+    @Override
+    public boolean updateListByDeptId(Map<String, Object> params) {
+        List<InputInvoiceSapEntity> sapEntitys = this.list(
+                new QueryWrapper<InputInvoiceSapEntity>()
+        );
+        for (int i = 0;i < sapEntitys.size();i++){
+            this.paraphraseParams(sapEntitys.get(i));
+            super.updateById(sapEntitys.get(i));
+        }
+        return true;
+    }
 
     @Override
-    public InputInvoiceSapEntity getEntityByNo(String documentNo) {
+    public InputInvoiceSapEntity getEntityByNo(String documentNo, String yearAndMonth, String deptCode) {
         InputInvoiceSapEntity sapEntity = this.getOne(
                 new QueryWrapper<InputInvoiceSapEntity>()
                         .eq("document_no", documentNo)
+                        .like("year_and_month", yearAndMonth)
+                        .eq("company_code", deptCode)
         );
         return sapEntity;
     }
 
     @Override
-    public List<InputInvoiceSapEntity> getEntityByDateAndStatus(String date, String status) {
+    public List<InputInvoiceSapEntity> getEntityByDateAndStatus(String date, String status,String deptId) {
         List<InputInvoiceSapEntity> sapEntitys = this.list(
                 new QueryWrapper<InputInvoiceSapEntity>()
                         .like("pstng_date", date)
                         .eq("match_type", status)
+                        .eq("dept_id", deptId)
         );
         return sapEntitys;
     }
@@ -226,14 +248,42 @@ public class InputInvoiceSapServiceImpl extends ServiceImpl<InputInvoiceSapDao, 
         }*/
         // 对类型转义 1:发票; 2:海关通知单; 3:红字通知单
         if (org.apache.commons.lang3.StringUtils.contains(accout, "165101") && amountInDoc.compareTo(BigDecimal.ZERO) < 0) {
-            entity=inputRedInvoiceService.voluntaryEntry(entity);
+            entity = inputRedInvoiceService.voluntaryEntry(entity);
             entity.setMatchType("3");
+            SysDeptEntity deptEntity = sysDeptService.getByDeptCode("CBC");
+            entity.setDeptId(String.valueOf(deptEntity.getDeptId()));
+            //查询部门ID
         } else if (org.apache.commons.lang3.StringUtils.contains(accout, "165102")) {
-            entity=inputInvoiceCustomsService.updateByEntry(entity);
+            entity = inputInvoiceCustomsService.updateByEntry(entity);
             entity.setMatchType("2");
+            //查询部门ID
+            if (entity.getReference() != null) {
+                if (entity.getReference().contains("IMPORT HQ") || entity.getReference().contains("Z04 IMPORT HQ")) {
+                    SysDeptEntity deptEntity = sysDeptService.getByDeptCode("CBC");
+                    entity.setDeptId(String.valueOf(deptEntity.getDeptId()));
+                }else if(entity.getReference().contains("IMPORT GZ")){
+                    SysDeptEntity deptEntity = sysDeptService.getByDeptCode("CBC-GZ");
+                    entity.setDeptId(String.valueOf(deptEntity.getDeptId()));
+                }
+            }
         } else if (org.apache.commons.lang3.StringUtils.contains(accout, "165101")) {
             entity.setMatchType("1");
-            entity=inputInvoiceService.voluntaryEntry(entity);
+            entity = inputInvoiceService.voluntaryEntry(entity);
+            //查询部门ID
+            SysDeptEntity deptEntity = sysDeptService.getByDeptCode("CBC");
+            entity.setDeptId(String.valueOf(deptEntity.getDeptId()));
+        }else if (org.apache.commons.lang3.StringUtils.contains(accout, "165103")) {
+            entity.setMatchType("1");
+            if (entity.getText().contains("CBC-DL")) {
+                SysDeptEntity deptEntity = sysDeptService.getByDeptCode("CBC-DL");
+                entity.setDeptId(String.valueOf(deptEntity.getDeptId()));
+            }else if(entity.getText().contains("CBC-SH")){
+                SysDeptEntity deptEntity = sysDeptService.getByDeptCode("CBC-SH");
+                entity.setDeptId(String.valueOf(deptEntity.getDeptId()));
+            }else{
+                SysDeptEntity deptEntity = sysDeptService.getByDeptCode("CBC");
+                entity.setDeptId(String.valueOf(deptEntity.getDeptId()));
+            }
         }
         return entity;
     }

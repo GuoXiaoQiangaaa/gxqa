@@ -9,16 +9,16 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fapiao.neon.client.customs.CustomsClient;
 import com.fapiao.neon.client.in.BaseClient;
 import com.fapiao.neon.client.in.CollectCustomsClient;
 import com.fapiao.neon.client.in.DeductClient;
 import com.fapiao.neon.model.CallResult;
+import com.fapiao.neon.model.Entity;
 import com.fapiao.neon.model.in.*;
 import com.fapiao.neon.param.PaymentCertificate;
 import com.fapiao.neon.param.PaymentCertificateParamBody;
-import com.fapiao.neon.param.in.CommonParamBody;
-import com.fapiao.neon.param.in.DeclareParamBody;
-import com.fapiao.neon.param.in.SyncInvoiceParamBody;
+import com.fapiao.neon.param.in.*;
 import com.pwc.common.annotation.ApiLogFilter;
 import com.pwc.common.exception.RRException;
 import com.pwc.common.utils.*;
@@ -49,7 +49,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 @Service("inputInvoiceCustomsService")
 public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCustomsDao, InputInvoiceCustomsEntity> implements InputInvoiceCustomsService {
     @Resource
@@ -73,24 +72,24 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         String payNo = (String) params.get("payNo");
-        String purchaserName=(String) params.get("purchaserName");
+        String purchaserName = (String) params.get("purchaserName");
         String taxNo = (String) params.get("taxNo");
         String deductible = (String) params.get("deductible");
         String entryState = (String) params.get("entryState");
         String statisticsState = (String) params.get("statisticsState");
         String batchNo = (String) params.get("batchNo");
         String deductiblePeriod = (String) params.get("deductiblePeriod");
-        String billingDateArray=(String) params.get("billingDateArray");
+        String billingDateArray = (String) params.get("billingDateArray");
         String billingDateStart = "";
         String billingDateEnd = "";
-        if(StringUtils.isNotBlank(billingDateArray)){
+        if (StringUtils.isNotBlank(billingDateArray)) {
             billingDateStart = billingDateArray.split(",")[0];
             billingDateEnd = billingDateArray.split(",")[1];
         }
-        String deductibleDateArray=(String) params.get("deductibleDateArray");
+        String deductibleDateArray = (String) params.get("deductibleDateArray");
         String deductibleDateStart = "";
         String deductibleDateEnd = "";
-        if(StringUtils.isNotBlank(deductibleDateArray)){
+        if (StringUtils.isNotBlank(deductibleDateArray)) {
             deductibleDateStart = deductibleDateArray.split(",")[0];
             deductibleDateEnd = deductibleDateArray.split(",")[1];
         }
@@ -121,9 +120,53 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
         return invoices;
     }
 
+
     /**
-     * 同步海关缴款书
+     * 海关缴款书采集
      */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String syncApply(String taxNo, String payNo, String billingDate, String totalTax) {
+        CustomsApplyParamBody paramBody = new CustomsApplyParamBody();
+        List<CustomsApplyInvoice> invoiceList = new ArrayList<>();
+        CustomsApplyInvoice invoice = new CustomsApplyInvoice();
+        invoice.setPayNo(payNo);
+        invoice.setBillingDate(billingDate);
+        invoice.setTotalTax(totalTax);
+        paramBody.setTaxNo(taxNo);
+        invoiceList.add(invoice);
+        paramBody.setInvoices(invoiceList);
+        paramBody.setServiceType("0");
+        CallResult<Entity> aa = collectCustomsClient.apply(paramBody);
+        if (aa.isSuccess()) {
+/*            CommonParamBody body = new CommonParamBody();
+            body.setRequestId(aa.getData().getRequestId());
+            CallResult<CollectCustomsResultInfo> bb = collectCustomsClient.results(body);
+            System.out.println(bb.getData().getResults().toString());*/
+            return aa.getData().getRequestId();
+        } else {
+            return aa.getExceptionResult().getMessage();
+        }
+    }
+
+    /**
+     * 海关缴款书采集结果获取
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public List<CustomsInvoiceResult> syncApplyResult(String requestId) {
+        CommonParamBody body = new CommonParamBody();
+        body.setRequestId(requestId);
+        CallResult<CollectCustomsResultInfo> bb = collectCustomsClient.results(body);
+        if (bb.isSuccess()) {
+            List<CustomsInvoiceResult> result = bb.getData().getResults();
+            return result;
+        } else {
+            System.out.println(bb.getExceptionResult().getMessage());
+            return null;
+        }
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void sync(String taxNo, String startBillingDate, String endBillingDate, int page) {
@@ -136,24 +179,24 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
         paramBody.setPage(page);
         paramBody.setPageSize(200);
         CallResult<CustomsInvoiceInfo> callResult = collectCustomsClient.invoices(paramBody);
-        if(null == callResult){
+        if (null == callResult) {
             log.error("税局接口无响应");
             throw new RRException("系统繁忙,请稍后重试");
         }
-        if(callResult.isSuccess()){
+        if (callResult.isSuccess()) {
             CustomsInvoiceInfo data = callResult.getData();
-            if(null != data && null != data.getInvoices()){
+            if (null != data && null != data.getInvoices()) {
                 List<CustomsInvoice> invoiceList = data.getInvoices();
                 this.saveInvoice(invoiceList);
 
                 // 获取全部
                 int currentPage = data.getCurrentPage();
                 int pages = data.getPages();
-                if(currentPage < pages){
+                if (currentPage < pages) {
                     this.sync(taxNo, startBillingDate, endBillingDate, currentPage + 1);
                 }
             }
-        }else {
+        } else {
             log.error("海关缴款书同步失败: {}", callResult.getExceptionResult().getMessage());
             throw new RRException("海关缴款书同步失败");
         }
@@ -173,24 +216,24 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
                         .eq("purchaser_tax_no", customsInvoice.getPurchaserTaxNo())
                         .orderByDesc("upload_date")
         );
-        if(CollectionUtil.isEmpty(customsEntityList)){
+        if (CollectionUtil.isEmpty(customsEntityList)) {
             batchNo += 1;
-        }else {
+        } else {
             InputInvoiceCustomsEntity customsEntity = customsEntityList.get(0);
             String lastBatchNo = customsEntity.getBatchNo();
             log.debug("最后一个批次号为: {}", lastBatchNo);
-            if(StringUtils.isNotBlank(lastBatchNo)){
+            if (StringUtils.isNotBlank(lastBatchNo)) {
                 String lastDateStr = lastBatchNo.split("-")[0];
                 String lastBatchStr = lastBatchNo.split("-")[1];
                 int res = DateUtil.compare(DateUtil.parse(dateStr, "yyyyMMdd"), DateUtil.parse(lastDateStr, "yyyyMMdd"));
-                if(0 == res){
+                if (0 == res) {
                     batchNo += Integer.valueOf(lastBatchStr) + 1;
-                }else if(1 == res){
+                } else if (1 == res) {
                     batchNo += 1;
-                }else {
+                } else {
                     throw new RRException("批次号有误,请联系管理员");
                 }
-            }else {
+            } else {
                 batchNo += 1;
             }
         }
@@ -206,7 +249,7 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
                 one.setUpdateTime(new Date());
                 one.setBatchNo(batchNo);
                 super.updateById(one);
-            }else {
+            } else {
                 InputInvoiceCustomsEntity invoiceSyncEntity = new InputInvoiceCustomsEntity();
                 BeanUtils.copyProperties(entity, invoiceSyncEntity);
                 // 入账状态 0为入账 1已入账 2已冲销
@@ -234,16 +277,16 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
         // 1:抵扣(勾选); 6:撤销抵扣
         String type = (String) params.get("type");
         String idsStr = (String) params.get("ids");
-        if(StringUtils.isBlank(idsStr) || StringUtils.isBlank(type)){
+        if (StringUtils.isBlank(idsStr) || StringUtils.isBlank(type)) {
             log.error("勾选/撤销参数为空");
             throw new RRException("参数不能为空");
         }
         List<String> ids = Arrays.asList(idsStr.split(","));
         Collection<InputInvoiceCustomsEntity> entityList = super.listByIds(ids);
-        if(CollectionUtil.isEmpty(entityList)){
+        if (CollectionUtil.isEmpty(entityList)) {
             log.error("根据id获取到的海关缴款书为空");
             throw new RRException("参数有误");
-        }else {
+        } else {
             for (InputInvoiceCustomsEntity entity : entityList) {
                 try {
                     // 构建请求参数
@@ -262,27 +305,27 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
                     paramBody.setPaymentCertificates(paymentCertificates);
                     // 调用勾选/撤销勾选接口
                     CallResult<ApplyDeductResultInfo> callResult = deductClient.deductPaymentCertificates(paramBody);
-                    if(null == callResult){
+                    if (null == callResult) {
                         log.error("勾选/撤销勾选税局接口无响应");
                         throw new RRException("接口无响应,请稍后重试");
-                    }else {
-                        if(callResult.isSuccess()){
+                    } else {
+                        if (callResult.isSuccess()) {
                             String requestId = callResult.getData().getRequestId();
                             log.info("勾选/撤销勾选中：{}" + requestId);
-                            if("1".equals(type)){
+                            if ("1".equals(type)) {
                                 entity.setDeductible("2");
-                            }else if("6".equals(type)){
+                            } else if ("6".equals(type)) {
                                 entity.setDeductible("4");
                             }
                             entity.setRequestId(requestId);
                             entity.setUpdateBy(ShiroUtils.getUserId().intValue());
                             entity.setUpdateTime(new Date());
                             super.updateById(entity);
-                        }else {
+                        } else {
                             String code = callResult.getExceptionResult().getCode();
                             String message = callResult.getExceptionResult().getMessage();
                             log.info("勾选/撤销勾选失败: code:{}, message:{}", code, message);
-                            if("1".equals(type)){
+                            if ("1".equals(type)) {
                                 entity.setDeductible("3");
                                 entity.setRequestId(callResult.getExceptionResult().getRequestId());
                                 entity.setUpdateBy(ShiroUtils.getUserId().intValue());
@@ -291,10 +334,10 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
                             }
                         }
                     }
-                } catch (RRException e){
+                } catch (RRException e) {
                     log.error("勾选/撤销勾选出错: {}", e);
                     throw e;
-                } catch (Exception e){
+                } catch (Exception e) {
                     log.error("勾选/撤销勾选异常: {}", e);
                     throw new RRException("操作发生异常");
                 }
@@ -315,7 +358,7 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
                         .in("deductible", Arrays.asList(deductible))
         );
 
-        if(CollectionUtil.isEmpty(entityList)){
+        if (CollectionUtil.isEmpty(entityList)) {
             return;
         }
         for (InputInvoiceCustomsEntity entity : entityList) {
@@ -323,29 +366,29 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
                 CommonParamBody commonParamBody = new CommonParamBody();
                 commonParamBody.setRequestId(entity.getRequestId());
                 CallResult<PaymentCertificateListInfo> callResult = deductClient.deductPaymentCertificateResult(commonParamBody);
-                if(null == callResult){
+                if (null == callResult) {
                     log.error("获取勾选/撤销勾选结果税局接口无响应");
-                }else {
-                    if(callResult.isSuccess()){
+                } else {
+                    if (callResult.isSuccess()) {
                         List<PaymentCertificateResult> resultList = callResult.getData().getPaymentCertificateResults();
-                        if(CollectionUtil.isEmpty(resultList)){
+                        if (CollectionUtil.isEmpty(resultList)) {
                             log.info("获取结果为空");
-                        }else {
+                        } else {
                             for (PaymentCertificateResult result : resultList) {
                                 // 1: 成功; 其余都为失败
-                                if("1".equals(result.getDeductibleResult())){
-                                    if("1".equals(result.getDeductType())){// 勾选
+                                if ("1".equals(result.getDeductibleResult())) {
+                                    if ("1".equals(result.getDeductType())) {// 勾选
                                         entity.setDeductible("1");
                                         entity.setDeductibleRes("1");
                                         entity.setDeductibleMode("1");
                                         entity.setDeductibleDate(result.getDeductibleDate());
-                                    }else if("6".equals(result.getDeductType())){// 撤销
+                                    } else if ("6".equals(result.getDeductType())) {// 撤销
                                         entity.setDeductible("0");
                                         entity.setDeductibleRes("1");
                                         entity.setDeductibleMode("6");
                                     }
-                                }else {
-                                    if("1".equals(result.getDeductType())){// 勾选
+                                } else {
+                                    if ("1".equals(result.getDeductType())) {// 勾选
                                         entity.setDeductible("3");
                                         entity.setDeductibleRes(result.getDeductibleResult());
                                         entity.setDeductibleMode("1");
@@ -356,14 +399,14 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
                                 super.updateById(entity);
                             }
                         }
-                    }else {
+                    } else {
                         String code = callResult.getExceptionResult().getCode();
                         String message = callResult.getExceptionResult().getMessage();
                         String requestId = callResult.getExceptionResult().getRequestId();
                         log.error("获取勾选/撤销勾选结果失败: code:{}, message:{}, requestId:{}", code, message, requestId);
                     }
                 }
-            } catch (Exception e){
+            } catch (Exception e) {
                 log.error("获取勾选/撤销结果出现异常: {}", e);
             }
         }
@@ -392,11 +435,11 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
         }
         String requestId = null;
         // 可配置申报期
-        if("1".equals(deductType)){
+        if ("1".equals(deductType)) {
             period = getPeriodById(String.valueOf(invoiceEntity.getId())).getDeductiblePeriod();
             invoiceEntity.setDeductiblePeriod(period);
-        }else if("6".equals(deductType)){
-            period=invoiceEntity.getDeductiblePeriod();
+        } else if ("6".equals(deductType)) {
+            period = invoiceEntity.getDeductiblePeriod();
         }
         PaymentCertificateParamBody deductParamBody = new PaymentCertificateParamBody();
         deductParamBody.setTaxNo(invoiceEntity.getPurchaserTaxNo());
@@ -517,7 +560,7 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
         List<Map<String, Object>> ErrorDatas = new ArrayList<>();
         Map<String, Object> errorMap = null;
         Map<String, Object> returnMap = new HashMap<>();
-        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Pattern pattern = Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2}");
 
         if (params.size() > 200) {
@@ -538,7 +581,7 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
             String textField = (String) map.get("wenbenText");
             String distributeField = (String) map.get("FenpeiText");
             String consultField = (String) map.get("cankaoText");
-            if (!(StringUtils.isNotBlank(voucherNumber)&&StringUtils.isNotBlank(companyId)&&StringUtils.isNotBlank(accountingNumber)&&StringUtils.isNotBlank(postingDate)&&StringUtils.isNotBlank(currencyType)&&StringUtils.isNotBlank(amount)&&StringUtils.isNotBlank(accountingCode))) {
+            if (!(StringUtils.isNotBlank(voucherNumber) && StringUtils.isNotBlank(companyId) && StringUtils.isNotBlank(accountingNumber) && StringUtils.isNotBlank(postingDate) && StringUtils.isNotBlank(currencyType) && StringUtils.isNotBlank(amount) && StringUtils.isNotBlank(accountingCode))) {
                 errorMap.put("voucherNumber", voucherNumber);
                 errorMap.put("errorMsg", "参数不合法");
                 ErrorDatas.add(errorMap);
@@ -552,7 +595,7 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
                 continue;
             }
             try {
-                 sdf.parse(postingDate);
+                sdf.parse(postingDate);
             } catch (ParseException e) {
                 e.printStackTrace();
                 errorMap.put("voucherNumber", voucherNumber);
@@ -562,9 +605,9 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
             }
             InputInvoiceCustomsPushEntity one = inputInvoiceCustomsPushService.getOne(new QueryWrapper<InputInvoiceCustomsPushEntity>()
                     .eq("voucher_number", voucherNumber)
-            .eq("company_id",companyId)
-            .eq("accounting_number",accountingNumber)
-            .likeRight("posting_date",postingDate.substring(0,4)));
+                    .eq("company_id", companyId)
+                    .eq("accounting_number", accountingNumber)
+                    .likeRight("posting_date", postingDate.substring(0, 4)));
             if (one != null) {
                 one.setCompanyId(companyId);
                 one.setVoucherType(voucherType);
@@ -624,7 +667,7 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
     public Map<String, Object> updateByIdReturn(Map<String, Object> params) {
         String idsStr = (String) params.get("ids");
         String returnReason = (String) params.get("returnReason");
-        if(StringUtils.isBlank(idsStr) || StringUtils.isBlank(returnReason)){
+        if (StringUtils.isBlank(idsStr) || StringUtils.isBlank(returnReason)) {
             log.error("作废海关缴款书参数为空");
             throw new RRException("参数不能为空");
         }
@@ -637,15 +680,15 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
             List<String> ids = Arrays.asList(idsStr.split(","));
             // 校验海关缴款书勾选状态是否为 0:未勾选; 3:勾选失败
             Collection<InputInvoiceCustomsEntity> entityList = super.listByIds(ids);
-            if(CollectionUtil.isEmpty(entityList)){
+            if (CollectionUtil.isEmpty(entityList)) {
                 log.error("根据id获取到的海关缴款书为空");
                 throw new RRException("参数有误");
-            }else {
+            } else {
                 for (InputInvoiceCustomsEntity entity : entityList) {
-                    if(!"0".equals(entity.getDeductible()) && !"3".equals(entity.getDeductible())){
+                    if (!"0".equals(entity.getDeductible()) && !"3".equals(entity.getDeductible())) {
                         log.debug("海关缴款书状态有误: {}", entity.getPayNo());
                         failPayNo.add(entity.getPayNo());
-                    }else {
+                    } else {
                         successIds.add(entity.getId());
                     }
                 }
@@ -654,13 +697,13 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
             resMap.put("success", successIds.size());
             resMap.put("fail", failPayNo.size());
             resMap.put("failDetail", failPayNo);
-            if(CollectionUtil.isNotEmpty(successIds)){
+            if (CollectionUtil.isNotEmpty(successIds)) {
                 Integer updateBy = ShiroUtils.getUserId().intValue();
                 Date updateTime = new Date();
                 this.baseMapper.updateByIdReturn(successIds, returnReason, updateBy, updateTime);
             }
             return resMap;
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("作废海关缴款书出错: {}", e);
             throw new RRException("作废发生异常");
         }
@@ -711,15 +754,15 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
                 .apply(" LENGTH(distribute_field)=18 "));
         if (pushList != null && pushList.size() > 0) {
             for (InputInvoiceCustomsPushEntity e : pushList) {
-                String entryState="1";
-                if( new BigDecimal(e.getAmount()).compareTo(BigDecimal.ZERO)>0){//根据amout 判断入账或冲销
-                    entryState="1";
-                }else{
-                    entryState="2";
+                String entryState = "1";
+                if (new BigDecimal(e.getAmount()).compareTo(BigDecimal.ZERO) > 0) {//根据amout 判断入账或冲销
+                    entryState = "1";
+                } else {
+                    entryState = "2";
                 }
-                String voucherNumber=e.getVoucherNumber();
+                String voucherNumber = e.getVoucherNumber();
                 InputInvoiceCustomsEntity byId = getOne(new QueryWrapper<InputInvoiceCustomsEntity>()
-                .like("pay_no",e.getDistributeField()));
+                        .like("pay_no", e.getDistributeField()));
                 InputInvoiceVoucherNoEntity voucherNo = new InputInvoiceVoucherNoEntity();
                 voucherNo.setCreateDate(DateUtils.format(new Date()));
                 voucherNo.setEntryState(entryState);
@@ -757,93 +800,119 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
 
     @Override
     public InputInvoiceCustomsEntity getPeriodById(String id) {
-        String taxPeriod="";
+        String taxPeriod = "";
         InputInvoiceCustomsEntity byId = getById(id);
         String taxNo = byId.getPurchaserTaxNo();
         DeclareParamBody body = new DeclareParamBody();
         body.setTaxNo(taxNo);
         CallResult<DeclareInfo> result = baseClient.declareInfo(body);
-        if(result.isSuccess()){
+        if (result.isSuccess()) {
             taxPeriod = result.getData().getTaxPeriod();
             byId.setDeductiblePeriod(taxPeriod);
-        }else {
+        } else {
             byId.setPeriodErrorInfo(result.getExceptionResult().getMessage());
         }
         return byId;
     }
+
     @Override
-    public PageUtils getListBySuccess(Map<String, Object> params){
-        params.put("deductible","1");
+    public PageUtils getListBySuccess(Map<String, Object> params) {
+        params.put("deductible", "1");
         params.put("entryState", InputConstant.InvoiceMatch.MATCH_YES.getValue());
-        return  queryPage(params);
+        return queryPage(params);
     }
+
     @Override
-    public PageUtils getListByNo(Map<String, Object> params){
-        params.put("deductible","1");
+    public PageUtils getListByNo(Map<String, Object> params) {
+        params.put("deductible", "1");
         params.put("entryState", InputConstant.InvoiceMatch.MATCH_NO.getValue());
-        return  queryPage(params);
+        return queryPage(params);
     }
+
     @Override
-    public PageUtils getListByError(Map<String, Object> params){
-        params.put("deductible","1");
+    public PageUtils getListByError(Map<String, Object> params) {
+        params.put("deductible", "1");
         params.put("entryState", InputConstant.InvoiceMatch.MATCH_ERROR.getValue());
-        return  queryPage(params);
+        return queryPage(params);
     }
 
     /**
      * 手工入账
+     *
      * @param params
      */
     @Override
-    public void manualEntry(Map<String, Object> params){
-        String[] ids = ((String) params.get("ids")).split(",");
-        String annualAccountant= (String) params.get("annualAccountant");
-        String documentNo = (String) params.get("documentNo");
-        InputInvoiceSapEntity sapEntity=inputInvoiceSapService.getEntityByNo(documentNo);
-        if(sapEntity!=null) {
-            for (String id : ids) {
-                InputInvoiceCustomsEntity customsEntity = getById(id);
-                customsEntity.setVoucherCode(sapEntity.getDocumentNo());
-                updateById(customsEntity);
+    public String manualEntry(Map<String, Object> params) {
+        String ids = params.get("ids").toString();
+        String yearAndMonth = params.get("yearAndMonth").toString();
+        String documentNo = params.get("documentNo").toString();
+        //匹配组织是否一致
+        InputInvoiceCustomsEntity customsEntity = getById(ids);
+        SysDeptEntity sysDept = sysDeptService.getByName(customsEntity.getPurchaserName());
+
+        boolean flag = true;
+        List<InputInvoiceSapEntity> sapEntityList = new ArrayList<>();
+        String[] documentNoList = documentNo.split("/");
+        if (documentNoList.length > 1) {
+            //一票多账的情况
+            for (int i = 0; i < documentNoList.length; i++) {
+                //匹配组织及信息是否一致
+                InputInvoiceSapEntity sapEntity = inputInvoiceSapService.getEntityByNo(documentNoList[i], yearAndMonth, sysDept.getSapDeptCode());
+                if (sapEntity != null) {
+                    sapEntityList.add(sapEntity);
+                } else {
+                    flag = false;
+                }
             }
-            sapEntity = saveByEntry(sapEntity);
-            inputInvoiceSapService.updateById(sapEntity);
-        }else{
-            throw new RRException("未查询到该凭证号数据！");
+        } else {
+            InputInvoiceSapEntity sapEntity = inputInvoiceSapService.getEntityByNo(documentNo, yearAndMonth, sysDept.getSapDeptCode());
+            sapEntityList.add(sapEntity);
+        }
+        if (flag) {
+            customsEntity.setVoucherCode(documentNo);
+            updateById(customsEntity);
+            String type = saveByEntry(documentNo, sapEntityList);
+            return type;
+        } else {
+            return "0";
         }
     }
 
     /**
      * 自动入账
+     *
      * @param sapEntitys
      */
     @Override
-    public InputInvoiceSapEntity updateByEntry(InputInvoiceSapEntity sapEntitys){
-        int a = 0;
-        if(sapEntitys.getText() != null){
+    public InputInvoiceSapEntity updateByEntry(InputInvoiceSapEntity sapEntitys) {
+        int updateNum = 0;
+        if (sapEntitys.getText() != null) {
             List<String> list = disposeText(sapEntitys.getText());
-            if(list.size() > 0){
-                a =  this.baseMapper.updateByVoucherCode(sapEntitys.getDocumentNo(),list);
+            if (list.size() > 0) {
+                updateNum = this.baseMapper.updateByVoucherCode(sapEntitys.getDocumentNo(), list);
             }
         }
-       if(a!=0){
-           sapEntitys=saveByEntry(sapEntitys);
-       }else{
-           sapEntitys.setSapMatch("0");
-       }
-       return sapEntitys;
+        if (updateNum != 0) {
+            List<InputInvoiceSapEntity> sapEntityList = new ArrayList<>();
+            sapEntityList.add(sapEntitys);
+            String type = saveByEntry(sapEntitys.getDocumentNo(), sapEntityList);
+            sapEntitys.setSapMatch(type);
+        } else {
+            sapEntitys.setSapMatch("0");
+        }
+        return sapEntitys;
     }
 
     //导入text格式处理
-    private List<String> disposeText(String text){
+    private List<String> disposeText(String text) {
         List<String> list = new ArrayList<String>();
-        String arr[]=text.split(",");
-        if(arr.length > 1){
-            for (int i = 1;i < arr.length;i++){
-                String arr2[]=arr[1].split("-");
-                if(arr[i].length() == 3){
-                    list.add(arr2[0] +"-"+ arr[i]);
-                }else{
+        String arr[] = text.split(",");
+        if (arr.length > 1) {
+            for (int i = 1; i < arr.length; i++) {
+                String arr2[] = arr[1].split("-");
+                if (arr[i].length() == 3) {
+                    list.add(arr2[0] + "-" + arr[i]);
+                } else {
                     list.add(arr[i]);
                 }
             }
@@ -852,69 +921,75 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
     }
 
     // 入账
-    public InputInvoiceSapEntity saveByEntry(InputInvoiceSapEntity sapEntity){
+    public String saveByEntry(String documentNo, List<InputInvoiceSapEntity> sapEntityList) {
         //获取容差
         String value = sysConfigService.getValue("TOLERANCE_VALUE");
-        BigDecimal valueTax = value !=null?new BigDecimal(value):BigDecimal.ZERO;
-        String documentNo = sapEntity.getDocumentNo();
-        String totalTax= this.baseMapper.getCountByVoucherCode(documentNo);
+        BigDecimal valueTax = value != null ? new BigDecimal(value) : BigDecimal.ZERO;
+        BigDecimal amountInLocal = BigDecimal.ZERO;
+        for (int i = 0; i < sapEntityList.size(); i++) {
+            amountInLocal = amountInLocal.add(sapEntityList.get(i).getAmountInLocal());
+        }
+        String totalTax = this.baseMapper.getCountByVoucherCode(documentNo);
         String type = InputConstant.InvoiceMatch.MATCH_NO.getValue();
-        //匹配组织是否一致
-        boolean flag = false;
-        InputInvoiceCustomsEntity invoiceEntity = super.getOne(
-                new QueryWrapper<InputInvoiceCustomsEntity>()
-                        .eq("voucher_code", sapEntity.getDocumentNo())
-        );
-        SysDeptEntity sysDept = sysDeptService.getByName(invoiceEntity.getPurchaserName());
-        if(sysDept != null && sysDept.getDeptCode().equals(sapEntity.getCompanyCode())){
-            flag = true;
-        }
-        if(totalTax!=null&& (new BigDecimal(totalTax)).compareTo(BigDecimal.ZERO)==0){
-            sapEntity.setSapMatch(InputConstant.InvoiceMatch.MATCH_NO.getValue());
-            inputInvoiceSapService.updateById(sapEntity);
-            this.baseMapper.updateByentryState(InputConstant.InvoiceMatch.MATCH_NO.getValue(),documentNo);
-        } else if(totalTax!=null&&((new BigDecimal(totalTax).subtract(valueTax)).compareTo(sapEntity.getAmountInDoc())==0
-                || (new BigDecimal(totalTax)).compareTo(sapEntity.getAmountInDoc().subtract(valueTax))==0
-        ) && flag){
-            sapEntity.setSapMatch(InputConstant.InvoiceMatch.MATCH_YES.getValue());
-            inputInvoiceSapService.updateById(sapEntity);
-            type = InputConstant.InvoiceMatch.MATCH_YES.getValue();
-            this.baseMapper.updateByentryState(InputConstant.InvoiceMatch.MATCH_YES.getValue(),documentNo);
-        }else{
-            type = InputConstant.InvoiceMatch.MATCH_ERROR.getValue();
-            sapEntity.setSapMatch(InputConstant.InvoiceMatch.MATCH_ERROR.getValue());
-            inputInvoiceSapService.updateById(sapEntity);
-            this.baseMapper.updateByentryState(InputConstant.InvoiceMatch.MATCH_ERROR.getValue(),documentNo);
-        }
         InputInvoiceCustomsEntity customsEntity = new InputInvoiceCustomsEntity();
+        if (totalTax != null && (new BigDecimal(totalTax)).compareTo(BigDecimal.ZERO) == 0) {
+            for (int i = 0; i < sapEntityList.size(); i++) {
+                InputInvoiceSapEntity sapEntity = sapEntityList.get(i);
+                sapEntity.setSapMatch(InputConstant.InvoiceMatch.MATCH_NO.getValue());
+                inputInvoiceSapService.updateById(sapEntity);
+            }
+        } else if (totalTax != null && ((new BigDecimal(totalTax).subtract(valueTax)).compareTo(amountInLocal) == 0
+                || (new BigDecimal(totalTax)).compareTo(amountInLocal.subtract(valueTax)) == 0
+        )) {
+            for (int i = 0; i < sapEntityList.size(); i++) {
+                InputInvoiceSapEntity sapEntity = sapEntityList.get(i);
+                sapEntity.setSapMatch(InputConstant.InvoiceMatch.MATCH_YES.getValue());
+                inputInvoiceSapService.updateById(sapEntity);
+            }
+            type = InputConstant.InvoiceMatch.MATCH_YES.getValue();
+        } else{
+            for (int i = 0; i < sapEntityList.size(); i++) {
+                InputInvoiceSapEntity sapEntity = sapEntityList.get(i);
+                sapEntity.setSapMatch(InputConstant.InvoiceMatch.MATCH_ERROR.getValue());
+                inputInvoiceSapService.updateById(sapEntity);
+            }
+            type = InputConstant.InvoiceMatch.MATCH_ERROR.getValue();
+            if(totalTax != null){
+                customsEntity.setSapCheckTax(((new BigDecimal(totalTax).subtract(valueTax)).subtract(amountInLocal).toString()));
+            }
+        }
         customsEntity.setEntryState(type);
         customsEntity.setMatchDate(DateUtils.format(new Date()));
-        customsEntity.setEntryDate(sapEntity.getPstngDate());
-        customsEntity.setYearAndMonth(sapEntity.getYearAndMonth());
-        customsEntity.setSapTax(sapEntity.getAmountInLocal().toString());
+        customsEntity.setEntryDate(sapEntityList.get(0).getPstngDate());
+        customsEntity.setYearAndMonth(sapEntityList.get(0).getYearAndMonth());
+        customsEntity.setSapTax(amountInLocal.toString());
         UpdateWrapper<InputInvoiceCustomsEntity> updateQueryWrapper = new UpdateWrapper();
         updateQueryWrapper.eq("voucher_code", documentNo);
         baseMapper.update(customsEntity, updateQueryWrapper);
-        return sapEntity;
+        return type;
     }
 
     /**
      * 获取查询月份认证完成的数据
+     *
      * @param params
      * @return
      */
     @Override
-    public List<InputInvoiceCustomsEntity> getCertification(Map<String, Object> params){
-        String date = params.get("queryDate").toString();
-        return  this.list(
+    public List<InputInvoiceCustomsEntity> getCertification(Map<String, Object> params) {
+        String date = params.get("yearAndMonth").toString();
+        String deptId = params.get("deptId").toString();
+        SysDeptEntity deptEntity = sysDeptService.getById(deptId);
+        return this.list(
                 new QueryWrapper<InputInvoiceCustomsEntity>()
-                        .like("deductible_date",date)
-                        .in("deductible",1)
+                        .like("deductible_date", date)
+                        .in("deductible", 1)
+                        .eq("purchaser_name", deptEntity.getName())
         );
     }
 
     public static void main(String[] args) {
-        List<String> list = new ArrayList<String>();
+/*        List<String> list = new ArrayList<String>();
         String text = "Import,010120201000514950-A01,L02,97500431-00100Xi";
         String arr[]=text.split(",");
         if(arr.length > 1){
@@ -927,7 +1002,9 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
                 }
             }
         }
-        System.out.println(list.toString());
+        System.out.println(list.toString());*/
+
+
     }
 }
 

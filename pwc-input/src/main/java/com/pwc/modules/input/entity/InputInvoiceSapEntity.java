@@ -69,6 +69,8 @@ public class InputInvoiceSapEntity implements Serializable {
     private String sapMatch;
     /**匹配类型 1 发票 2 海关 3 红字通知单*/
     private String matchType;
+    /**公司组织ID*/
+    private String deptId;
     /**
      * 创建人
      */

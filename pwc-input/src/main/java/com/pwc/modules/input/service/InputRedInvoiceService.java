@@ -50,7 +50,7 @@ public interface InputRedInvoiceService extends IService<InputRedInvoiceEntity> 
      * 手工入账
      * @param params
      */
-    void manualEntryByRed(Map<String, Object> params);
+    String manualEntryByRed(Map<String, Object> params);
 
     /**
      * 作废红字通知单

@@ -5,6 +5,7 @@ import com.fapiao.neon.model.CallResult;
 import com.fapiao.neon.model.in.ApplyDeductResultInfo;
 import com.fapiao.neon.model.in.CustomsInvoice;
 import com.fapiao.neon.model.in.CustomsInvoiceInfo;
+import com.fapiao.neon.model.in.CustomsInvoiceResult;
 import com.fapiao.neon.param.PaymentCertificateParamBody;
 import com.fapiao.neon.param.in.SyncInvoiceParamBody;
 import com.pwc.common.utils.PageUtils;
@@ -36,6 +37,10 @@ public interface InputInvoiceCustomsService extends IService<InputInvoiceCustoms
      * 同步海关缴款书
      */
     void sync(String taxNo, String startBillingDate, String endBillingDate, int page);
+
+    String syncApply(String taxNo, String payNo, String billingDate, String totalTax);
+
+    List<CustomsInvoiceResult> syncApplyResult(String requestId);
 
     /**
      * 海关缴款书入库
@@ -147,7 +152,7 @@ public interface InputInvoiceCustomsService extends IService<InputInvoiceCustoms
      * 手工入账
      * @param params
      */
-    void manualEntry(Map<String, Object> params);
+    String manualEntry(Map<String, Object> params);
 
     /**
      * 自动入账

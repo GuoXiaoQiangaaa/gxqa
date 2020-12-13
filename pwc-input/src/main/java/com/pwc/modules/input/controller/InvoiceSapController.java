@@ -42,8 +42,20 @@ public class InvoiceSapController {
      */
     @RequestMapping("/getListBySap")
         // @RequiresPermissions("input:invoicesap:getListBySap")
-    public R  getListBySap(Map<String, Object> params){
+    public R  getListBySap(@RequestParam Map<String, Object> params){
         PageUtils page=inputInvoiceSapService.getListBySap(params);
+        return R.ok().put("page",page);
+    }
+
+    /**
+     * 自动匹配库里deptId
+     * @param params
+     * @return
+     */
+    @RequestMapping("/updateListByDeptId")
+    // @RequiresPermissions("input:invoicesap:getListBySap")
+    public R  updateListByDeptId(@RequestParam Map<String, Object> params){
+        boolean page=inputInvoiceSapService.updateListByDeptId(params);
         return R.ok().put("page",page);
     }
 
@@ -54,7 +66,7 @@ public class InvoiceSapController {
      */
     @RequestMapping("/getListByMatch")
     // @RequiresPermissions("input:invoicesap:getListByMatch")
-    public R  getListByMatch(Map<String, Object> params){
+    public R  getListByMatch(@RequestParam Map<String, Object> params){
         String[] status = {InputConstant.InvoiceMatch.MATCH_NO.getValue()};
         params.put("match",status);
         PageUtils page=inputInvoiceSapService.getListBySap(params);

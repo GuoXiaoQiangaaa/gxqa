@@ -22,12 +22,14 @@ public interface InputInvoiceSapService  extends IService<InputInvoiceSapEntity>
      */
     PageUtils getListBySap(Map<String, Object> params);
 
+    boolean updateListByDeptId(Map<String, Object> params);
+
     /**
      * 根据凭证号查询数据
      * @param documentNo
      * @return
      */
-    InputInvoiceSapEntity getEntityByNo(String documentNo);
+    InputInvoiceSapEntity getEntityByNo(String documentNo,String yearAndMonth,String deptCode);
 
     /**
      * 根据日期 和类型查询入账数据
@@ -35,5 +37,5 @@ public interface InputInvoiceSapService  extends IService<InputInvoiceSapEntity>
      * @param status
      * @return
      */
-    List<InputInvoiceSapEntity> getEntityByDateAndStatus(String date, String status);
+    List<InputInvoiceSapEntity> getEntityByDateAndStatus(String date, String status,String deptId);
 }
