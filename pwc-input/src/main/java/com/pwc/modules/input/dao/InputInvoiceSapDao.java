@@ -10,4 +10,5 @@ import org.apache.ibatis.annotations.Mapper;
  **/
 @Mapper
 public interface InputInvoiceSapDao extends BaseMapper<InputInvoiceSapEntity> {
+    int getListByShow();
 }

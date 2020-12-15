@@ -4,18 +4,18 @@ import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.fapiao.neon.model.CallResult;
 import com.fapiao.neon.model.in.CustomsInvoiceInfo;
 import com.fapiao.neon.model.in.CustomsInvoiceResult;
 import com.fapiao.neon.param.in.SyncInvoiceParamBody;
 import com.pwc.common.exception.RRException;
-import com.pwc.common.utils.DateUtils;
-import com.pwc.common.utils.PageUtils;
-import com.pwc.common.utils.ParamsMap;
-import com.pwc.common.utils.R;
+import com.pwc.common.utils.*;
 import com.pwc.common.utils.excel.ExportExcel;
 import com.pwc.common.validator.ValidatorUtils;
 import com.pwc.modules.input.entity.InputInvoiceCustomsEntity;
+import com.pwc.modules.input.entity.InputInvoiceEntity;
+import com.pwc.modules.input.entity.vo.InputInvoiceListVo;
 import com.pwc.modules.input.service.InputInvoiceCustomsService;
 import com.pwc.modules.sys.entity.SysDeptEntity;
 import com.pwc.modules.sys.service.SysDeptService;
@@ -122,6 +122,7 @@ public class InputInvoiceCustomsController {
         return R.ok().put("page", page);
     }
 
+
     /**
      * 海关缴款书采集
      */
@@ -173,11 +174,11 @@ public class InputInvoiceCustomsController {
      * @param response
      * @return
      */
-    @GetMapping(value = "exportRecordListByIds")
+    @GetMapping(value = "/exportRecordListByIds")
     // @RequiresPermissions("input:invoiceCustoms:exportRecordListByIds")
     public R exportRecordListByIds(@RequestParam Map<String, Object> params, HttpServletResponse response) {
         String title = (String) params.get("title");
-        String ids = (String) params.get("ids");
+        String ids = String.valueOf(params.get("ids"));
         List<InputInvoiceCustomsEntity> inputInvoiceCustomsEntities = (List<InputInvoiceCustomsEntity>) inputInvoiceCustomsService.listByIds(Arrays.asList(ids.split(",")));
         try {
             String fileName = title + DateUtils.format(new Date(), "yyyyMMddHHmmss") + ".xlsx";
@@ -196,8 +197,7 @@ public class InputInvoiceCustomsController {
      * @param response
      * @return
      */
-    @GetMapping(value = "exportRecordList")
-    //@RequiresPermissions("input:invoice:exportRecordList")
+    @GetMapping(value = "/exportRecordList")
     public R exportRecordList(@RequestParam Map<String, Object> params, HttpServletResponse response) {
         String title = (String) params.get("title");
         InputInvoiceCustomsEntity invoiceEntity = JSON.parseObject(JSON.toJSONString(params), InputInvoiceCustomsEntity.class);
@@ -216,6 +216,49 @@ public class InputInvoiceCustomsController {
             return R.error("导出失败");
         }
     }
+
+    /**
+     * 查询海关通知单前期认证本月入账
+     *
+     * @param params
+     * @return
+     */
+    @RequestMapping("/getCustomsBeforeResult")
+    public R getCustomsBeforeResult(@RequestParam Map<String, Object> params){
+        String yearAndMonth=ParamsMap.findMap(params, "yearAndMonth");
+        String deptId=ParamsMap.findMap(params, "deptId");
+        if(yearAndMonth != null  && deptId != null){
+            PageUtils matchResultList = inputInvoiceCustomsService.getMonthCredBeforeResult(params);
+            return R.ok().put("page",matchResultList);
+        }else{
+            return  null;
+        }
+    }
+
+    /**
+     * 海关通知单前期认证本月入账下载
+     *
+     * @param params
+     * @return
+     */
+    @GetMapping(value = "/exportBeforeResultList")
+    public R exportBeforeResultList(@RequestParam Map<String, Object> params, HttpServletResponse response) {
+        String title = (String) params.get("title");
+
+        int count = inputInvoiceCustomsService.getListByShow();
+        params.put("limit", count + "");
+        PageUtils matchResultList  = inputInvoiceCustomsService.getMonthCredBeforeResult(params);
+        List<InputInvoiceCustomsEntity> invoiceEntityList = (List<InputInvoiceCustomsEntity>) matchResultList.getList();
+        try {
+            String fileName = title + DateUtils.format(new Date(), "yyyyMMddHHmmss") + ".xlsx";
+            new ExportExcel("", InputInvoiceCustomsEntity.class).setDataList(invoiceEntityList).write(response, fileName).dispose();
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return R.error("导出失败");
+        }
+    }
+
     /**
      *海关缴款书入账或冲销
      * @param payNos

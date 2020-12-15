@@ -62,10 +62,13 @@
             voucher_code = #{voucherCode}
         </set>
         where deductible = '1'
+        <if test="list.size() > 0">
             and  pay_no in
             <foreach collection="list" index="index" item="item"
                      open="(" separator="," close=")">
                 #{item}
             </foreach>
+        </if>
+
     </update>
 </mapper>

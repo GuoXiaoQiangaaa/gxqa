@@ -24,6 +24,9 @@ public interface InputInvoiceDao extends BaseMapper<InputInvoiceEntity> {
 //    void setDescription(@Param("invoiceRemarks") String invoiceRemark, @Param("list") String[] ids);
     void updateByEnter(InputInvoiceEntity invoiceEntity);
     List<InputInvoiceEntity> getListAndCreateName(@Param("list") List<InputInvoiceEntity> list, @Param("createUserName") String createUserName);
+
+    List<InputInvoiceEntity> getMonthCredBeforeResult(@Param("list") List<String> list, @Param("createUserName") String createUserName);
+
     void setCreateBy(@Param("list") List<InputInvoiceEntity> list, @Param("userId") Long userId);
     void deleteByRepeat(@Param("list") List<Integer> list);
     Integer getGroupSizeByBatchId(InputInvoiceEntity invoiceEntity);

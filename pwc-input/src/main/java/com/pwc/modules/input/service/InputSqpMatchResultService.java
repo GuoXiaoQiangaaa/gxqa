@@ -1,7 +1,9 @@
 package com.pwc.modules.input.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pwc.common.utils.PageUtils;
+import com.pwc.modules.input.entity.InputInvoiceEntity;
 import com.pwc.modules.input.entity.InputSapMatchResultEntity;
 import com.pwc.modules.input.entity.vo.InvoiceCustomsDifferenceMatch;
 import com.pwc.modules.input.entity.vo.InvoiceDifferenceMatch;
@@ -26,6 +28,8 @@ public interface InputSqpMatchResultService extends IService<InputSapMatchResult
     List<InputSapMatchResultEntity> queryMatchCurTime(Map<String, Object> params);
 
     Map<String,Object> getDifferenceMatchResult(Map<String, Object> params);
+
+    PageUtils getMonthCredBeforeResult(Map<String, Object> params);
 
     Map<String,Object> getRedDifferenceMatchResult(Map<String, Object> params);
 

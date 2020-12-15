@@ -90,10 +90,13 @@
         a.*,b.username AS "createUserName"
         FROM input_invoice a
         LEFT JOIN sys_user b on a.create_by = b.user_id
-        WHERE a.id in
-        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
-            #{item.id}
-        </foreach>
+        WHERE 1=1
+        <if test="list.size() > 0">
+            and a.id in
+            <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+                #{item.id}
+            </foreach>
+        </if>
         <if test="createUserName != null and createUserName != ''">
             and b.username =#{createUserName}
         </if>
@@ -766,10 +769,13 @@
         FROM input_invoice a
         LEFT JOIN input_invoice_batch b ON a.invoice_batch_number = b.id
         LEFT JOIN sys_user c ON a.create_by = c.user_id
-        WHERE a.id IN
-        <foreach collection="list" index="index" item="item"  open="(" separator="," close=")">
-            #{item.id}
-        </foreach>
+        WHERE 1 = 1
+        <if test="list.size() > 0">
+           and a.id IN
+            <foreach collection="list" index="index" item="item"  open="(" separator="," close=")">
+                #{item.id}
+            </foreach>
+        </if>
         ORDER BY a.invoice_batch_number DESC 
     </select>
 

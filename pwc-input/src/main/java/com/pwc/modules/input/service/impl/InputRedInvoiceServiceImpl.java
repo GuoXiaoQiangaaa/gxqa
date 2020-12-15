@@ -758,4 +758,56 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
         );
     }
 
+
+    @Override
+    public PageUtils getMonthCredBeforeResult(Map<String, Object> params){
+        String yearAndMonth=ParamsMap.findMap(params, "yearAndMonth");
+        String newYearAndMonth = yearAndMonth.substring(0,7) + "-01";
+        String deptId=ParamsMap.findMap(params, "deptId");
+        String redNoticeNumber=ParamsMap.findMap(params, "redNoticeNumber");
+        String blueInvoiceNumber=ParamsMap.findMap(params, "blueInvoiceNumber");
+        String documentNo=ParamsMap.findMap(params, "documentNo");
+        SysDeptEntity sysDeptEntity = sysDeptService.getById(deptId);
+        String resultType=ParamsMap.findMap(params, "resultType");
+        if(resultType.equals("1")){
+            IPage<InputRedInvoiceEntity> page = this.page(
+                    new Query<InputRedInvoiceEntity>().getPage(params),
+                    new QueryWrapper<InputRedInvoiceEntity>()
+                            .eq(org.apache.commons.lang.StringUtils.isNotBlank(sysDeptEntity.getTaxCode()), "purchaser_tax_code", sysDeptEntity.getTaxCode())
+                            .eq("entry_status", "1")
+                            .lt("write_date", newYearAndMonth)
+                            .ge("entry_date", newYearAndMonth)
+                            .like(org.apache.commons.lang.StringUtils.isNotBlank(redNoticeNumber), "red_notice_number", redNoticeNumber)
+                            .like(org.apache.commons.lang.StringUtils.isNotBlank(blueInvoiceNumber), "blue_invoice_number", blueInvoiceNumber)
+                            .like(org.apache.commons.lang.StringUtils.isNotBlank(documentNo), "document_no", documentNo)
+            );
+            return new PageUtils(page);
+        }else if(resultType.equals("2")){
+            IPage<InputRedInvoiceEntity> page = this.page(
+                    new Query<InputRedInvoiceEntity>().getPage(params),
+                    new QueryWrapper<InputRedInvoiceEntity>()
+                            .eq(org.apache.commons.lang.StringUtils.isNotBlank(sysDeptEntity.getTaxCode()), "purchaser_tax_code", sysDeptEntity.getTaxCode())
+                            .ne("entry_status", "1")
+                            .ge("write_date", newYearAndMonth)
+                            .like(org.apache.commons.lang.StringUtils.isNotBlank(redNoticeNumber), "red_notice_number", redNoticeNumber)
+                            .like(org.apache.commons.lang.StringUtils.isNotBlank(blueInvoiceNumber), "blue_invoice_number", blueInvoiceNumber)
+                            .like(org.apache.commons.lang.StringUtils.isNotBlank(documentNo), "document_no", documentNo)
+            );
+            return new PageUtils(page);
+        }else{
+
+            IPage<InputRedInvoiceEntity> page = this.page(
+                    new Query<InputRedInvoiceEntity>().getPage(params),
+                    new QueryWrapper<InputRedInvoiceEntity>()
+                            .eq(org.apache.commons.lang.StringUtils.isNotBlank(sysDeptEntity.getTaxCode()), "purchaser_tax_code", sysDeptEntity.getTaxCode())
+                            .eq("entry_status", "1")
+                            .ge("write_date", newYearAndMonth)
+                            .lt("entry_date", newYearAndMonth)
+                            .like(org.apache.commons.lang.StringUtils.isNotBlank(redNoticeNumber), "red_notice_number", redNoticeNumber)
+                            .like(org.apache.commons.lang.StringUtils.isNotBlank(blueInvoiceNumber), "blue_invoice_number", blueInvoiceNumber)
+                            .like(org.apache.commons.lang.StringUtils.isNotBlank(documentNo), "document_no", documentNo)
+            );
+            return new PageUtils(page);
+        }
+    }
 }

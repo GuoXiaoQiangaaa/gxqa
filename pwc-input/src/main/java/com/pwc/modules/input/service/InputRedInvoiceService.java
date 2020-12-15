@@ -1,8 +1,10 @@
 package com.pwc.modules.input.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pwc.common.utils.PageUtils;
 import com.pwc.modules.input.entity.InputInvoiceCustomsEntity;
+import com.pwc.modules.input.entity.InputInvoiceEntity;
 import com.pwc.modules.input.entity.InputInvoiceSapEntity;
 import com.pwc.modules.input.entity.InputRedInvoiceEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -79,5 +81,7 @@ public interface InputRedInvoiceService extends IService<InputRedInvoiceEntity> 
      * @return
      */
     List<InputRedInvoiceEntity> getCertification(Map<String, Object> params);
+
+    PageUtils getMonthCredBeforeResult(Map<String, Object> params);
 }
 

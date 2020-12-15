@@ -22,6 +22,8 @@ public interface InputInvoiceSapService  extends IService<InputInvoiceSapEntity>
      */
     PageUtils getListBySap(Map<String, Object> params);
 
+    int getListByShow();
+
     boolean updateListByDeptId(Map<String, Object> params);
 
     /**

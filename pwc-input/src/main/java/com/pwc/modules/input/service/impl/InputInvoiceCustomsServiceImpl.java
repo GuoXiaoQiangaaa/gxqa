@@ -68,6 +68,10 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
     private SysConfigService sysConfigService;
     @Autowired
     private SysDeptService sysDeptService;
+    @Autowired
+    private InputInvoiceCustomsService customsService;
+    @Autowired
+    private InputInvoiceCustomsService inputInvoiceCustomsService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -549,6 +553,61 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
     @Override
     public int getListByShow() {
         return this.baseMapper.getListByShow();
+    }
+
+    @Override
+    public PageUtils getMonthCredBeforeResult(Map<String, Object> params){
+        String yearAndMonth=ParamsMap.findMap(params, "yearAndMonth");
+
+        String deptId=ParamsMap.findMap(params, "deptId");
+        String payNo=ParamsMap.findMap(params, "payNo");
+        String voucherCode=ParamsMap.findMap(params, "voucherCode");
+        String batchNo=ParamsMap.findMap(params, "batchNo");
+        SysDeptEntity sysDeptEntity = sysDeptService.getById(deptId);
+        String resultType=ParamsMap.findMap(params, "resultType");
+        if(resultType.equals("1")){
+            String newYearAndMonth = yearAndMonth.substring(0,7) + "-01";
+            IPage<InputInvoiceCustomsEntity> page = this.page(
+                    new Query<InputInvoiceCustomsEntity>().getPage(params),
+                    new QueryWrapper<InputInvoiceCustomsEntity>()
+                            .eq(StringUtils.isNotBlank(sysDeptEntity.getTaxCode()), "purchaser_tax_no", sysDeptEntity.getTaxCode())
+                            .eq("entry_state", "1")
+                            .lt("billing_date", newYearAndMonth)
+                            .ge("entry_date", newYearAndMonth)
+                            .eq("deductible", "1")
+                            .like(StringUtils.isNotBlank(payNo), "pay_no", payNo)
+                            .like(StringUtils.isNotBlank(voucherCode), "voucher_code", voucherCode)
+                            .like(StringUtils.isNotBlank(batchNo), "batch_no", batchNo)
+            );
+            return new PageUtils(page);
+        }else if(resultType.equals("2")){
+            IPage<InputInvoiceCustomsEntity> page = this.page(
+                    new Query<InputInvoiceCustomsEntity>().getPage(params),
+                    new QueryWrapper<InputInvoiceCustomsEntity>()
+                            .eq(StringUtils.isNotBlank(sysDeptEntity.getTaxCode()), "purchaser_tax_no", sysDeptEntity.getTaxCode())
+                            .ne("entry_state", "1")
+                            .like("billing_date", yearAndMonth)
+                            .like(StringUtils.isNotBlank(payNo), "pay_no", payNo)
+                            .like(StringUtils.isNotBlank(voucherCode), "voucher_code", voucherCode)
+                            .like(StringUtils.isNotBlank(batchNo), "batch_no", batchNo)
+            );
+            return new PageUtils(page);
+        }else{
+            String newYearAndMonth = yearAndMonth.substring(0,7) + "-01";
+            IPage<InputInvoiceCustomsEntity> page = this.page(
+                    new Query<InputInvoiceCustomsEntity>().getPage(params),
+                    new QueryWrapper<InputInvoiceCustomsEntity>()
+                            .eq(StringUtils.isNotBlank(sysDeptEntity.getTaxCode()), "purchaser_tax_no", sysDeptEntity.getTaxCode())
+                            .eq("entry_state", "1")
+                            .ge("billing_date", newYearAndMonth)
+                            .lt("entry_date", newYearAndMonth)
+                            .eq("deductible", "1")
+                            .like(StringUtils.isNotBlank(payNo), "pay_no", payNo)
+                            .like(StringUtils.isNotBlank(voucherCode), "voucher_code", voucherCode)
+                            .like(StringUtils.isNotBlank(batchNo), "batch_no", batchNo)
+            );
+            return new PageUtils(page);
+        }
     }
 
     @Override

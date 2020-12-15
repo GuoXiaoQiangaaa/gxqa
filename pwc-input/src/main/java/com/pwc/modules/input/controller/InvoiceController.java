@@ -752,13 +752,37 @@ public class InvoiceController {
         System.out.println(invoiceEntity);
         List<InputInvoiceEntity> invoiceEntityList = invoiceService.getListById(invoiceEntity);
         invoiceService.checkStstus(invoiceEntityList);
-//        for (InputInvoiceEntity Entity:invoiceEntityList){
-//            if(Entity.getInvoiceFreePrice()!=null && Entity.getInvoiceTaxPrice()!=null){
-//                NumberFormat nf = NumberFormat.getPercentInstance();
-//                Entity.getInvoiceTaxPrice().divide(Entity.getInvoiceFreePrice(),2);
-//                Entity.setTax(nf.format(Entity.getInvoiceTaxPrice().divide(Entity.getInvoiceFreePrice(),2)));
-//            }
-//        }
+        if(invoiceEntityList.size() > 0){
+            for (InputInvoiceEntity Entity : invoiceEntityList) {
+                List<InputInvoiceMaterialEntity> invoiceMaterialEntityList = new ArrayList<>();
+                InputInvoiceMaterialEntity invoiceMaterialEntity = new InputInvoiceMaterialEntity();
+                invoiceMaterialEntity.setInvoiceId(Entity.getId());
+                invoiceMaterialEntityList = invoiceMaterialService.getByInvoiceId(invoiceMaterialEntity);
+                Entity.setManyTax(InputConstant.YesAndNo.NO.getValue());
+                StringBuffer sphSpmc = new StringBuffer();
+                if (invoiceMaterialEntityList.size() > 0) {
+                    String tax = invoiceMaterialEntityList.get(0).getSphSlv();
+                    for (InputInvoiceMaterialEntity materialEntity : invoiceMaterialEntityList) {
+                        if (materialEntity.getSphSlv().compareTo(tax) == 1) {
+                            Entity.setManyTax(InputConstant.YesAndNo.YES.getValue());
+                            tax = materialEntity.getSphSlv();
+                        }
+                        sphSpmc.append(materialEntity.getSphSpmc() + ";");
+                    }
+                    if (tax.matches("^[-\\\\+]?([0-9]+\\\\.?)?[0-9]+$")) {
+                        Entity.setTax(tax + "%");
+                    } else {
+                        Entity.setTax(tax);
+                    }
+                } else {
+                    if (Entity.getInvoiceFreePrice() != null && Entity.getInvoiceTaxPrice() != null) {
+                        NumberFormat nf = NumberFormat.getPercentInstance();
+                        Entity.setTax(nf.format(Entity.getInvoiceTaxPrice().divide(Entity.getInvoiceFreePrice(), 4)));
+                    }
+                }
+            }
+        }
+
         try {
             String fileName = title + DateUtils.format(new Date(), "yyyyMMddHHmmss") + ".xlsx";
             new ExportExcel(title, InputInvoiceEntity.class).setDataList(invoiceEntityList).write(response, fileName).dispose();

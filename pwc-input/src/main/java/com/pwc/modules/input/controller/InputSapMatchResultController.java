@@ -2,23 +2,20 @@ package com.pwc.modules.input.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.pwc.common.excel.ExportExcel;
-import com.pwc.common.utils.DateUtils;
-import com.pwc.common.utils.PageUtils;
-import com.pwc.common.utils.ParamsMap;
-import com.pwc.common.utils.R;
+import com.pwc.common.utils.*;
+import com.pwc.modules.input.entity.InputInvoiceEntity;
 import com.pwc.modules.input.entity.InputRedInvoiceEntity;
 import com.pwc.modules.input.entity.InputSapMatchResultEntity;
 import com.pwc.modules.input.entity.vo.InvoiceCustomsDifferenceMatch;
 import com.pwc.modules.input.entity.vo.InvoiceDifferenceMatch;
 import com.pwc.modules.input.entity.vo.RedInvoiceDifferenceMatch;
+import com.pwc.modules.input.service.InputInvoiceService;
 import com.pwc.modules.input.service.InputSqpMatchResultService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
@@ -28,6 +25,8 @@ import java.util.*;
 public class InputSapMatchResultController {
     @Autowired
     private InputSqpMatchResultService inputSqpMatchResultService;
+    @Autowired
+    private InputInvoiceService invoiceService;
 
     @RequestMapping("/matchResultlist")
     public R list(@RequestBody Map<String, Object> params){
@@ -124,6 +123,66 @@ public class InputSapMatchResultController {
             return  null;
         }
     }
+
+    /**
+     * 查询发票前期认证本月入账||本月认证未入账
+     *
+     * @param params
+     * @return
+     */
+    @RequestMapping("/getMonthCredBeforeResult")
+    public R getMonthCredBeforeResult(@RequestParam Map<String, Object> params){
+        String yearAndMonth=ParamsMap.findMap(params, "yearAndMonth");
+        String deptId=ParamsMap.findMap(params, "deptId");
+        if(yearAndMonth != null  && deptId != null){
+            //1-前期认证本月入账 2-本月认证未入账
+            PageUtils matchResultList = inputSqpMatchResultService.getMonthCredBeforeResult(params);
+            return R.ok().put("page",matchResultList);
+        }else{
+            return  null;
+        }
+    }
+
+    /**
+     * 查询发票前期认证本月入账下载
+     *
+     * @param params
+     * @return
+     */
+    @GetMapping(value = "/exportRecordList")
+    public R exportRecordList(@RequestParam Map<String, Object> params, HttpServletResponse response) {
+        String title = (String) params.get("title");
+        String[] state = null;
+        if (StringUtils.isNotBlank((String) params.get("invoiceStatus"))) {
+            state = new String[]{
+                    (String) params.get("invoiceStatus")
+            };
+        } else {
+            state = new String[]{
+                    InputConstant.InvoiceStatus.RECOGNITION_FAILED.getValue(),
+                    InputConstant.InvoiceStatus.REPEAT.getValue(),
+                    InputConstant.InvoiceStatus.INVALID.getValue(),
+                    InputConstant.InvoiceStatus.REFUND.getValue(),
+                    InputConstant.InvoiceStatus.VERIFICATION_FAILED.getValue(),
+                    InputConstant.InvoiceStatus.FIRST_VERIFICATION_FAILED.getValue(),
+            };
+        }
+        params.put("invoiceStatus", state);
+        int count = invoiceService.getListByShow();
+        params.put("limit", count + "");
+        PageUtils invoiceEntityList = inputSqpMatchResultService.getMonthCredBeforeResult(params);
+        List<InputInvoiceEntity> invoiceEntities = invoiceService.getListByItems((List<InputInvoiceEntity>)invoiceEntityList);
+        invoiceService.checkStstus(invoiceEntities);
+        try {
+            String fileName = title + DateUtils.format(new Date(), "yyyyMMddHHmmss") + ".xlsx";
+            new ExportExcel("", InputInvoiceEntity.class).setDataList(invoiceEntities).write(response, fileName).dispose();
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return R.error("导出失败");
+        }
+    }
+
     /**
      * 查询红字发票差异清单
      *

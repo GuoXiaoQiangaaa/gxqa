@@ -32,6 +32,8 @@ public interface InputInvoiceService extends IService<InputInvoiceEntity> {
     //传入发票识别
     String functionSaveInvoice(InputInvoiceEntity invoiceEntity);
 
+    InputInvoiceEntity saveInvoice(InputInvoiceEntity invoiceEntity, InputInvoiceUploadEntity uploadEntity);
+
     /**
      * 根据发票代码和发票号码查询发票是否重复
      *

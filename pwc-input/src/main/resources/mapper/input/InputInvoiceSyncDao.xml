@@ -53,4 +53,5 @@
        delete from input_company_task_invoices where company_id=#{id}
 
     </delete>
+
 </mapper>

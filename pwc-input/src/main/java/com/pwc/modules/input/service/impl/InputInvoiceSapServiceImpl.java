@@ -138,10 +138,6 @@ public class InputInvoiceSapServiceImpl extends ServiceImpl<InputInvoiceSapDao, 
     public PageUtils getListBySap(Map<String, Object> params) {
         // 公司代码
         String companyCode = ParamsMap.findMap(params, "companyCode");
-        if (companyCode != null) {
-            SysDeptEntity sysDeptEntity = sysDeptService.getById(companyCode);
-            companyCode = sysDeptEntity.getSapDeptCode();
-        }
         // 入账日期
         String pstngDate = ParamsMap.findMap(params, "pstngDate");
         // 凭证编码
@@ -157,11 +153,16 @@ public class InputInvoiceSapServiceImpl extends ServiceImpl<InputInvoiceSapDao, 
         //摘要
         String headerText = ParamsMap.findMap(params, "headerText");
         // 匹配状态
-        String match = ParamsMap.findMap(params, "match");
+        String[] match = null;
+        if(params.containsKey("match") && params.get("match")!= null){
+            match = (String[])params.get("match");
+        }else{
+            match = new String[]{"0","1","2"};
+        }
         IPage<InputInvoiceSapEntity> page = this.page(
-                new Query<InputInvoiceSapEntity>().getPage(params, null, true),
+                new Query<InputInvoiceSapEntity>().getPage(params),
                 new QueryWrapper<InputInvoiceSapEntity>()
-                        .eq(StringUtils.isNotBlank(companyCode), "company_code", companyCode)
+                        .eq(StringUtils.isNotBlank(companyCode), "dept_id", companyCode)
                         .ge(StringUtils.isNotBlank(pstngDate), "pstng_date", StringUtils.isNotBlank(pstngDate) ? pstngDate.split(",")[0] : "")
                         .le(StringUtils.isNotBlank(pstngDate), "pstng_date", StringUtils.isNotBlank(pstngDate) ? pstngDate.split(",")[1] : "")
                         .eq(StringUtils.isNotBlank(documentNo), "document_no", documentNo)
@@ -169,11 +170,10 @@ public class InputInvoiceSapServiceImpl extends ServiceImpl<InputInvoiceSapDao, 
                         .eq(StringUtils.isNotBlank(matchType), "match_type", matchType)
                         .like(StringUtils.isNotBlank(reference), "reference", reference)
                         .eq(StringUtils.isNotBlank(assignment), "assignment", assignment)
-                        .in(StringUtils.isNotBlank(match), "sap_match", match)
+                        .in("sap_match", match)
                         .like(StringUtils.isNotBlank(headerText), "header_text", headerText)
         );
         return new PageUtils(page);
-
     }
 
     @Override
@@ -187,6 +187,12 @@ public class InputInvoiceSapServiceImpl extends ServiceImpl<InputInvoiceSapDao, 
         }
         return true;
     }
+
+    @Override
+    public int getListByShow() {
+        return this.baseMapper.getListByShow();
+    }
+
 
     @Override
     public InputInvoiceSapEntity getEntityByNo(String documentNo, String yearAndMonth, String deptCode) {
@@ -227,7 +233,7 @@ public class InputInvoiceSapServiceImpl extends ServiceImpl<InputInvoiceSapDao, 
     }
 
     /**
-     * 枚举值转义
+     * 进项税导入
      */
     private InputInvoiceSapEntity paraphraseParams(InputInvoiceSapEntity entity) {
         String type = entity.getDocumentType();

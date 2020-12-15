@@ -96,14 +96,16 @@ public class SysDeptController extends AbstractController {
 	@RequiresPermissions("sys:dept:list")
 	public R treeSelect(){
 		Long userId = getUserId();
-		Long deptId = getDeptId();
+		Long deptId = 0L;
 		if (userId == 1) {
 			deptId = 0L;
 		}
 
-		List<TreeSelectVo> resultList = new ArrayList<>();
+		//去掉所属公司限制
+		//List<TreeSelectVo> resultList = new ArrayList<>();
 		List<TreeSelectVo> deptList = sysDeptService.getTreeSelectList(deptId);
-		if (deptId != 0) {
+/*		if (deptId != 0) {
+		//根据部门ID获取部门信息
 			SysDeptEntity sysDeptEntity = sysDeptService.getById(deptId);
 			if (null != sysDeptEntity) {
 				TreeSelectVo treeSelectVo = new TreeSelectVo();
@@ -113,8 +115,7 @@ public class SysDeptController extends AbstractController {
 				resultList.add(treeSelectVo);
 			}
 			return R.ok().put("data", resultList);
-		}
-
+		}*/
 		return R.ok().put("data", deptList);
 	}
 

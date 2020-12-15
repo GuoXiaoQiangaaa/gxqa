@@ -54,6 +54,7 @@ public class InputInvoiceCustomsEntity implements Serializable {
 	/**
 	 * 缴款单位名称
 	 */
+	@ExcelField(title="缴款单位名称", align=1, sort=10)
 	private String purchaserName;
 	/**
 	 * 勾选状态 0:未勾选认证; 1:已勾选认证; 2:勾选中; 3:勾选认证失败; 4:撤销勾选认证中; 5:已作废
@@ -63,12 +64,12 @@ public class InputInvoiceCustomsEntity implements Serializable {
 	/**
 	 * 勾选属期 YYYYMM
 	 */
-	//@ExcelField(title="海关缴款书勾选所属期", align=1, sort=120)
+	@ExcelField(title="海关缴款书勾选所属期", align=1, sort=120)
 	private String deductiblePeriod;
 	/**
 	 * 勾选日期 YYYY-MM-DD
 	 */
-	//@ExcelField(title="海关缴款书勾选日期", align=1, sort=130)
+	@ExcelField(title="海关缴款书勾选日期", align=1, sort=130)
 	private String deductibleDate;
 	/**
 	 * 勾选结果
@@ -149,12 +150,12 @@ public class InputInvoiceCustomsEntity implements Serializable {
 	/**
 	 * 公司代码
 	 */
-	@ExcelField(title="公司代码", align=1, sort=20)
+	@ExcelField(title="公司代码", align=1, sort=180)
 	private String companyCode;
 	/**
 	 * 公司名称
 	 */
-	@ExcelField(title="公司名称", align=1, sort=30)
+	@ExcelField(title="公司名称", align=1, sort=180)
 	private String companyName;
 	/**
 	 * 进口报关单号
@@ -203,7 +204,7 @@ public class InputInvoiceCustomsEntity implements Serializable {
 	/**
 	 * 批次号(格式:yyyyMMdd-1)
 	 */
-	@TableField(fill = FieldFill.DEFAULT)
+	@ExcelField(title="批次号", align=1, sort=30)
 	private String batchNo;
 	/**
 	 * 年月

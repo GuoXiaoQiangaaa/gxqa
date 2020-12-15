@@ -30,4 +30,5 @@ public interface InputInvoiceSyncDao extends BaseMapper<InputInvoiceSyncEntity> 
     void deleteDifferenceByCompanyId(Integer id);
 
     void deleteInvoicesByCompanyId(Integer id);
+
 }

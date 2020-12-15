@@ -39,6 +39,8 @@ public class InputSapMatchResultServiceImpl extends ServiceImpl<InputSqpMatchRes
     private InputSqpMatchResultDao inputSqpMatchResultDao;
     @Autowired
     private SysDeptService sysDeptService;
+    @Autowired
+    private InputInvoiceService invoiceService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -58,6 +60,77 @@ public class InputSapMatchResultServiceImpl extends ServiceImpl<InputSqpMatchRes
                         .orderByDesc("create_time") //根据创建排序
         );
         return new PageUtils(page);
+    }
+
+    @Override
+    public PageUtils getMonthCredBeforeResult(Map<String, Object> params) {
+        String yearAndMonth=ParamsMap.findMap(params, "yearAndMonth");
+        String newYearAndMonth = yearAndMonth.substring(0,7) + "-01";
+        String deptId=ParamsMap.findMap(params, "deptId");
+        String invoiceCode=ParamsMap.findMap(params, "invoiceCode");
+        String invoiceNumber=ParamsMap.findMap(params, "invoiceNumber");
+        String invoiceClass=ParamsMap.findMap(params, "invoiceClass");
+        String entrySuccessCode=ParamsMap.findMap(params, "entrySuccessCode");
+        SysDeptEntity sysDeptEntity = sysDeptService.getById(deptId);
+        String resultType=ParamsMap.findMap(params, "resultType");
+        if(resultType.equals("1")){
+            IPage<InputInvoiceEntity> page = invoiceService.page(
+                    new Query<InputInvoiceEntity>().getPage(params),
+                    new QueryWrapper<InputInvoiceEntity>()
+                            .eq(StringUtils.isNotBlank(sysDeptEntity.getTaxCode()), "invoice_purchaser_paragraph", sysDeptEntity.getTaxCode())
+                            // 是否退票 0:未退票; 1:已退票
+                            .eq("invoice_return", "0")
+                            // 是否失效 0:否; 1:是
+                            .eq("invoice_delete", "0")
+                            // 认证结果 1:成功; 0:失败
+                            .eq("verfy", "1")
+                            .eq("invoice_match", "1")
+                            .lt("invoice_auth_date", newYearAndMonth)
+                            .ge("entry_date", newYearAndMonth)
+                            .like(StringUtils.isNotBlank(invoiceNumber), "invoice_number", invoiceNumber)
+                            .like(StringUtils.isNotBlank(invoiceCode), "invoice_code", invoiceCode)
+                            .like(StringUtils.isNotBlank(invoiceClass), "invoice_class", invoiceClass)
+                            .like(StringUtils.isNotBlank(entrySuccessCode), "entry_success_code", entrySuccessCode)
+            );
+            return new PageUtils(page);
+        }else if(resultType.equals("2")){
+            IPage<InputInvoiceEntity> page = invoiceService.page(
+                    new Query<InputInvoiceEntity>().getPage(params),
+                    new QueryWrapper<InputInvoiceEntity>()
+                            .eq(StringUtils.isNotBlank(sysDeptEntity.getTaxCode()), "invoice_purchaser_paragraph", sysDeptEntity.getTaxCode())
+                            // 是否退票 0:未退票; 1:已退票
+                            .eq("invoice_return", "0")
+                            // 是否失效 0:否; 1:是
+                            .eq("invoice_delete", "0")
+                            // 认证结果 1:成功; 0:失败
+                            .eq("verfy", "1")
+                            .ne("invoice_match", "1")
+                            .ge("invoice_auth_date", newYearAndMonth)
+                            .like(StringUtils.isNotBlank(invoiceNumber), "invoice_number", invoiceNumber)
+                            .like(StringUtils.isNotBlank(invoiceCode), "invoice_code", invoiceCode)
+                            .like(StringUtils.isNotBlank(invoiceClass), "invoice_class", invoiceClass)
+            );
+            return new PageUtils(page);
+        }else{
+            IPage<InputInvoiceEntity> page = invoiceService.page(
+                    new Query<InputInvoiceEntity>().getPage(params),
+                    new QueryWrapper<InputInvoiceEntity>()
+                            .eq(StringUtils.isNotBlank(sysDeptEntity.getTaxCode()), "invoice_purchaser_paragraph", sysDeptEntity.getTaxCode())
+                            // 是否退票 0:未退票; 1:已退票
+                            .eq("invoice_return", "0")
+                            // 是否失效 0:否; 1:是
+                            .eq("invoice_delete", "0")
+                            // 认证结果 1:成功; 0:失败
+                            .eq("verfy", "1")
+                            .eq("invoice_match", "1")
+                            .ge("invoice_auth_date", newYearAndMonth)
+                            .lt("entry_date", newYearAndMonth)
+                            .like(StringUtils.isNotBlank(invoiceNumber), "invoice_number", invoiceNumber)
+                            .like(StringUtils.isNotBlank(invoiceCode), "invoice_code", invoiceCode)
+                            .like(StringUtils.isNotBlank(invoiceClass), "invoice_class", invoiceClass)
+            );
+            return new PageUtils(page);
+        }
     }
 
     @Override
@@ -94,7 +167,7 @@ public class InputSapMatchResultServiceImpl extends ServiceImpl<InputSqpMatchRes
                 }
                 if (!invoiceNumMap.containsKey(doNo)) {
                     String amountInLocal = matchResultList.get(i).getInvoiceTaxPrice();
-                    if(amountInLocal != null){
+                    if (amountInLocal != null) {
                         invoiceNumMap.put(doNum, amountInLocal);
                         invoiceFee = invoiceFee.add(new BigDecimal(amountInLocal));
                     }
@@ -145,7 +218,7 @@ public class InputSapMatchResultServiceImpl extends ServiceImpl<InputSqpMatchRes
                 }
                 if (!invoiceNumMap.containsKey(doNo)) {
                     String amountInLocal = String.valueOf(matchResultList.get(i).getTaxPrice());
-                    if(amountInLocal != null && !amountInLocal.equals("null")){
+                    if (amountInLocal != null && !amountInLocal.equals("null")) {
                         invoiceNumMap.put(doNum, amountInLocal);
                         invoiceFee = invoiceFee.add(new BigDecimal(amountInLocal));
                     }
@@ -173,7 +246,7 @@ public class InputSapMatchResultServiceImpl extends ServiceImpl<InputSqpMatchRes
         BigDecimal differenceFee = BigDecimal.ZERO;
         String yearAndMonth = ParamsMap.findMap(params, "yearAndMonth");
         String deptId = ParamsMap.findMap(params, "deptId");
-        if(type == 1){
+        if (type == 1) {
             //发票下载
             List<InvoiceDifferenceMatch> matchResultList = inputSqpMatchResultDao.getDifferenceMatchInvoiceExcel(deptId, yearAndMonth);
             if (matchResultList.size() > 0) {
@@ -193,7 +266,7 @@ public class InputSapMatchResultServiceImpl extends ServiceImpl<InputSqpMatchRes
                     }
                     if (!invoiceNumMap.containsKey(doNo)) {
                         String amountInLocal = matchResultList.get(i).getInvoiceTaxPrice();
-                        if(amountInLocal != null){
+                        if (amountInLocal != null) {
                             invoiceNumMap.put(doNum, amountInLocal);
                             invoiceFee = invoiceFee.add(new BigDecimal(amountInLocal));
                         }
@@ -207,7 +280,7 @@ public class InputSapMatchResultServiceImpl extends ServiceImpl<InputSqpMatchRes
             match.setDifferenceFee(differenceFee.toString());
             matchResultList.add(match);
             return matchResultList;
-        }else if(type == 2){
+        } else if (type == 2) {
             //海关通知单下载
             List<InvoiceCustomsDifferenceMatch> matchResultList = inputSqpMatchResultDao.getCustomsDifferenceMatchResultExcel(deptId, yearAndMonth);
             if (matchResultList.size() > 0) {
@@ -227,7 +300,7 @@ public class InputSapMatchResultServiceImpl extends ServiceImpl<InputSqpMatchRes
                     }
                     if (!invoiceNumMap.containsKey(doNo)) {
                         String amountInLocal = matchResultList.get(i).getTotalTax();
-                        if(amountInLocal != null){
+                        if (amountInLocal != null) {
                             invoiceNumMap.put(doNum, amountInLocal);
                             invoiceFee = invoiceFee.add(new BigDecimal(amountInLocal));
                         }
@@ -241,7 +314,7 @@ public class InputSapMatchResultServiceImpl extends ServiceImpl<InputSqpMatchRes
             match.setDifferenceFee(differenceFee.toString());
             matchResultList.add(match);
             return matchResultList;
-        }else{
+        } else {
             //红字通知单下载
             List<RedInvoiceDifferenceMatch> matchResultList = inputSqpMatchResultDao.getRedDifferenceMatchInvoiceExcel(deptId, yearAndMonth);
             if (matchResultList.size() > 0) {
@@ -261,7 +334,7 @@ public class InputSapMatchResultServiceImpl extends ServiceImpl<InputSqpMatchRes
                     }
                     if (!invoiceNumMap.containsKey(doNo)) {
                         String amountInLocal = String.valueOf(matchResultList.get(i).getTaxPrice());
-                        if(amountInLocal != null && !amountInLocal.equals("null")){
+                        if (amountInLocal != null && !amountInLocal.equals("null")) {
                             invoiceNumMap.put(doNum, amountInLocal);
                             invoiceFee = invoiceFee.add(new BigDecimal(amountInLocal));
                         }
@@ -313,7 +386,7 @@ public class InputSapMatchResultServiceImpl extends ServiceImpl<InputSqpMatchRes
                 }
                 if (!invoiceNumMap.containsKey(doNo)) {
                     String amountInLocal = matchResultList.get(i).getTotalTax();
-                    if(amountInLocal != null){
+                    if (amountInLocal != null) {
                         invoiceNumMap.put(doNum, amountInLocal);
                         invoiceFee = invoiceFee.add(new BigDecimal(amountInLocal));
                     }
@@ -399,7 +472,7 @@ public class InputSapMatchResultServiceImpl extends ServiceImpl<InputSqpMatchRes
         resultVo.setCertificationtax(certificationTax.toString());
         BigDecimal differenceTax = creditTax.subtract(certificationTax);
         resultVo.setDifferencetax(differenceTax.toString());
-        BigDecimal adjustmentTax = (monthCredTax.add(monthCredBeforeTax)).subtract(monthCertTax.add(monthCertBeforeTax));
+        BigDecimal adjustmentTax = monthCredTax.add(monthCredBeforeTax).add(monthCertBeforeTax).add(monthCertTax);
         resultVo.setAdjustmenttax(adjustmentTax.toString());
         resultVo.setChecktax((differenceTax.subtract(adjustmentTax)).toString());
         resultVo.setMonthcredtax(monthCredTax.toString());
@@ -465,7 +538,7 @@ public class InputSapMatchResultServiceImpl extends ServiceImpl<InputSqpMatchRes
         resultVo.setCertificationtax(certificationTax.toString());
         BigDecimal differenceTax = creditTax.subtract(certificationTax);
         resultVo.setDifferencetax(differenceTax.toString());
-        BigDecimal adjustmentTax = (monthCredTax.add(monthCredBeforeTax)).subtract(monthCertTax.add(monthCertBeforeTax));
+        BigDecimal adjustmentTax = monthCredTax.add(monthCredBeforeTax).add(monthCertBeforeTax).add(monthCertTax);
         resultVo.setAdjustmenttax(adjustmentTax.toString());
         resultVo.setChecktax((differenceTax.subtract(adjustmentTax)).toString());
         resultVo.setMonthcredtax(monthCredTax.toString());
@@ -532,7 +605,8 @@ public class InputSapMatchResultServiceImpl extends ServiceImpl<InputSqpMatchRes
         resultVo.setCertificationtax(certificationTax.toString());
         BigDecimal differenceTax = creditTax.subtract(certificationTax);
         resultVo.setDifferencetax(differenceTax.toString());
-        BigDecimal adjustmentTax = (monthCredTax.add(monthCredBeforeTax)).subtract(monthCertTax.add(monthCertBeforeTax));
+        /*BigDecimal adjustmentTax = (monthCredTax.add(monthCredBeforeTax)).subtract(monthCertTax.add(monthCertBeforeTax));*/
+        BigDecimal adjustmentTax = monthCredTax.add(monthCredBeforeTax).add(monthCertBeforeTax).add(monthCertTax);
         resultVo.setAdjustmenttax(adjustmentTax.toString());
         resultVo.setChecktax((differenceTax.subtract(adjustmentTax)).toString());
         resultVo.setMonthcredtax(monthCredTax.toString());

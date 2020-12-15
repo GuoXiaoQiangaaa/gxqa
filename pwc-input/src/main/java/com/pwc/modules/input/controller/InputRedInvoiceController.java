@@ -1,9 +1,11 @@
 package com.pwc.modules.input.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.pwc.common.excel.ExportExcel;
 import com.pwc.common.exception.RRException;
 import com.pwc.common.utils.DateUtils;
 import com.pwc.common.utils.PageUtils;
+import com.pwc.common.utils.ParamsMap;
 import com.pwc.common.utils.R;
 import com.pwc.common.validator.ValidatorUtils;
 import com.pwc.modules.input.entity.InputInvoiceCustomsEntity;
@@ -216,6 +218,49 @@ public class InputRedInvoiceController {
     public R manualEntry(@RequestParam Map<String, Object> params) {
         String sapMatch = inputRedInvoiceService.manualEntryByRed(params);
         return R.ok().put("sapMatch",sapMatch);
+    }
+
+
+    /**
+     * 查询红字通知单前期认证本月入账
+     *
+     * @param params
+     * @return
+     */
+    @RequestMapping("/getRedInvoiceBeforeResult")
+    public R getRedInvoiceBeforeResult(@RequestParam Map<String, Object> params){
+        String yearAndMonth= ParamsMap.findMap(params, "yearAndMonth");
+        String deptId=ParamsMap.findMap(params, "deptId");
+        if(yearAndMonth != null  && deptId != null){
+            PageUtils matchResultList = inputRedInvoiceService.getMonthCredBeforeResult(params);
+            return R.ok().put("page",matchResultList);
+        }else{
+            return  null;
+        }
+    }
+
+    /**
+     * 红字通知单前期认证本月入账下载
+     *
+     * @param params
+     * @return
+     */
+    @GetMapping(value = "/exportRedInvoiceResultList")
+    public R exportRedInvoiceResultList(@RequestParam Map<String, Object> params, HttpServletResponse response) {
+        String title = (String) params.get("title");
+
+        int count = inputRedInvoiceService.getListByShow();
+        params.put("limit", count + "");
+        PageUtils matchResultList  = inputRedInvoiceService.getMonthCredBeforeResult(params);
+        List<InputInvoiceCustomsEntity> invoiceEntityList = (List<InputInvoiceCustomsEntity>) matchResultList.getList();
+        try {
+            String fileName = title + DateUtils.format(new Date(), "yyyyMMddHHmmss") + ".xlsx";
+            new com.pwc.common.utils.excel.ExportExcel("", InputInvoiceCustomsEntity.class).setDataList(invoiceEntityList).write(response, fileName).dispose();
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return R.error("导出失败");
+        }
     }
 
 }

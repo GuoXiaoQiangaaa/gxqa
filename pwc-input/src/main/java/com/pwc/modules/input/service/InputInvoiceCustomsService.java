@@ -1,5 +1,6 @@
 package com.pwc.modules.input.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.fapiao.neon.model.CallResult;
 import com.fapiao.neon.model.in.ApplyDeductResultInfo;
@@ -10,6 +11,7 @@ import com.fapiao.neon.param.PaymentCertificateParamBody;
 import com.fapiao.neon.param.in.SyncInvoiceParamBody;
 import com.pwc.common.utils.PageUtils;
 import com.pwc.modules.input.entity.InputInvoiceCustomsEntity;
+import com.pwc.modules.input.entity.InputInvoiceEntity;
 import com.pwc.modules.input.entity.InputInvoiceSapEntity;
 
 import java.util.List;
@@ -103,6 +105,8 @@ public interface InputInvoiceCustomsService extends IService<InputInvoiceCustoms
      * @return
      */
     Map saveVoucherPush(List<Map<String,Object>> params);
+
+    PageUtils getMonthCredBeforeResult(Map<String, Object> params);
     /**
      * 作废(退票)
      */

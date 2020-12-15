@@ -80,7 +80,7 @@ public class InputInvoiceEntity implements Serializable {
     private String invoiceAuthPeriod;
     private String invoiceDeductibleResult; //认证结果
     private Date authDate; // 认证时间(new)
-    private String invoiceAuthDate; //认证日期
+        private String invoiceAuthDate; //认证日期
     private Boolean verfy; //认证
     @TableField(exist = false)
     private List<String> fileList;
@@ -101,7 +101,7 @@ public class InputInvoiceEntity implements Serializable {
     @TableField(exist = false)
     private List<String> InvoiceBatchNumberList;
     @TableField(exist = false)
-    @ExcelField(title = "上传人", align = 1, sort = 170)
+/*    @ExcelField(title = "上传人", align = 1, sort = 170)*/
     private String createUserName;
     @TableField(exist = false)
     private String priceStr;
@@ -233,7 +233,7 @@ public class InputInvoiceEntity implements Serializable {
      *
      * @param Related
      */
-    @ExcelField(title = "发票分类", align = 1, sort = 120)
+    @ExcelField(title = "发票分类", align = 1, sort = 120, dictType = "invoiceClass")
     private String invoiceClass;
     /**
      * 修改发票分类原因

@@ -58,12 +58,33 @@ public class InputConstant {
 
     private static Map<String, String> INVOICE_STYLE = Maps.newHashMap();
     private static Map<String, String> SAP_SORT = Maps.newHashMap();
+    private static Map<String, String> DEDUCTIBLE_MAP = Maps.newHashMap();
+    private static Map<String, String> ENTRY_STATE_MAP = Maps.newHashMap();
+    private static Map<String, String>  STATISTICS_STATE_MAP = Maps.newHashMap();
 
 
     static {
         STATUS_MAP.put("1", "正常");
         STATUS_MAP.put("2", "异常");
         ALL.put("status", STATUS_MAP);
+
+        ENTRY_STATE_MAP.put("0", "未入账");
+        ENTRY_STATE_MAP.put("1", "已入账");
+        ENTRY_STATE_MAP.put("2", "入账异常");
+        ALL.put("entryState", ENTRY_STATE_MAP);
+
+        STATISTICS_STATE_MAP.put("0", "未统计确认");
+        STATISTICS_STATE_MAP.put("1", "统计确认成功");
+        STATISTICS_STATE_MAP.put("2", "统计确认失败");
+        ALL.put("statisticsState", STATISTICS_STATE_MAP);
+
+        DEDUCTIBLE_MAP.put("0", "未勾选认证");
+        DEDUCTIBLE_MAP.put("1", "已勾选认证");
+        DEDUCTIBLE_MAP.put("2", "勾选中");
+        DEDUCTIBLE_MAP.put("3", "勾选认证失败");
+        DEDUCTIBLE_MAP.put("4", "撤销勾选认证中");
+        DEDUCTIBLE_MAP.put("5", "已作废");
+        ALL.put("deductible", DEDUCTIBLE_MAP);
 
         SAP_SORT.put("0", "发票");
         SAP_SORT.put("1", "海关通知单");
@@ -445,7 +466,7 @@ public class InputConstant {
 
     /**
      * 发票分类(0:NonPo Related; 1:MRKO; 2:DFU; 3:EDI; 4:R&D_外部; 5:IC_R&D; 6:IC_RRB; 7:IC_非R&D; 8:Red-letter VAT; 9:General)
-     * @param Related
+     * @param
      */
     public enum InvoiceClass {
         /**  NonPo Related */
