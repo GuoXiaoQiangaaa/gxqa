@@ -20,6 +20,7 @@ import com.fapiao.neon.param.PaymentCertificate;
 import com.fapiao.neon.param.PaymentCertificateParamBody;
 import com.fapiao.neon.param.in.*;
 import com.pwc.common.annotation.ApiLogFilter;
+import com.pwc.common.annotation.DataFilter;
 import com.pwc.common.exception.RRException;
 import com.pwc.common.utils.*;
 import com.pwc.common.utils.apidemo.utils.IDGenerator;
@@ -76,7 +77,14 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         String payNo = (String) params.get("payNo");
-        String purchaserName = (String) params.get("purchaserName");
+        String deptId = ParamsMap.findMap(params, "deptId");
+        String taxCode = null;
+        if(deptId != null){
+            SysDeptEntity deptEntity = sysDeptService.getById(deptId);
+            if(deptEntity != null){
+                taxCode = deptEntity.getTaxCode();
+            }
+        }
         String taxNo = (String) params.get("taxNo");
         String deductible = (String) params.get("deductible");
         String entryState = (String) params.get("entryState");
@@ -102,7 +110,7 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
                 new Query<InputInvoiceCustomsEntity>().getPage(params),
                 new QueryWrapper<InputInvoiceCustomsEntity>()
                         .eq(StringUtils.isNotBlank(payNo), "pay_no", payNo)
-                        .eq(StringUtils.isNotBlank(purchaserName), "purchaser_name", purchaserName)
+                        .eq(StringUtils.isNotBlank(taxCode), "purchaser_tax_no", taxCode)
                         .eq(StringUtils.isNotBlank(taxNo), "purchaser_tax_no", taxNo)
                         .eq(StringUtils.isNotBlank(deductible), "deductible", deductible)
                         .eq(StringUtils.isNotBlank(entryState), "entry_state", entryState)
@@ -143,10 +151,6 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
         paramBody.setServiceType("0");
         CallResult<Entity> aa = collectCustomsClient.apply(paramBody);
         if (aa.isSuccess()) {
-/*            CommonParamBody body = new CommonParamBody();
-            body.setRequestId(aa.getData().getRequestId());
-            CallResult<CollectCustomsResultInfo> bb = collectCustomsClient.results(body);
-            System.out.println(bb.getData().getResults().toString());*/
             return aa.getData().getRequestId();
         } else {
             return aa.getExceptionResult().getMessage();

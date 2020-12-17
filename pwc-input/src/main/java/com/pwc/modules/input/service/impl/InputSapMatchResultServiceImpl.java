@@ -566,7 +566,7 @@ public class InputSapMatchResultServiceImpl extends ServiceImpl<InputSqpMatchRes
         List<InputInvoiceEntity> customsEntitys = inputInvoiceService.getCertificationList(params);
         for (InputInvoiceEntity invoice : customsEntitys) {
             certificationTax = certificationTax.add(new BigDecimal(invoice.getInvoiceTaxPrice().toString()));
-            if ((invoice.getApplyStatus()).equals(InputConstant.InvoiceMatch.MATCH_NO.getValue())) {
+            if ((invoice.getInvoiceMatch()).equals(InputConstant.InvoiceMatch.MATCH_NO.getValue())) {
                 monthCertTax = monthCertTax.add(new BigDecimal(invoice.getInvoiceTaxPrice().toString()));
             } else {
                 Date date = DateUtils.stringToDate(invoice.getEntryDate(), "yyyy-MM-dd");

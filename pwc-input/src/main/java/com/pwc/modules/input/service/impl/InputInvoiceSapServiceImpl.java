@@ -180,6 +180,7 @@ public class InputInvoiceSapServiceImpl extends ServiceImpl<InputInvoiceSapDao, 
     public boolean updateListByDeptId(Map<String, Object> params) {
         List<InputInvoiceSapEntity> sapEntitys = this.list(
                 new QueryWrapper<InputInvoiceSapEntity>()
+                .ne("company_code","2520")
         );
         for (int i = 0;i < sapEntitys.size();i++){
             this.paraphraseParams(sapEntitys.get(i));
@@ -253,43 +254,59 @@ public class InputInvoiceSapServiceImpl extends ServiceImpl<InputInvoiceSapDao, 
             entity.setCurr("0");
         }*/
         // 对类型转义 1:发票; 2:海关通知单; 3:红字通知单
-        if (org.apache.commons.lang3.StringUtils.contains(accout, "165101") && amountInDoc.compareTo(BigDecimal.ZERO) < 0) {
-            entity = inputRedInvoiceService.voluntaryEntry(entity);
-            entity.setMatchType("3");
-            SysDeptEntity deptEntity = sysDeptService.getByDeptCode("CBC");
-            entity.setDeptId(String.valueOf(deptEntity.getDeptId()));
-            //查询部门ID
-        } else if (org.apache.commons.lang3.StringUtils.contains(accout, "165102")) {
-            entity = inputInvoiceCustomsService.updateByEntry(entity);
-            entity.setMatchType("2");
-            //查询部门ID
-            if (entity.getReference() != null) {
-                if (entity.getReference().contains("IMPORT HQ") || entity.getReference().contains("Z04 IMPORT HQ")) {
-                    SysDeptEntity deptEntity = sysDeptService.getByDeptCode("CBC");
+        if(entity.getCompanyCode().equals("2520")){
+            if (org.apache.commons.lang3.StringUtils.contains(accout, "165101") && amountInDoc.compareTo(BigDecimal.ZERO) < 0) {
+                entity = inputRedInvoiceService.voluntaryEntry(entity);
+                entity.setMatchType("3");
+                SysDeptEntity deptEntity = sysDeptService.getByDeptCode("CBC");
+                entity.setDeptId(String.valueOf(deptEntity.getDeptId()));
+                //查询部门ID
+            } else if (org.apache.commons.lang3.StringUtils.contains(accout, "165102")) {
+                entity = inputInvoiceCustomsService.updateByEntry(entity);
+                entity.setMatchType("2");
+                //查询部门ID
+                if (entity.getReference() != null) {
+                    if (entity.getReference().contains("IMPORT HQ") || entity.getReference().contains("Z04 IMPORT HQ")) {
+                        SysDeptEntity deptEntity = sysDeptService.getByDeptCode("CBC");
+                        entity.setDeptId(String.valueOf(deptEntity.getDeptId()));
+                    }else if(entity.getReference().contains("IMPORT GZ")){
+                        SysDeptEntity deptEntity = sysDeptService.getByDeptCode("CBC-GZ");
+                        entity.setDeptId(String.valueOf(deptEntity.getDeptId()));
+                    }
+                }
+            } else if (org.apache.commons.lang3.StringUtils.contains(accout, "165101")) {
+                entity.setMatchType("1");
+                entity = inputInvoiceService.voluntaryEntry(entity);
+                //查询部门ID
+                SysDeptEntity deptEntity = sysDeptService.getByDeptCode("CBC");
+                entity.setDeptId(String.valueOf(deptEntity.getDeptId()));
+            } else if (org.apache.commons.lang3.StringUtils.contains(accout, "165103")) {
+                entity.setMatchType("1");
+                if (entity.getText().contains("CBC-DL")) {
+                    SysDeptEntity deptEntity = sysDeptService.getByDeptCode("CBC-DL");
                     entity.setDeptId(String.valueOf(deptEntity.getDeptId()));
-                }else if(entity.getReference().contains("IMPORT GZ")){
-                    SysDeptEntity deptEntity = sysDeptService.getByDeptCode("CBC-GZ");
+                }else if(entity.getText().contains("CBC-SH")){
+                    SysDeptEntity deptEntity = sysDeptService.getByDeptCode("CBC-SH");
+                    entity.setDeptId(String.valueOf(deptEntity.getDeptId()));
+                }else{
+                    SysDeptEntity deptEntity = sysDeptService.getByDeptCode("CBC");
                     entity.setDeptId(String.valueOf(deptEntity.getDeptId()));
                 }
             }
-        } else if (org.apache.commons.lang3.StringUtils.contains(accout, "165101")) {
-            entity.setMatchType("1");
-            entity = inputInvoiceService.voluntaryEntry(entity);
-            //查询部门ID
-            SysDeptEntity deptEntity = sysDeptService.getByDeptCode("CBC");
-            entity.setDeptId(String.valueOf(deptEntity.getDeptId()));
-        }else if (org.apache.commons.lang3.StringUtils.contains(accout, "165103")) {
-            entity.setMatchType("1");
-            if (entity.getText().contains("CBC-DL")) {
-                SysDeptEntity deptEntity = sysDeptService.getByDeptCode("CBC-DL");
-                entity.setDeptId(String.valueOf(deptEntity.getDeptId()));
-            }else if(entity.getText().contains("CBC-SH")){
-                SysDeptEntity deptEntity = sysDeptService.getByDeptCode("CBC-SH");
-                entity.setDeptId(String.valueOf(deptEntity.getDeptId()));
-            }else{
-                SysDeptEntity deptEntity = sysDeptService.getByDeptCode("CBC");
-                entity.setDeptId(String.valueOf(deptEntity.getDeptId()));
+        }else{
+            SysDeptEntity deptEntity = sysDeptService.getBySapDeptCode(entity.getCompanyCode());
+            if (org.apache.commons.lang3.StringUtils.contains(accout, "165101") && amountInDoc.compareTo(BigDecimal.ZERO) < 0) {
+                entity = inputRedInvoiceService.voluntaryEntry(entity);
+                entity.setMatchType("3");
+            } else if (org.apache.commons.lang3.StringUtils.contains(accout, "165102")) {
+                entity = inputInvoiceCustomsService.updateByEntry(entity);
+                entity.setMatchType("2");
+            } else if (org.apache.commons.lang3.StringUtils.contains(accout, "165101")) {
+                entity.setMatchType("1");
+                entity = inputInvoiceService.voluntaryEntry(entity);
             }
+            //查询部门ID
+            entity.setDeptId(String.valueOf(deptEntity.getDeptId()));
         }
         return entity;
     }

@@ -1,7 +1,9 @@
+/*
 package com.pwc.common.config;
 
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -31,10 +33,13 @@ public class ThreadPoolTaskConfig  implements AsyncConfigurer {
         executor.initialize();
         return executor;
     }
-    /*异步任务中异常处理*/
+    */
+/*异步任务中异常处理*//*
+
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         // TODO Auto-generated method stub
         return new SimpleAsyncUncaughtExceptionHandler();
     }
 }
+*/

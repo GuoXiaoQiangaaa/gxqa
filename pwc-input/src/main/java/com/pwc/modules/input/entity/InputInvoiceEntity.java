@@ -28,10 +28,9 @@ public class InputInvoiceEntity implements Serializable {
 
     @TableId
     private Integer id;
-    //    @ExcelField(title="发票凭证编号", align=1, sort=170)
     private String entrySuccessCode; // 入账凭证编号
-    //    @ExcelField(title="会计凭证编号", align=1, sort=180)
     private String belnr;
+    @ExcelField(title = "备注", align = 1, sort = 210)
     private String invoiceRemarks; // 备注
     private Integer createBy; // 上传人
     @ExcelField(title = "发票代码", align = 1, sort = 10)
@@ -40,47 +39,49 @@ public class InputInvoiceEntity implements Serializable {
     @ExcelField(title = "发票号码", align = 1, sort = 20)
     private String invoiceNumber;        // 发票号
     private String invoicePrintedNumber;  // 号码小号
-    @ExcelField(title = "界面金额（含税）", align = 1, sort = 80)
+    @ExcelField(title = "总金额(含税)", align = 1, sort = 140)
     private BigDecimal invoiceTotalPrice;        // 界面金额（含税）
-    @ExcelField(title = "界面金额（不含税）", align = 1, sort = 90)
+    @ExcelField(title = "总金额(不含税)", align = 1, sort = 150)
     private BigDecimal invoiceFreePrice;        // 界面金额（不含税）
-    @ExcelField(title = "税额", align = 1, sort = 110)
+    @ExcelField(title = "总税额", align = 1, sort = 160)
     private BigDecimal invoiceTaxPrice;        // 税额
     private String invoiceCheckCode;        // 校验码
-    @ExcelField(title = "开票日期", align = 1, sort = 150)
+    @ExcelField(title = "开票日期", align = 1, sort = 240)
     private String invoiceCreateDate;        // 开票日期
     private String invoiceType;        // 发票类型
-    @ExcelField(title = "发票类型", align = 1, sort = 120, dictType = "invoiceEntity")
+    @ExcelField(title = "发票类型", align = 1, sort = 180, dictType = "invoiceEntity")
     private String invoiceEntity;        // 发票实体
     private String invoiceFromto;        // 发票来源
-    //    @ExcelField(title="上传方式", align=1, sort=,dictType ="invoiceUploadType")
+    @ExcelField(title="上传方式", align=1, sort=50,dictType ="invoiceUploadType")
     private String invoiceUploadType;        // 上传方式 上传方式 0 抵账库上传 1：启动扫描仪上传 2： 手工上传电子发票
     private String invoiceImage;        // 票据图
     @TableField(exist = false)
     private String imageName;        // 票据名称
-    @ExcelField(title = "发票状态", align = 1, sort = 200)
+    @ExcelField(title = "发票状态", align = 1, sort = 280)
     private String invoiceStatus;        // 发票状态
-    @ExcelField(title = "分组号", align = 1, sort = 30)
+    @ExcelField(title = "批次号", align = 1, sort = 30)
     private String invoiceBatchNumber;        // 批次号
-    @ExcelField(title = "金税发票状态", align = 1, sort = 140, dictType = "goldenTaxStatus")
+    @ExcelField(title = "金税发票状态", align = 1, sort = 190, dictType = "goldenTaxStatus")
     //（0 正常，1 失控，2 作废，3 红冲)
     private String invoiceRecognition;
     //    @ExcelField(title="快递单号", align=1, sort=160)
     private String expressNumber; // 寄件码
     private String invoiceReturn;        // 是否退票
     private String invoiceDelete;        // 是否失效
-    @ExcelField(title = "上传日期", align = 1, sort = 160)
+    @ExcelField(title = "上传日期", align = 1, sort = 250)
     private String invoiceUploadDate;   //上传日期
     //    @ExcelField(title="验真分类", align=1, sort=240)
     private String invoiceVerifyTruth; //验真分类
     //    @ExcelField(title="invoice_transout",align=1, sort=240)
     private String invoiceTransOut; //进项转出标记
+    @ExcelField(title = "认证月份", align = 1, sort = 220)
     private String invoiceDeductiblePeriod; // 税款所属期
     @TableField(exist = false)
     private String invoiceAuthPeriod;
     private String invoiceDeductibleResult; //认证结果
     private Date authDate; // 认证时间(new)
-        private String invoiceAuthDate; //认证日期
+    @ExcelField(title = "认证日期", align = 1, sort = 230)
+    private String invoiceAuthDate; //认证日期
     private Boolean verfy; //认证
     @TableField(exist = false)
     private List<String> fileList;
@@ -88,20 +89,19 @@ public class InputInvoiceEntity implements Serializable {
     private String uploadType; // 上传方式 1：启动扫描仪上传 2： 上传电子发票
     @TableField(exist = false)
     private String[] ids3;
-    @ExcelField(title = "购方企业名称", align = 1, sort = 40)
+    @ExcelField(title = "购方名称", align = 1, sort = 90)
     private String invoicePurchaserCompany; //购方企业名称
-    @ExcelField(title = "购方税号", align = 1, sort = 50)
+    @ExcelField(title = "购方纳税人识别号（税号）", align = 1, sort = 100)
     private String invoicePurchaserParagraph;//购方税号
-    @ExcelField(title = "销方企业名称", align = 1, sort = 60)
+    @ExcelField(title = "销方名称", align = 1, sort = 110)
     private String invoiceSellCompany; //销方企业名称
-    @ExcelField(title = "销方税号", align = 1, sort = 70)
+    @ExcelField(title = "销方纳税人识别号（税号）", align = 1, sort = 120)
     private String invoiceSellParagraph; //销方税号
     @TableField(exist = false)
     private String batchNumber;
     @TableField(exist = false)
     private List<String> InvoiceBatchNumberList;
     @TableField(exist = false)
-/*    @ExcelField(title = "上传人", align = 1, sort = 170)*/
     private String createUserName;
     @TableField(exist = false)
     private String priceStr;
@@ -115,6 +115,7 @@ public class InputInvoiceEntity implements Serializable {
     private List<String> picUrlList;
     //商品名称
     @TableField(exist = false)
+    @ExcelField(title = "发票商品名称", align = 1, sort = 200)
     private String sphSpmc;
     private String invoiceAuthType; // 认证方式 1勾选 2 扫描
     private String invoiceAuthPattern; // 认证模式1抵扣 2退税
@@ -126,40 +127,27 @@ public class InputInvoiceEntity implements Serializable {
     /**
      * Report ID
      */
+    @ExcelField(title = "上传日期", align = 1, sort = 80)
     private String invoiceExpense;
     private String invoiceTransOutType;
-
-
-    private String applyStatus; // 统计状态 1:已撤消，2:已确认
-
+    @ExcelField(title = "统计状态", align = 1, sort = 290,dictType = "applyStatus")
+    private String applyStatus; // 统计状态 0-未统计 1-统计确认成功 2-统计确认失败
     private String entryMessage;
-
     private Integer companyId; // 所属公司Id
-
     private String repeatBill;//重复发票状态 0：不重复 1：重复
-
     private String invoiceEntryMessage; // 入账结果
-
     private String invoicePurchaserBankAccount; //购方银行及账号
-
     private String invoicePurchaserAddress; //购方地址电话
-
     private String invoiceSellBankAccount; //销方银行及账号
-
     private String invoiceSellAddress;  //销方地址电话
-
     private String invoiceDescription; // 二次验证失败
-    @ExcelField(title = "异常原因", align = 1, sort = 190)
     private String invoiceErrorDescription; //验真失败原因
-
     @TableField(exist = false)
     private List<InputMaterialDocumentEntity> materialDocumentEntityList; //关联物料表
     @TableField(exist = false)
     private String deductiblePeriodBegin;
     @TableField(exist = false)
     private String deductiblePeriodEnd;
-
-
     @TableField(exist = false)
     private String invoiceUploadDateArray;
     @TableField(exist = false)
@@ -188,7 +176,6 @@ public class InputInvoiceEntity implements Serializable {
     @TableField(exist = false)
     private String idma;
     private String invoiceCheckCodeDetails;
-
     @TableField(exist = false)
     private List<String> invoiceBatchNumbers;
     // @ExcelField(title="订单类型", align=1, sort=210)
@@ -203,53 +190,49 @@ public class InputInvoiceEntity implements Serializable {
     @TableField(exist = false)
     private BigDecimal outRatio;
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    @ExcelField(title = "更新日期", align = 1, sort = 180)
+    @ExcelField(title = "更新日期", align = 1, sort = 260)
     private Date updateTime;
-    @ExcelField(title = "上传时间", align = 1, sort = 180)
     private Date uploadCreateTime;
-    // 公司编码
     private String legalEntity;
     /**
      * 请求id来请求勾选结果
      */
     private String requestId;
-
     /**
      * 发票序号 YYYY_mm_dd: HH_mm_{{index}}
      */
     private String invoiceSeq;
-
     /**
      * 入账税额 (第三方回写)
      */
-
-
     /**
      * 5AP发票 4 Te发票 3 po 2 红 1 蓝 0 其他
      */
+    @ExcelField(title = "发票来源", align = 1, sort = 40, dictType = "invoiceStyle")
     private int invoiceStyle;
     /**
      * 发票分类(0:NonPo Related; 1:MRKO; 2:DFU; 3:EDI; 4:R&D_外部; 5:IC_R&D; 6:IC_RRB; 7:IC_非R&D; 8:Red-letter VAT; 9:General)
      *
      * @param Related
      */
-    @ExcelField(title = "发票分类", align = 1, sort = 120, dictType = "invoiceClass")
+    @ExcelField(title = "发票分类", align = 1, sort = 170, dictType = "invoiceClass")
     private String invoiceClass;
     /**
      * 修改发票分类原因
      */
     private String classReason;
-
-    @ExcelField(title = "税率", align = 1, sort = 100)
+    @ExcelField(title = "税率", align = 1, sort = 140)
     private String tax;
     @TableField(exist = false)
     /**是否多税率 0 否 1 是 */
+    @ExcelField(title = "是否多税率", align = 1, sort = 130)
     private String manyTax;
     /**
      * po号码
      *
      * @return
      */
+    @ExcelField(title = "po号码", align = 1, sort = 70)
     private String poNumber;
     /**
      * 关联上传id
@@ -261,6 +244,7 @@ public class InputInvoiceEntity implements Serializable {
      *
      * @return
      */
+    @ExcelField(title = "红字通知单编号", align = 1, sort = 60)
     private String redNoticeNumber;
 
     /**
@@ -279,6 +263,7 @@ public class InputInvoiceEntity implements Serializable {
     /**
      * 账票匹配标志
      */
+    @ExcelField(title = "入账状态", align = 1, sort = 270,dictType = "entryState")
     private String invoiceMatch;
     /**
      * 账票匹配日期

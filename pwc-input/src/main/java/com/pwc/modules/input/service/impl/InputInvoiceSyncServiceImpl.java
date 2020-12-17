@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fapiao.neon.client.in.*;
 import com.fapiao.neon.model.CallResult;
+import com.fapiao.neon.model.Entity;
 import com.fapiao.neon.model.in.*;
 import com.fapiao.neon.model.in.inspect.BaseInvoice;
 import com.fapiao.neon.param.in.*;
@@ -308,8 +309,7 @@ public class InputInvoiceSyncServiceImpl extends ServiceImpl<InputInvoiceSyncDao
                     throw new RRException("未查询到税号为:" + taxNo +"的企业进项信息");
                 }
                 /** 测试使用开始 */
-
-                if("1".equals(type)){
+/*                if("1".equals(type)){
                     companyEntity.setStatus(AuthCountStatusEnum.APPLYSUCCESS.getKey());
                 }else {
                     companyEntity.setStatus(AuthCountStatusEnum.NOTCOUNT.getKey());
@@ -317,11 +317,9 @@ public class InputInvoiceSyncServiceImpl extends ServiceImpl<InputInvoiceSyncDao
                 companyEntity.setRequestId(UUID.randomUUID().toString());
                 companyEntity.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
                 companyEntity.setUpdateTime(new Date());
-                companyService.updateById(companyEntity);
-
+                companyService.updateById(companyEntity);*/
                 /** 测试使用结束 */
-
-                /*StatisticsParamBody statisticsParamBody = new StatisticsParamBody();
+                StatisticsParamBody statisticsParamBody = new StatisticsParamBody();
                 statisticsParamBody.setStatisticsType(type);
                 statisticsParamBody.setTaxNo(taxNo);
                 // 调用申请/撤销统计接口
@@ -359,7 +357,7 @@ public class InputInvoiceSyncServiceImpl extends ServiceImpl<InputInvoiceSyncDao
                 }else {
                     log.error("申请/撤销统计税局接口无响应");
                     throw new RRException("接口无响应,请稍后重试");
-                }*/
+                }
             } catch (RRException e){
                 log.error("参数有误: {}", e);
                 throw e;
@@ -492,15 +490,14 @@ public class InputInvoiceSyncServiceImpl extends ServiceImpl<InputInvoiceSyncDao
 
                 /** 测试使用开始 */
 
-                companyEntity.setStatus(AuthCountStatusEnum.CONFIRMSUCCESS.getKey());
+               /* companyEntity.setStatus(AuthCountStatusEnum.CONFIRMSUCCESS.getKey());
                 companyEntity.setRequestId(UUID.randomUUID().toString());
                 companyEntity.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
                 companyEntity.setUpdateTime(new Date());
-                companyService.updateById(companyEntity);
+                companyService.updateById(companyEntity);*/
 
                 /** 测试使用结束 */
-
-                /*ConfirmParamBody confirmParamBody = new ConfirmParamBody();
+                ConfirmParamBody confirmParamBody = new ConfirmParamBody();
                 confirmParamBody.setTaxNo(taxNo);
                 confirmParamBody.setStatisticsTime(companyEntity.getStatisticsTime());
                 // 调用确认统计接口
@@ -531,7 +528,7 @@ public class InputInvoiceSyncServiceImpl extends ServiceImpl<InputInvoiceSyncDao
                 }else {
                     log.error("确认统计税局接口无响应");
                     throw new RRException("接口无响应,请稍后重试");
-                }*/
+                }
             } catch (RRException e){
                 log.error("参数有误: {}", e);
                 throw e;

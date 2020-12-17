@@ -620,7 +620,7 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
     @Override
     public void obsoleteEntryByRed(InputRedInvoiceEntity inputRedInvoice) {
         //删除红字通知单与发票关联关系
-        InputRedInvoiceEntity oldInputRedInvoiceEntity = super.getById(inputRedInvoice);
+        InputRedInvoiceEntity oldInputRedInvoiceEntity = super.getById(inputRedInvoice.getRedId());
         if (oldInputRedInvoiceEntity.getRedInvoiceNumber() != null && oldInputRedInvoiceEntity.getRedInvoiceCode() != null) {
             // 识别失败的发票状态 0:识别异常; 1:未识别; 3:部分识别; 4:识别失败
             List<String> status = Arrays.asList("0", "1", "3", "4");

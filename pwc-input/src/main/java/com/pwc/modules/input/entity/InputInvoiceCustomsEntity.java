@@ -30,17 +30,17 @@ public class InputInvoiceCustomsEntity implements Serializable {
 	/**
 	 * 海关缴款书号码
 	 */
-	@ExcelField(title="海关缴款书编号", align=1, sort=10)
+	@ExcelField(title="专用缴款书号码", align=1, sort=10)
 	private String payNo;
 	/**
 	 * 填发日期
 	 */
-	@ExcelField(title="填发日期", align=1, sort=70)
+	@ExcelField(title="填发日期", align=1, sort=30)
 	private String billingDate;
 	/**
 	 * 税款金额
 	 */
-	@ExcelField(title="税额", align=1, sort=50)
+	@ExcelField(title="税额", align=1, sort=40)
 	private String totalTax;
 	/**
 	 * 发票类型 17 海关缴款书
@@ -49,12 +49,11 @@ public class InputInvoiceCustomsEntity implements Serializable {
 	/**
 	 * 缴款单位税号
 	 */
-	@ExcelField(title="公司税号", align=1, sort=40)
 	private String purchaserTaxNo;
 	/**
 	 * 缴款单位名称
 	 */
-	@ExcelField(title="缴款单位名称", align=1, sort=10)
+	@ExcelField(title="所属公司", align=1, sort=50)
 	private String purchaserName;
 	/**
 	 * 勾选状态 0:未勾选认证; 1:已勾选认证; 2:勾选中; 3:勾选认证失败; 4:撤销勾选认证中; 5:已作废
@@ -64,12 +63,12 @@ public class InputInvoiceCustomsEntity implements Serializable {
 	/**
 	 * 勾选属期 YYYYMM
 	 */
-	@ExcelField(title="海关缴款书勾选所属期", align=1, sort=120)
+	@ExcelField(title="海关缴款书勾选所属期", align=1, sort=70)
 	private String deductiblePeriod;
 	/**
 	 * 勾选日期 YYYY-MM-DD
 	 */
-	@ExcelField(title="海关缴款书勾选日期", align=1, sort=130)
+	@ExcelField(title="海关缴款书勾选日期", align=1, sort=60)
 	private String deductibleDate;
 	/**
 	 * 勾选结果
@@ -77,6 +76,7 @@ public class InputInvoiceCustomsEntity implements Serializable {
 	 * 7:申请勾选月份已过期; 8:其它异常; 9:勾选类型错误; 11:有效税额异常(有效税额大于实际税额);
 	 * 12:当期已锁定; 13:勾选异常; 14:该缴款书已申请核查
 	 */
+	@ExcelField(title="认证接口返回信息", align=1, sort=80)
 	private String deductibleRes;
 	/**
 	 * 勾选类型  1-抵扣 2-退税 3-代办退税 4 -不抵扣 6-撤销抵扣 7-撤销不抵扣
@@ -93,7 +93,6 @@ public class InputInvoiceCustomsEntity implements Serializable {
 	/**
 	 * 有效税额 当deductibleMode=1、4、5时不为空
 	 */
-	@ExcelField(title="有效税额", align=1, sort=60)
 	private String effectiveTaxAmount;
 	/**
 	 * 逾期可勾选标志 0：默认值 1：可勾选逾期
@@ -124,7 +123,7 @@ public class InputInvoiceCustomsEntity implements Serializable {
 	/**
 	 * 入账状态0 1已入账 2匹配差异
 	 */
-	@ExcelField(title="海关缴款书入账状态", align=1, sort=100,dictType ="entryState")
+	//@ExcelField(title="海关缴款书入账状态", align=1, sort=100,dictType ="entryState")
 	private String entryState;
 	/**
 	 * 入账类型 0 定时 1手工
@@ -139,23 +138,20 @@ public class InputInvoiceCustomsEntity implements Serializable {
 	/**---------------
 	 * 凭证编号
 	 */
-	@ExcelField(title="凭证编号", align=1, sort=80)
 	private String voucherCode;
 	/**
 	 * 统计状态 0 未统计确认 1 统计确认成功 2 统计确认失败
 	 */
-	@ExcelField(title="统计确认状态", align=1, sort=110,dictType ="statisticsState")
+	@ExcelField(title="统计确认状态", align=1, sort=100,dictType ="statisticsState")
 	private String statisticsState;
 
 	/**
 	 * 公司代码
 	 */
-	@ExcelField(title="公司代码", align=1, sort=180)
 	private String companyCode;
 	/**
 	 * 公司名称
 	 */
-	@ExcelField(title="公司名称", align=1, sort=180)
 	private String companyName;
 	/**
 	 * 进口报关单号
@@ -204,7 +200,7 @@ public class InputInvoiceCustomsEntity implements Serializable {
 	/**
 	 * 批次号(格式:yyyyMMdd-1)
 	 */
-	@ExcelField(title="批次号", align=1, sort=30)
+	@ExcelField(title="批次号", align=1, sort=20)
 	private String batchNo;
 	/**
 	 * 年月

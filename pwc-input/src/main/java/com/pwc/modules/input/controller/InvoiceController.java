@@ -997,7 +997,7 @@ public class InvoiceController {
         invoiceService.checkStstus(list);
         try {
             String fileName = title + DateUtils.format(new Date(), "yyyyMMddHHmmss") + ".xlsx";
-            new ExportExcel(title, InputInvoiceListVo.class).setDataList(list).write(response, fileName).dispose();
+            new ExportExcel(title, InputInvoiceEntity.class).setDataList(list).write(response, fileName).dispose();
             return null;
         } catch (Exception e) {
             e.printStackTrace();

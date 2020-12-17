@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pwc.modules.input.dao.InputInvoiceCustomsGatherDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.pwc.modules.input.entity.InputInvoiceCustomsGatherEntity" id="inputInvoiceCustomsGatherMap">
+        <result property="id" column="id"/>
+        <result property="period" column="period"/>
+        <result property="payNo" column="pay_no"/>
+        <result property="billingDate" column="billing_date"/>
+        <result property="totalTax" column="total_tax"/>
+        <result property="invoiceType" column="invoice_type"/>
+        <result property="purchaserTaxNo" column="purchaser_tax_no"/>
+        <result property="purchaserName" column="purchaser_name"/>
+        <result property="infoSources" column="info_sources"/>
+        <result property="effectiveTaxAmount" column="effective_tax_amount"/>
+        <result property="abnormalType" column="abnormal_type"/>
+        <result property="uploadType" column="upload_type"/>
+        <result property="auditStatus" column="audit_status"/>
+        <result property="gatherDate" column="gather_date"/>
+        <result property="gatherStatus" column="gather_status"/>
+        <result property="uploadDate" column="upload_date"/>
+        <result property="uploadBy" column="upload_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="batchNo" column="batch_no"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="requestId" column="request_id"/>
+    </resultMap>
+
+
+    <select id="getListByShow" resultType="int">
+        SELECT count(1)
+        FROM input_invoice_customs_gather a
+        where a.del_flag = 0
+    </select>
+
+</mapper>

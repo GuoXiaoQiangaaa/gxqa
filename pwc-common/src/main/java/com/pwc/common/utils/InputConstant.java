@@ -60,13 +60,49 @@ public class InputConstant {
     private static Map<String, String> SAP_SORT = Maps.newHashMap();
     private static Map<String, String> DEDUCTIBLE_MAP = Maps.newHashMap();
     private static Map<String, String> ENTRY_STATE_MAP = Maps.newHashMap();
-    private static Map<String, String>  STATISTICS_STATE_MAP = Maps.newHashMap();
+    private static Map<String, String> STATISTICS_STATE_MAP = Maps.newHashMap();
+    private static Map<String, String> GATHERSTATUS_MAP = Maps.newHashMap();
+    private static Map<String, String> AUDITSTATUS_MAP = Maps.newHashMap();
+    private static Map<String, String> ABNORMALTYPE_MAP = Maps.newHashMap();
+    private static Map<String, String> APPLYSTATUS_MAP = Maps.newHashMap();
+    private static Map<String, String> INVOICESTATUS_MAP = Maps.newHashMap();
 
 
     static {
         STATUS_MAP.put("1", "正常");
         STATUS_MAP.put("2", "异常");
         ALL.put("status", STATUS_MAP);
+
+        APPLYSTATUS_MAP.put("0", "未统计");
+        APPLYSTATUS_MAP.put("1", "统计确认成功");
+        APPLYSTATUS_MAP.put("2", "统计确认失败");
+        ALL.put("applyStatus", APPLYSTATUS_MAP);
+
+        ABNORMALTYPE_MAP.put("1", "成功");
+        ABNORMALTYPE_MAP.put("2", "缴款书号码不合法");
+        ABNORMALTYPE_MAP.put("3", "无此税号");
+        ABNORMALTYPE_MAP.put("4", "填发日期已逾期");
+        ABNORMALTYPE_MAP.put("5", "税款金额不合法（不能为负数）");
+        ABNORMALTYPE_MAP.put("6", "已采集（已经做过采集）");
+        ABNORMALTYPE_MAP.put("7", "已存在（未认证或已认证）");
+        ABNORMALTYPE_MAP.put("8", "其它异常");
+        ABNORMALTYPE_MAP.put("9", "不符合不符录入条件");
+        ALL.put("abnormalType", ABNORMALTYPE_MAP);
+
+        AUDITSTATUS_MAP.put("0", "稽核中");
+        AUDITSTATUS_MAP.put("1", "相符");
+        AUDITSTATUS_MAP.put("2", "不符");
+        AUDITSTATUS_MAP.put("3", "缺联");
+        AUDITSTATUS_MAP.put("4", "重号");
+        AUDITSTATUS_MAP.put("5", "历史相符");
+        AUDITSTATUS_MAP.put("99", "已撤销");
+        ALL.put("auditStatus", AUDITSTATUS_MAP);
+
+        GATHERSTATUS_MAP.put("1", "采集中");
+        GATHERSTATUS_MAP.put("2", "采集成功");
+        GATHERSTATUS_MAP.put("3", "采集失败");
+        GATHERSTATUS_MAP.put("4", "申请采集失败");
+        ALL.put("gatherStatus", GATHERSTATUS_MAP);
 
         ENTRY_STATE_MAP.put("0", "未入账");
         ENTRY_STATE_MAP.put("1", "已入账");
@@ -175,56 +211,81 @@ public class InputConstant {
         ALL.put("invoiceFromto", INVOICE_FROMTO_MAP);
 
         INVOICE_UPLOADTYPE_MAP.put("0", "抵账库同步");
-        INVOICE_UPLOADTYPE_MAP.put("1", "扫描仪上传");
+        INVOICE_UPLOADTYPE_MAP.put("1", "自动上传");
         INVOICE_UPLOADTYPE_MAP.put("2", "手工上传");
+        INVOICE_UPLOADTYPE_MAP.put("3", "Excel上传");
         ALL.put("invoiceUploadType", INVOICE_UPLOADTYPE_MAP);
 
         INVOICE_VERIFYTRYTH_MAP.put("1", "自动验真");
         INVOICE_VERIFYTRYTH_MAP.put("2", "手动验真");
         ALL.put("invoiceVerifyTruth", INVOICE_VERIFYTRYTH_MAP);
 
-        TOLERANCE_FLAG_MAP.put("0","待调差");
-        TOLERANCE_FLAG_MAP.put("1","调差中");
-        TOLERANCE_FLAG_MAP.put("2","调差完成");
+        TOLERANCE_FLAG_MAP.put("0", "待调差");
+        TOLERANCE_FLAG_MAP.put("1", "调差中");
+        TOLERANCE_FLAG_MAP.put("2", "调差完成");
         ALL.put("toleranceFlag", TOLERANCE_FLAG_MAP);
 
 
-        UPDOLD_STATE.put("0","未识别");
-        UPDOLD_STATE.put("1","识别失败");
-        UPDOLD_STATE.put("2","识别成功");
-        UPDOLD_STATE.put("3","重复识别");
+        UPDOLD_STATE.put("0", "未识别");
+        UPDOLD_STATE.put("1", "识别失败");
+        UPDOLD_STATE.put("2", "识别成功");
+        UPDOLD_STATE.put("3", "重复识别");
         ALL.put("UpdoldState", UPDOLD_STATE);
 
-        INVOICE_ENTITY.put("1","增值税专用发票");
-        INVOICE_ENTITY.put("4","增值税普通发票");
-        INVOICE_ENTITY.put("10","增值税电子普通发票");
-        ALL.put("invoiceEntity",INVOICE_ENTITY);
+        INVOICE_ENTITY.put("1", "增值税专用发票");
+        INVOICE_ENTITY.put("4", "增值税普通发票");
+        INVOICE_ENTITY.put("10", "增值税电子普通发票");
+        ALL.put("invoiceEntity", INVOICE_ENTITY);
 
-        GOLDENTAX_STATUS.put("0","正常");
-        GOLDENTAX_STATUS.put("1","失控");
-        GOLDENTAX_STATUS.put("2","作废");
-        GOLDENTAX_STATUS.put("3","红冲");
-        ALL.put("goldenTaxStatus",GOLDENTAX_STATUS);
+        GOLDENTAX_STATUS.put("0", "正常");
+        GOLDENTAX_STATUS.put("1", "失控");
+        GOLDENTAX_STATUS.put("2", "作废");
+        GOLDENTAX_STATUS.put("3", "红冲");
+        ALL.put("goldenTaxStatus", GOLDENTAX_STATUS);
 
-        INVOICE_CLASS.put("0","NonPo Related");
-        INVOICE_CLASS.put("1","MRKO");
-        INVOICE_CLASS.put("2","DFU");
-        INVOICE_CLASS.put("3","EDI");
-        INVOICE_CLASS.put("4","R&D_外部");
-        INVOICE_CLASS.put("5","IC_R&D");
-        INVOICE_CLASS.put("6","IC_RRB");
-        INVOICE_CLASS.put("7","IC_非R&D");
-        INVOICE_CLASS.put("8","Red-letter VAT");
-        INVOICE_CLASS.put("9","General");
-        ALL.put("invoiceClass",INVOICE_CLASS);
+        INVOICE_CLASS.put("0", "NonPo Related");
+        INVOICE_CLASS.put("1", "MRKO");
+        INVOICE_CLASS.put("2", "DFU");
+        INVOICE_CLASS.put("3", "EDI");
+        INVOICE_CLASS.put("4", "R&D_外部");
+        INVOICE_CLASS.put("5", "IC_R&D");
+        INVOICE_CLASS.put("6", "IC_RRB");
+        INVOICE_CLASS.put("7", "IC_非R&D");
+        INVOICE_CLASS.put("8", "Red-letter VAT");
+        INVOICE_CLASS.put("9", "General");
+        ALL.put("invoiceClass", INVOICE_CLASS);
 
-        INVOICE_STYLE.put("0","其他");
-        INVOICE_STYLE.put("1","蓝字发票");
-        INVOICE_STYLE.put("2","红字发票");
-        INVOICE_STYLE.put("3","PO发票");
-        INVOICE_STYLE.put("4","TE发票");
-        INVOICE_STYLE.put("5","AP发票");
+        INVOICE_STYLE.put("0", "其他");
+        INVOICE_STYLE.put("1", "蓝字发票");
+        INVOICE_STYLE.put("2", "红字发票");
+        INVOICE_STYLE.put("3", "PO发票");
+        INVOICE_STYLE.put("4", "TE发票");
+        INVOICE_STYLE.put("5", "AP发票");
         ALL.put("invoiceStyle", INVOICE_STYLE);
+
+        INVOICESTATUS_MAP.put("2", "识别失败");
+        INVOICESTATUS_MAP.put("3", "待验真（识别成功）");
+        INVOICESTATUS_MAP.put("4", "验真失败");
+        INVOICESTATUS_MAP.put("5", "验真成功");
+        INVOICESTATUS_MAP.put("6", "匹配失败");
+        INVOICESTATUS_MAP.put("7", "待入账（匹配成功）");
+        INVOICESTATUS_MAP.put("8", "入账失败");
+        INVOICESTATUS_MAP.put("9", "待认证（入账成功）");
+        INVOICESTATUS_MAP.put("10", "认证中");
+        INVOICESTATUS_MAP.put("11", "撤销认证中");
+        INVOICESTATUS_MAP.put("12", "认证成功");
+        INVOICESTATUS_MAP.put("13", "认证失败");
+        INVOICESTATUS_MAP.put("14", "撤销认证失败");
+        INVOICESTATUS_MAP.put("18", "完成");
+        INVOICESTATUS_MAP.put("-1", "异常（重复（OCR识别）");
+        INVOICESTATUS_MAP.put("-2", "退票（入账前）");
+        INVOICESTATUS_MAP.put("-3", "购方信息不一致");
+        INVOICESTATUS_MAP.put("-4", "购方信息错误");
+        INVOICESTATUS_MAP.put("-5", "PO信息缺失");
+        INVOICESTATUS_MAP.put("-6", "税率异常");
+        INVOICESTATUS_MAP.put("-7", "作废");
+        INVOICESTATUS_MAP.put("-8", "初次验真失败");
+        ALL.put("invoiceStatu", INVOICESTATUS_MAP);
 
     }
 
@@ -345,7 +406,7 @@ public class InputConstant {
          */
         DIFFERENT_MESSAGE("-3"),
         /**
-         *   购方信息错误
+         * 购方信息错误
          */
         CHARGE_AGAINST("-4"),
         /**
@@ -363,8 +424,7 @@ public class InputConstant {
         /**
          * 初次验真失败
          */
-        FIRST_VERIFICATION_FAILED("-8")
-        ;
+        FIRST_VERIFICATION_FAILED("-8");
 
 
         private String value;
@@ -407,17 +467,18 @@ public class InputConstant {
         FLAG_TAXATION("1"),
         // 数据处理标志
         YES("1"),
-        NO("0")
-        ;
-        private  String value;
+        NO("0");
+        private String value;
 
         TaxationStats(String value) {
             this.value = value;
         }
+
         public String getValue() {
             return value;
         }
     }
+
     public enum InvoiceStyle {
         // 其他
         NULL(0),
@@ -430,18 +491,18 @@ public class InputConstant {
         // te
         TE(4),
         // AP
-        AP(5)
-        ;
-        ;
-        private  int value;
+        AP(5);;
+        private int value;
 
         InvoiceStyle(int value) {
             this.value = value;
         }
+
         public int getValue() {
             return value;
         }
     }
+
     public enum UpdoldState {
         // 未识别
         NULL("0"),
@@ -452,11 +513,12 @@ public class InputConstant {
         // 重复识别
         REPEAT("3"),
         ;
-        private  String value;
+        private String value;
 
         UpdoldState(String value) {
             this.value = value;
         }
+
         public String getValue() {
             return value;
         }
@@ -466,14 +528,21 @@ public class InputConstant {
 
     /**
      * 发票分类(0:NonPo Related; 1:MRKO; 2:DFU; 3:EDI; 4:R&D_外部; 5:IC_R&D; 6:IC_RRB; 7:IC_非R&D; 8:Red-letter VAT; 9:General)
+     *
      * @param
      */
     public enum InvoiceClass {
-        /**  NonPo Related */
+        /**
+         * NonPo Related
+         */
         NONPO_RELATED("0"),
-        /** MRKO */
+        /**
+         * MRKO
+         */
         MRKO("1"),
-        /** DFU */
+        /**
+         * DFU
+         */
         DFU("2"),
         //  EDI
         EDI("3"),
@@ -490,63 +559,71 @@ public class InputConstant {
         // General
         GENERAL("9"),
         ;
-        private  String value;
+        private String value;
 
         InvoiceClass(String value) {
             this.value = value;
         }
+
         public String getValue() {
             return value;
         }
     }
+
     /**
-     *    1 增值税专用发票  4 增值税普通发票  10 增值税电子普通发票
+     * 1 增值税专用发票  4 增值税普通发票  10 增值税电子普通发票
      */
-    public enum InvoiceEntity{
+    public enum InvoiceEntity {
         SPECIAL("1"),
         AVERAGE("4"),
         ELECTRON_AVERAGE("10"),
         ;
 
-        private  String value;
+        private String value;
 
         InvoiceEntity(String value) {
             this.value = value;
         }
+
         public String getValue() {
             return value;
         }
     }
+
     /**
-     *    -1识别失败 0识别重复  1识别成功 2匹配成功
+     * -1识别失败 0识别重复  1识别成功 2匹配成功
      */
-    public enum InvoicePo{
+    public enum InvoicePo {
         FAIL("-1"),
         REPEAT("0"),
         SUCCESS("1"),
-        MATCH("2")
-        ;
-        private  String value;
+        MATCH("2");
+        private String value;
+
         InvoicePo(String value) {
             this.value = value;
         }
+
         public String getValue() {
             return value;
         }
     }
+
     /**
      * 金税发票状态0 正常，1 失控，2 作废，3 红冲
      */
-    public enum GoldenTaxStatus{
+    public enum GoldenTaxStatus {
         NORMAL("0"),
         OUT_OF_CONTROL("1"),
         INVALID("2"),
         RED_PUNCH("3"),
         ;
-        private  String value;
+        private String value;
+
         GoldenTaxStatus(String value) {
             this.value = value;
         }
+
         public String getValue() {
             return value;
         }
@@ -555,14 +632,16 @@ public class InputConstant {
     /**
      * 通用状态0 否 1 是
      */
-    public enum YesAndNo{
+    public enum YesAndNo {
         NO("0"),
         YES("1"),
         ;
-        private  String value;
+        private String value;
+
         YesAndNo(String value) {
             this.value = value;
         }
+
         public String getValue() {
             return value;
         }
@@ -571,15 +650,17 @@ public class InputConstant {
     /**
      * 匹配状态0 否 1 是 2 失败
      */
-    public enum InvoiceMatch{
+    public enum InvoiceMatch {
         MATCH_NO("0"),
         MATCH_YES("1"),
         MATCH_ERROR("2"),
         ;
-        private  String value;
+        private String value;
+
         InvoiceMatch(String value) {
             this.value = value;
         }
+
         public String getValue() {
             return value;
         }

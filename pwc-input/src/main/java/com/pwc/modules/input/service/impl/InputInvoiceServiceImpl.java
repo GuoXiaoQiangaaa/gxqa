@@ -46,6 +46,7 @@ import com.pwc.modules.input.entity.vo.CertificationVo;
 import com.pwc.modules.input.entity.vo.InvoiceTeVo;
 import com.pwc.modules.input.entity.vo.MatchResultVo;
 import com.pwc.modules.input.service.*;
+import com.pwc.modules.input.threadpool.MyThreadFactory;
 import com.pwc.modules.sys.entity.SysDeptEntity;
 import com.pwc.modules.sys.service.SysConfigService;
 import com.pwc.modules.sys.service.SysDeptService;
@@ -71,6 +72,8 @@ import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -161,8 +164,8 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
     private InputInvoiceDao inputInvoiceDao;
     @Autowired
     private InputInvoiceService inputInvoiceService;
-    @Autowired
-    private TreadTasks treadTasks;
+/*    @Autowired
+    private TreadTasks treadTasks;*/
 
     /**
      * 票据总览页面方法
@@ -253,8 +256,8 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                         .eq(StringUtils.isNotBlank(invoiceEntity), "invoice_entity", invoiceEntity) // 发票类型
                         .eq(StringUtils.isNotBlank(invoiceMatch), "invoice_match", invoiceMatch)
                         .orderByDesc("upload_create_time", "invoice_batch_number") //先根据上传时间排序
-                //临时去掉验证
-                /* .apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))*/
+                        //临时去掉验证
+                        //.apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))
         );
         return new PageUtils(page);
     }
@@ -1754,6 +1757,9 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                         continue;
                     case "-7":
                         list.get(i).setInvoiceStatus("作废");
+                        continue;
+                    case "-8":
+                        list.get(i).setInvoiceStatus("初次验真失败");
                         continue;
                 }
             }
@@ -3895,6 +3901,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
             PageUtils page = queryPage(params, invoiceEntity);
             invoiceEntityList = (List<InputInvoiceEntity>) page.getList();
         }
+
         List<InputInvoiceEntity> list = getListAndCreateName(invoiceEntityList, createUserName);
         for (InputInvoiceEntity Entity : list) {
             if (Entity.getInvoiceStyle() == InputConstant.InvoiceStyle.PO.getValue()) {
@@ -3904,6 +3911,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                     poNumber = poEntity.getPoNumber() + "|";
                 }
                 Entity.setPoNumber(poNumber);
+
             }
 
             List<InputInvoiceMaterialEntity> invoiceMaterialEntityList = new ArrayList<>();
@@ -3911,6 +3919,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
             invoiceMaterialEntity.setInvoiceId(Entity.getId());
             invoiceMaterialEntityList = invoiceMaterialService.getByInvoiceId(invoiceMaterialEntity);
             Entity.setManyTax("否");
+            StringBuffer sphSpmc = new StringBuffer();
             if (invoiceMaterialEntityList.size() > 0) {
                 String tax = invoiceMaterialEntityList.get(0).getSphSlv();
                 for (InputInvoiceMaterialEntity materialEntity : invoiceMaterialEntityList) {
@@ -3918,6 +3927,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                         Entity.setManyTax("是");
                         tax = materialEntity.getSphSlv();
                     }
+                    sphSpmc.append(materialEntity.getSphSpmc() + ";");
                 }
                 if (tax.matches("^[-\\\\+]?([0-9]+\\\\.?)?[0-9]+$")) {
                     Entity.setTax(tax + "%");
@@ -3930,6 +3940,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                     Entity.setTax(nf.format(Entity.getInvoiceTaxPrice().divide(Entity.getInvoiceFreePrice(), 4)));
                 }
             }
+            Entity.setSphSpmc(sphSpmc.toString());
         }
         return list;
     }
@@ -4600,13 +4611,13 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
         invoiceEntity.setUploadId(uploadEntity.getUploadId());
         invoiceEntity.setUploadCreateTime(new Date());
         //异步执行
-        treadTasks.startTreadTask(invoiceEntity, uploadEntity);
-        //saveInvoice(invoiceEntity, uploadEntity);
+        MyThreadFactory.executorService.execute(()->{
+            saveInvoice(invoiceEntity, uploadEntity);
+        });
         return "0";
     }
 
 
-    /*@Override*/
     public InputInvoiceEntity saveInvoice(InputInvoiceEntity invoiceEntity, InputInvoiceUploadEntity uploadEntity) {
         SimpleDateFormat sdf_result = new SimpleDateFormat("yyyy-MM-dd");
         SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -4652,8 +4663,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                 }
             }
         } else {
-             content = httpUploadFile.findOCRByPo("http://81.68.180.156:7070/ocr/", invoiceEntity.getInvoiceImage());
-            //content = getInvoiceOCR(invoiceEntity.getInvoiceImage());
+            content = getInvoiceOCR(invoiceEntity.getInvoiceImage());
             JSONObject jo = JSONObject.fromObject(content);
             if ("invoice".equals(jo.get("type"))) {
                 JSONObject jos = JSONObject.fromObject(jo.get("scan_result"));
