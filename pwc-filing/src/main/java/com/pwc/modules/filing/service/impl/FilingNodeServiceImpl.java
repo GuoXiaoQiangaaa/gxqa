@@ -48,15 +48,8 @@ public class FilingNodeServiceImpl extends ServiceImpl<FilingNodeDao, FilingNode
         }
         QueryWrapper<FilingNodeEntity> queryWrapper = new QueryWrapper<FilingNodeEntity>()
                         .like(StringUtils.isNotBlank(deptName),"dept_name", deptName)
-                        .like(StringUtils.isNotBlank(globalDate), "create_time", globalDate);
-                        //.apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER));
-//        IPage<FilingNodeEntity> page = this.page(
-//                new Query<FilingNodeEntity>().getPage(params),
-//                new QueryWrapper<FilingNodeEntity>()
-//                        .like(StringUtils.isNotBlank(deptName),"dept_name", deptName)
-//                        .like(StringUtils.isNotBlank(globalDate), "create_time", globalDate)
-//                        .apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
-//        );
+                        .like(StringUtils.isNotBlank(globalDate), "create_time", globalDate)
+                        .apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER));
         int pageSise = MapUtil.getInt(params, "limit");
         int currPage = MapUtil.getInt(params, "page");
         Page<FilingNodeEntity> page = new Page<>(currPage,pageSise);

@@ -49,15 +49,8 @@ public class FilingProcessServiceImpl extends ServiceImpl<FilingProcessDao, Fili
         }
         QueryWrapper<FilingProcessEntity> queryWrapper = new QueryWrapper<FilingProcessEntity>()
                 .like(StringUtils.isNotBlank(deptName),"dept_name", deptName)
-                .like(StringUtils.isNotBlank(globalDate), "create_time", globalDate);
-            //    .apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER));
-//        IPage<FilingProcessEntity> page = this.page(
-//                new Query<FilingProcessEntity>().getPage(params),
-//                new QueryWrapper<FilingProcessEntity>()
-//                        .like(StringUtils.isNotBlank(deptName),"dept_name", deptName)
-//                        .like(StringUtils.isNotBlank(globalDate), "create_time", globalDate)
-//                        .apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
-//        );
+                .like(StringUtils.isNotBlank(globalDate), "create_time", globalDate)
+                .apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER));
         int pageSise = MapUtil.getInt(params, "limit");
         int currPage = MapUtil.getInt(params, "page");
         Page<FilingProcessEntity> page = new Page<>(currPage,pageSise);

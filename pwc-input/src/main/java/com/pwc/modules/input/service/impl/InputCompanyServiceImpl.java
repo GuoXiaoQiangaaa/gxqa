@@ -44,7 +44,7 @@ public class InputCompanyServiceImpl extends ServiceImpl<InputCompanyDao, InputC
         IPage<InputCompanyEntity> page = this.page(
                 new Query<InputCompanyEntity>().getPage(params),
                 new QueryWrapper<InputCompanyEntity>()
-                        //.apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))
+                        .apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))
         );
         for (InputCompanyEntity companyEntity : page.getRecords()) {
             SysDeptEntity deptEntity = sysDeptService.getById(companyEntity.getDeptId());

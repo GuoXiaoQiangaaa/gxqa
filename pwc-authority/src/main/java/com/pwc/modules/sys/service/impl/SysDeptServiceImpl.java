@@ -85,8 +85,8 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 						.like(StringUtils.isNotBlank(name),"name", name)
 						.like(StringUtils.isNotBlank(contact),"contact", contact)
 						.like(StringUtils.isNotBlank(owner),"owner", owner)
-						.eq(StringUtils.isNotBlank(parentId),"parent_id", parentId)
-						//.apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
+						//.eq(StringUtils.isNotBlank(parentId),"parent_id", parentId)
+						.apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
 						.orderByDesc("create_time")
 		);
 
@@ -126,8 +126,8 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 							.like("bank", keyWords).or()
 							.like("bank_account", keyWords).or()
 							.like("contact", keyWords)
-							.eq(StringUtils.isNotBlank(parentId),"parent_id", parentId)
-							//.apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
+							//.eq(StringUtils.isNotBlank(parentId),"parent_id", parentId)
+							.apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
 							.orderByDesc("create_time")
 			);
 			for(SysDeptEntity sysDeptEntity : page.getRecords()){
@@ -375,7 +375,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptDao, SysDeptEntity> i
 						.like(StringUtils.isNotBlank(name),"name", name)
 						.eq(StringUtils.isNotBlank(taxCode),"tax_code", taxCode)
 						.like(StringUtils.isNotBlank(owner),"owner", owner)
-						//.apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
+						.apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
 						.orderByDesc("dept_id")
 		);
 

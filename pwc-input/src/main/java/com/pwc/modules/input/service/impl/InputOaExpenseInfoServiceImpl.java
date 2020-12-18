@@ -89,7 +89,7 @@ public class InputOaExpenseInfoServiceImpl extends ServiceImpl<InputOaExpenseInf
                         .gt(StringUtils.isNotBlank(applyTimeBegin), "apply_time", applyTimeBegin)
                         .lt(StringUtils.isNotBlank(applyTimeEnd), "apply_time", applyTimeEnd)
                         .between(StringUtils.isNotBlank(maxAmount) && StringUtils.isNotBlank(minAmount), "amount", minAmount, maxAmount)
-                        //.apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
+                        .apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
         );
         if (InputConstant.MenuType.MANAGE.getValue().equals(menuType)) {
             for (InputOaExpenseInfoEntity expenseInfo : page.getRecords()) {

@@ -24,49 +24,44 @@ import java.util.Map;
 @RequestMapping("/input/invoiceupload")
 public class InvoiceUploadController {
     @Autowired
-    private  InputInvoiceUploadService  inputInvoiceUploadService;
+    private InputInvoiceUploadService inputInvoiceUploadService;
     @Autowired
     private InputInvoiceService invoiceService;
     @Autowired
     private InputInvoicePoService inputInvoicePoService;
+
     // 查询
     @RequestMapping("/findUpload")
-//    @RequiresPermissions("input:invoiceupload:findUpload")
     public R findUpload(@RequestParam Map<String, Object> params) {
         PageUtils page = inputInvoiceUploadService.findUploadList(params);
-
         String createUserName = params.get("createUserName").toString();
-        List<InputInvoiceUploadEntity>  UploadEntitysList = (List<InputInvoiceUploadEntity>) page.getList();
-        if(!UploadEntitysList.isEmpty()){
-            List<InputInvoiceUploadEntity>  UploadEntitys= inputInvoiceUploadService.getListAndCreateName(UploadEntitysList,createUserName);
-            for(InputInvoiceUploadEntity entity: UploadEntitys){
-                if((entity.getUploadType()==InputConstant.InvoiceStyle.PO.getValue())||entity.getUploadType().equals(InputConstant.InvoiceStyle.PO.getValue())){
-                     // po 数据
+        List<InputInvoiceUploadEntity> UploadEntitysList = (List<InputInvoiceUploadEntity>) page.getList();
+        if (!UploadEntitysList.isEmpty()) {
+            List<InputInvoiceUploadEntity> UploadEntitys = inputInvoiceUploadService.getListAndCreateName(UploadEntitysList, createUserName);
+            for (InputInvoiceUploadEntity entity : UploadEntitys) {
+                if ((entity.getUploadType() == InputConstant.InvoiceStyle.PO.getValue()) || entity.getUploadType().equals(InputConstant.InvoiceStyle.PO.getValue())) {
+                    // po 数据
                     entity.setInvoiceEntity(new InputInvoiceEntity());
                     entity.setPoEntity(inputInvoicePoService.findByuploadId(entity.getUploadId().toString()));
-                }
-                /*else if((entity.getUploadType()==InputConstant.InvoiceStyle.NULL.getValue())||entity.getUploadType().equals(InputConstant.InvoiceStyle.NULL.getValue())){
-                    entity.setPoEntity(new InputInvoicePoEntity());
-                    entity.setInvoiceEntity(new InputInvoiceEntity());
-                }*/
-                else {
+                } else {
                     entity.setPoEntity(new InputInvoicePoEntity());
                     entity.setInvoiceEntity(invoiceService.findByuploadId(entity.getUploadId().toString()));
                 }
             }
             page.setList(UploadEntitys);
         }
-        return R.ok().put("page",page);
+        return R.ok().put("page", page);
     }
+
     // 补录
     @RequestMapping("/updateUpload")
     //    @RequiresPermissions("input:invoiceupload:updateUpload")
-    public R updateUpload(@RequestBody InputInvoiceUploadEntity  uploadEntity) {
-        if(uploadEntity.getInvoiceEntity()!=null&&uploadEntity.getInvoiceEntity().getUploadId()!=null){
+    public R updateUpload(@RequestBody InputInvoiceUploadEntity uploadEntity) {
+        if (uploadEntity.getInvoiceEntity() != null && uploadEntity.getInvoiceEntity().getUploadId() != null) {
             uploadEntity.setUploadType(uploadEntity.getUploadSource());
             uploadEntity.getInvoiceEntity().setInvoiceUploadType(uploadEntity.getUploadSource().toString());
             invoiceService.makeUpInvoice(uploadEntity.getInvoiceEntity());
-        }else if( uploadEntity.getPoEntity()!=null&&uploadEntity.getPoEntity().getUploadId()!=null){
+        } else if (uploadEntity.getPoEntity() != null && uploadEntity.getPoEntity().getUploadId() != null) {
             uploadEntity.setUploadType(InputConstant.InvoiceStyle.PO.getValue());
             inputInvoicePoService.uploadPo(uploadEntity.getPoEntity());
         }

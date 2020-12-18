@@ -174,7 +174,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
      * @return
      */
     @Override
-    @DataFilter(deptId = "company_ids", subDept = true, user = false)
+    @DataFilter(subDept = true, userId = "create_by")
     public PageUtils queryPage(Map<String, Object> params, InputInvoiceEntity inputInvoiceEntity) {
         // 发票分类
         String invoiceStyle = ParamsMap.findMap(params, "invoiceStyle");
@@ -256,7 +256,6 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                         .eq(StringUtils.isNotBlank(invoiceEntity), "invoice_entity", invoiceEntity) // 发票类型
                         .eq(StringUtils.isNotBlank(invoiceMatch), "invoice_match", invoiceMatch)
                         .orderByDesc("upload_create_time", "invoice_batch_number") //先根据上传时间排序
-                        //临时去掉验证
                         .apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))
         );
         return new PageUtils(page);
@@ -322,7 +321,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                         .le(StringUtils.isNotBlank(ientryDateArray), "entry_date", !StringUtils.isNotBlank(ientryDateArray) ? "" : ientryDateArray.split(",")[1])
                         .ge(invoiceEntity.getInvoiceTotalPriceBegin() != null && !"".equals(invoiceEntity.getInvoiceTotalPriceBegin()), "invoice_total_price", invoiceEntity.getInvoiceTotalPriceBegin())
                         .le(invoiceEntity.getInvoiceTotalPriceEnd() != null && !"".equals(invoiceEntity.getInvoiceTotalPriceEnd()), "invoice_total_price", invoiceEntity.getInvoiceTotalPriceEnd())
-                        //.apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))
+                        .apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))
         );
         return new PageUtils(page);
     }
@@ -814,7 +813,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
 //                    InputCompanyEntity companyEntity = companyService.getByName(invoiceEntity.getInvoicePurchaserParagraph());
                     SysDeptEntity deptEntity = sysDeptService.getByName(invoiceEntity.getInvoicePurchaserParagraph());
                     if (deptEntity != null) {
-                        invoiceEntity.setCompanyId(deptEntity.getDeptId().intValue());
+                        invoiceEntity.setDeptId(deptEntity.getDeptId().intValue());
                     }
                     if (zfbz.equals("Y")) {
                         // 验真失败（判断是否初验）
@@ -1420,7 +1419,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                         .le(StringUtils.isNotBlank(invoiceCreateDateArray), "invoice_create_date", !StringUtils.isNotBlank(invoiceCreateDateArray) ? "" : invoiceCreateDateArray.split(",")[1])
                         .ge(invoiceTotalPriceBegin != null && !"".equals(invoiceTotalPriceBegin), "invoice_total_price", invoiceTotalPriceBegin)
                         .le(invoiceTotalPriceEnd != null && !"".equals(invoiceTotalPriceEnd), "invoice_total_price", invoiceTotalPriceEnd)
-                        //.apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))
+                        .apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))
         );
         return new PageUtils(page);
 
@@ -1478,7 +1477,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                         .le(StringUtils.isNotBlank(invoiceCreateDateArray), "invoice_create_date", !StringUtils.isNotBlank(invoiceCreateDateArray) ? "" : invoiceCreateDateArray.split(",")[1])
                         .ge(invoiceTotalPriceBegin != null && !"".equals(invoiceTotalPriceBegin), "invoice_total_price", invoiceTotalPriceBegin)
                         .le(invoiceTotalPriceEnd != null && !"".equals(invoiceTotalPriceEnd), "invoice_total_price", invoiceTotalPriceEnd)
-                        //.apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))
+                        .apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))
 
         );
         return new PageUtils(page);
@@ -3813,6 +3812,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
 
     // 页面接口汇总一下
     @Override
+    @DataFilter(subDept = true, userId = "create_by")
     public PageUtils getPageList(Map<String, Object> params) {
         String createUserName = (String) params.get("createUserName");
         List<InputInvoiceEntity> list = new ArrayList<>();
@@ -3822,19 +3822,6 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
         if (!invoiceEntityList.isEmpty()) {
             list = getListAndCreateName(invoiceEntityList, createUserName);
             for (InputInvoiceEntity Entity : list) {
-//                if (Entity.getInvoiceFreePrice() != null && Entity.getInvoiceTaxPrice() != null) {
-//                    NumberFormat nf = NumberFormat.getPercentInstance();
-//                    Entity.getInvoiceTaxPrice().divide(Entity.getInvoiceFreePrice(), 2);
-//                    Entity.setInvoiceTax(nf.format(Entity.getInvoiceTaxPrice().divide(Entity.getInvoiceFreePrice(), 2)));
-//                }
-//                if(Entity.getInvoiceStyle()==InputConstant.InvoiceStyle.PO.getValue()){
-//                    List<InputInvoicePoEntity>  poEntitys = inputInvoicePoService.getListByNumber(Entity.getInvoiceNumber());
-//                    String poNumber = null;
-//                    for(InputInvoicePoEntity poEntity:poEntitys){
-//                        poNumber = poEntity.getPoNumber()+"|";
-//                    }
-//                    Entity.setPoNumber(poNumber);
-//                }
                 List<InputInvoiceMaterialEntity> invoiceMaterialEntityList = new ArrayList<>();
                 InputInvoiceMaterialEntity invoiceMaterialEntity = new InputInvoiceMaterialEntity();
                 invoiceMaterialEntity.setInvoiceId(Entity.getId());
@@ -3859,6 +3846,12 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                     if (Entity.getInvoiceFreePrice() != null && Entity.getInvoiceTaxPrice() != null) {
                         NumberFormat nf = NumberFormat.getPercentInstance();
                         Entity.setTax(nf.format(Entity.getInvoiceTaxPrice().divide(Entity.getInvoiceFreePrice(), 4)));
+                    }
+                }
+                if(Entity.getDeptId() == null){
+                    SysDeptEntity sysDeptEntity = sysDeptService.getByTaxCode(Entity.getInvoicePurchaserParagraph());
+                    if(sysDeptEntity != null){
+                        Entity.setDeptId(sysDeptEntity.getDeptId().intValue());
                     }
                 }
                 updateById(Entity);
@@ -4259,7 +4252,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
         // 有效税额
         invoiceEntity.setInvoiceCheckCode(invoiceSyncEntity.getCheckCode());
         invoiceEntity.setCreateBy(ShiroUtils.getUserEntity().getUserId().intValue());
-        invoiceEntity.setCompanyId(ShiroUtils.getUserEntity().getDeptId().intValue());
+        invoiceEntity.setDeptId(ShiroUtils.getUserEntity().getDeptId().intValue());
         invoiceEntity.setInvoiceUploadDate(DateUtils.format(new Date()));
         invoiceEntity.setInvoiceReturn("0");
         invoiceEntity.setInvoiceDelete("0");
@@ -4635,7 +4628,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
         if ("pdf".equals(invoiceEntity.getInvoiceType())) {
             content = getInvoiceOCRresult(invoiceEntity);
             invoiceEntity.setCreateBy(invoiceEntity.getCreateBy());
-            invoiceEntity.setCompanyId(invoiceEntity.getCompanyId());
+            invoiceEntity.setDeptId(invoiceEntity.getCompanyId());
             JSONArray jsonArray = null;
             jsonArray = JSONArray.fromObject("[" + content + "]");
             System.out.println(content);
@@ -4724,7 +4717,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                 PoEntity.setCreateBy(invoiceEntity.getCreateBy());
                 PoEntity.setInvoiceImage(invoiceEntity.getInvoiceImage());
                 PoEntity.setCreateTime(new Date());
-                PoEntity.setDeptId(invoiceEntity.getCompanyId());
+                PoEntity.setDeptId(invoiceEntity.getDeptId());
                 PoEntity.setUploadId(invoiceEntity.getUploadId());
                 List<InputInvoicePoEntity> poEntitys = new ArrayList<InputInvoicePoEntity>();
                 if (PoEntity.getPoNumber() != null) {
@@ -4822,6 +4815,11 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                     type = InputConstant.InvoiceStyle.NULL.getValue();
                     invoiceEntity.setSourceStyle(type);
                 }
+                SysDeptEntity sysDeptEntity = sysDeptService.getByTaxCode(invoiceEntity.getInvoicePurchaserParagraph());
+                if(sysDeptEntity != null && sysDeptEntity.getDeptId() != null){
+                    invoiceEntity.setDeptId(sysDeptEntity.getDeptId().intValue());
+                }
+                invoiceEntity.setCreateBy(ShiroUtils.getUserId().intValue());
                 save(invoiceEntity);
                 mainProcess(invoiceEntity);
             }
@@ -4837,6 +4835,8 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
         uploadEntity.setUploadType(type); // 类型
         uploadEntity.setUploadSource(Integer.valueOf(invoiceEntity.getUploadType())); //
         uploadEntity.setUploadImage(invoiceEntity.getInvoiceImage());
+        uploadEntity.setCreateBy(invoiceEntity.getCreateBy());
+        uploadEntity.setDeptId(invoiceEntity.getDeptId());
         inputInvoiceUploadService.updateById(uploadEntity);
         return null;
     }

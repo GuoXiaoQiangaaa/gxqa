@@ -134,5 +134,9 @@ public class InputInvoiceCustomsGatherEntity implements Serializable {
 	 * 请求金税获取的request_id，用于获取结果集
 	 */
 	private String requestId;
+	/**
+	 * 部门ID
+	 */
+	private Integer deptId;
 
 }

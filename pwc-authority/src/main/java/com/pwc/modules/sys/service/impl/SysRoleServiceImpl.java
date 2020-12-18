@@ -48,8 +48,8 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleDao, SysRoleEntity> i
 			new Query<SysRoleEntity>().getPage(params),
 			new QueryWrapper<SysRoleEntity>()
 				.like(StringUtils.isNotBlank(roleName),"role_name", roleName)
-					.in(CollUtil.isNotEmpty(queryIds), "role_id", queryIds)
-//				.apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER)).orderByDesc("role_id")
+				.in(CollUtil.isNotEmpty(queryIds), "role_id", queryIds)
+				.apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER)).orderByDesc("role_id")
 		);
 
 		for(SysRoleEntity sysRoleEntity : page.getRecords()){

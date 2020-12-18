@@ -61,6 +61,7 @@ public class AuthebtucationStatisticsController {
                 InputInvoiceEntity invoiceEntity = new InputInvoiceEntity();
                 invoiceEntity.setApplyStatus("1");
                 invoiceEntity.setCompanyId(companyEntity.getId());
+                invoiceEntity.setDeptId(companyEntity.getDeptId().intValue());
                 invoiceService.updateApply(invoiceEntity);
                 return R.ok();
             } else {
@@ -117,6 +118,7 @@ public class AuthebtucationStatisticsController {
                 InputInvoiceEntity invoiceEntity = new InputInvoiceEntity();
                 invoiceEntity.setApplyStatus("1");
                 invoiceEntity.setCompanyId(companyEntity.getId());
+                invoiceEntity.setDeptId(companyEntity.getDeptId().intValue());
                 invoiceService.updateApply(invoiceEntity);
                 return R.ok();
             } else {
@@ -174,6 +176,7 @@ public class AuthebtucationStatisticsController {
                 InputInvoiceEntity invoiceEntity = new InputInvoiceEntity();
                 invoiceEntity.setApplyStatus("1");
                 invoiceEntity.setCompanyId(companyEntity.getId());
+                invoiceEntity.setDeptId(companyEntity.getDeptId().intValue());
                 invoiceService.updateApply(invoiceEntity);
                 return apply(companyEntity);
             } else {
@@ -436,6 +439,7 @@ public class AuthebtucationStatisticsController {
                 InputInvoiceEntity invoiceEntity = new InputInvoiceEntity();
                 invoiceEntity.setApplyStatus("2");
                 invoiceEntity.setCompanyId(companyEntity.getId());
+                invoiceEntity.setDeptId(companyEntity.getDeptId().intValue());
                 invoiceService.updateApply(invoiceEntity);
             }
             companyService.update(companyEntity);
@@ -487,6 +491,7 @@ public class AuthebtucationStatisticsController {
                     InputInvoiceEntity invoiceEntity = new InputInvoiceEntity();
                     invoiceEntity.setApplyStatus("1");
                     invoiceEntity.setCompanyId(companyEntity.getId());
+                    invoiceEntity.setDeptId(companyEntity.getDeptId().intValue());
                     invoiceService.updateApply(invoiceEntity);
                 }
                 companyService.update(companyEntity);

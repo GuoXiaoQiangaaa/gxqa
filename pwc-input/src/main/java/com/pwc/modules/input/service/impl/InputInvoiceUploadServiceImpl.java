@@ -30,7 +30,7 @@ public class InputInvoiceUploadServiceImpl extends ServiceImpl<InputInvoiceUploa
    SysUserService sysUserService;
 
     @Override
-    @DataFilter(subDept = true, user = false)
+    @DataFilter(subDept = true, userId = "create_by")
     public PageUtils findUploadList(Map<String, Object> params){
         String createTime = ParamsMap.findMap(params,"createTime"); // 日期
         String  uploadType = ParamsMap.findMap(params,"uploadType");// 上传类型
@@ -50,8 +50,7 @@ public class InputInvoiceUploadServiceImpl extends ServiceImpl<InputInvoiceUploa
                     .apply(StringUtils.isNotBlank(createTime),"date_format(create_time,'%Y-%m-%d')>={0}",!StringUtils.isNotBlank(createTime) ? "":createTime.split(",")[0])
                     .apply(StringUtils.isNotBlank(createTime),"date_format(create_time,'%Y-%m-%d')<={0}",!StringUtils.isNotBlank(createTime) ? "":createTime.split(",")[1])
                     .eq(StringUtils.isNotBlank(createUserName),"create_by",userId)
-                    //临时去掉验证
-                    /*.apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))*/
+                    .apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))
     );
     return new PageUtils(page);
 

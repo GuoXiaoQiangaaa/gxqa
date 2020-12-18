@@ -222,5 +222,9 @@ public class InputInvoiceCustomsEntity implements Serializable {
 	 * 匹配日期
 	 */
 	private String matchDate;
+	/**
+	 * 部门ID
+	 */
+	private Integer deptId;
 
 }

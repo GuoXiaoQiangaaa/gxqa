@@ -123,7 +123,7 @@ public class OCRcontroller {
                     invoiceEntity.setInvoiceImage(localUrl);
                     invoiceEntity = invoiceUtils.saveHEHEVATInvoice(invoiceEntity, itemList, invoiceType, fromTo);
                     invoiceEntity.setCreateBy(ShiroUtils.getUserEntity().getUserId().intValue());
-                    invoiceEntity.setCompanyId(ShiroUtils.getUserEntity().getDeptId().intValue());
+                    invoiceEntity.setDeptId(ShiroUtils.getUserEntity().getDeptId().intValue());
                     invoiceEntity.setInvoiceStatus("2");
                     invoiceService.functionCheckTrue(invoiceEntity, "1");
                     if ("增值税专用发票".equals(typeDescription)) {

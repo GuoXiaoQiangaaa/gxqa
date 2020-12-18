@@ -43,7 +43,7 @@ public class InputInvoicePoEntity implements Serializable {
      */
     private String  invoiceImage;
     /**
-     * 状态 0识别失败 1识别成功 2 已匹配
+     * 状态 -1识别失败 0识别重复  1识别成功 2匹配成功
      */
     @ExcelField(title="状态", align=1, sort=40,dictType = "UpdoldState")
     private String status;

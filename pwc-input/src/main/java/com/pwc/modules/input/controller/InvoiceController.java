@@ -369,7 +369,7 @@ public class InvoiceController {
             }
             for (InputInvoiceEntity invoice : invoiceList) {
                 if (dept.getTaxCode().equals(invoice.getInvoicePurchaserParagraph())) {
-                    invoice.setCompanyId(dept.getDeptId().intValue());
+                    invoice.setDeptId(dept.getDeptId().intValue());
                     invoiceService.update(invoice);
                 }
             }
@@ -392,7 +392,7 @@ public class InvoiceController {
                 List<InputInvoiceEntity> invoiceList = invoiceService.getListByBatchId(inputInvoiceEntity);
                 for (InputInvoiceEntity invoice : invoiceList) {
                     if (dept.getTaxCode().equals(invoice.getInvoicePurchaserParagraph())) {
-                        inputInvoiceEntity.setCompanyId(dept.getDeptId().intValue());
+                        inputInvoiceEntity.setDeptId(dept.getDeptId().intValue());
                         invoiceBatchService.update(batch);
                         break;
                     }
@@ -535,7 +535,7 @@ public class InvoiceController {
                     invoice.setInvoiceType("ofd");
                 }
                 invoice.setCreateBy(ShiroUtils.getUserId().intValue());
-                invoice.setCompanyId(ShiroUtils.getUserEntity().getDeptId().intValue());
+                invoice.setDeptId(ShiroUtils.getUserEntity().getDeptId().intValue());
                 invoice.setUploadType("2");  // 手动上传
                 invoice.setInvoiceFromto(invoiceEntity.getInvoiceFromto());
                 invoice.setImageName(invoiceEntity.getImagesNameList().get(i));
@@ -598,6 +598,7 @@ public class InvoiceController {
             }
             invoice.setCreateBy(0);
             invoice.setCompanyId(0);
+            invoice.setDeptId(0);
             // 1  扫描上传
             invoice.setUploadType(params.get("from").toString());
             invoice.setInvoiceBatchNumber(params.get("code").toString());
@@ -980,7 +981,6 @@ public class InvoiceController {
      * 票据总览列表
      */
     @RequestMapping("/invoiceList")
-    //@RequiresPermissions("input:invoice:invoiceList")
     public R invoiceList(@RequestParam Map<String, Object> params) {
         String[] state = null;
         String invoiceStatus = (String) params.get("invoiceStatus");

@@ -14,10 +14,7 @@ import com.fapiao.neon.model.in.inspect.BaseInvoice;
 import com.fapiao.neon.param.in.*;
 import com.pwc.common.annotation.DataFilter;
 import com.pwc.common.exception.RRException;
-import com.pwc.common.utils.DateUtils;
-import com.pwc.common.utils.InputConstant;
-import com.pwc.common.utils.PageUtils;
-import com.pwc.common.utils.Query;
+import com.pwc.common.utils.*;
 import com.pwc.modules.input.dao.InputInvoiceSyncDao;
 import com.pwc.modules.input.entity.*;
 import com.pwc.modules.input.enums.AuthCountStatusEnum;
@@ -80,7 +77,7 @@ public class InputInvoiceSyncServiceImpl extends ServiceImpl<InputInvoiceSyncDao
     private Log log = Log.get(this.getClass());
 
     @Override
-    @DataFilter(subDept = true, user = false)
+    @DataFilter(subDept = true)
     public PageUtils queryPage(Map<String, Object> params, InputInvoiceSyncEntity invoiceSyncEntity) {
         // 所属公司
         String originalPeriod = (String) params.get("originalPeriod"); // 认证所属期
@@ -104,6 +101,7 @@ public class InputInvoiceSyncServiceImpl extends ServiceImpl<InputInvoiceSyncDao
                         .like(StringUtils.isNotBlank(salesTaxName), "sales_tax_name", salesTaxName) // 销方名称
                         .eq(StringUtils.isNotBlank(deductible), "deductible", deductible) // 认证状态
                         .eq(StringUtils.isNotBlank(deptEntity.getTaxCode()), "purchaser_tax_no", deptEntity.getTaxCode())
+                        .apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
         );
         return new PageUtils(page);
     }
@@ -178,6 +176,12 @@ public class InputInvoiceSyncServiceImpl extends ServiceImpl<InputInvoiceSyncDao
             invoiceSyncEntity.setTotalAmount(entity.getTotalAmount());
             invoiceSyncEntity.setTotalTax(entity.getTotalTax());
             invoiceSyncEntity.setValidTax(entity.getEffectiveTaxAmount());
+            if(entity.getPurchaserTaxNo() != null){
+                SysDeptEntity sysDeptEntity = sysDeptService.getByTaxCode(entity.getPurchaserTaxNo());
+                if(sysDeptEntity != null && sysDeptEntity.getDeptId() != null){
+                    invoiceSyncEntity.setDeptId(sysDeptEntity.getDeptId());
+                }
+            }
             baseMapper.insert(invoiceSyncEntity);
         }
         return results;
@@ -275,6 +279,7 @@ public class InputInvoiceSyncServiceImpl extends ServiceImpl<InputInvoiceSyncDao
                 invoiceSyncEntity.setOriginalPeriod(entity.getOriginalPeriod());
                 invoiceSyncEntity.setStatus("1");
                 invoiceSyncEntity.setCreateTime(new Date());
+
                 baseMapper.insert(invoiceSyncEntity);
             }
         }

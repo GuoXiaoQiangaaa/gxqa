@@ -178,4 +178,6 @@ public class InputInvoiceSyncEntity extends SyncInvoice implements Serializable 
 	 *  插入日期
 	 */
 	private Date createTime;
+
+	private Long deptId;
 }

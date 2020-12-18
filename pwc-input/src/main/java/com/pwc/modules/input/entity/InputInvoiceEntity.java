@@ -270,6 +270,10 @@ public class InputInvoiceEntity implements Serializable {
      */
     private String matchDate;
     /**
+     * 部门ID
+     */
+    private Integer deptId;
+    /**
      * 入账日期
      */
     private String entryDate;
