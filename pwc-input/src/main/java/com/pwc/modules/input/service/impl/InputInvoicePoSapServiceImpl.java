@@ -9,6 +9,7 @@ import com.pwc.modules.input.entity.InputExportDetailEntity;
 import com.pwc.modules.input.entity.InputInvoicePoSapEntity;
 import com.pwc.modules.input.service.InputInvoicePoSapService;
 import com.pwc.modules.sys.shiro.ShiroUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.text.NumberFormat;
@@ -38,7 +39,7 @@ public class InputInvoicePoSapServiceImpl extends ServiceImpl<InputInvoicePoSapD
 
     /**
      * SAP抓取PO明细导入
-    */
+     */
     @Override
     public Map<String, Object> importSapPoData(MultipartFile[] files) {
         Map<String, Object> resMap = new HashMap<>();
@@ -63,7 +64,7 @@ public class InputInvoicePoSapServiceImpl extends ServiceImpl<InputInvoicePoSapD
                         "Order Unit", "Net price", "Currency", "Net Order Value", "Still to be delivered (qty)", "Still to be delivered (value)",
                         "Still to be invoiced (qty)", "Still to be invoiced (val.)", "Acct Assignment Cat.", "Purchasing Group", "Material Group",
                         "Req. Tracking Number", "Deletion Indicator", "Item Category"};
-                String [] excelHeadAlias = {"outlineAgreement", "purchasingDocument", "item", "documentDate", "purchOrganization",
+                String[] excelHeadAlias = {"outlineAgreement", "purchasingDocument", "item", "documentDate", "purchOrganization",
                         "plant", "material", "nameOfVendor", "shortText", "orderQuantity",
                         "orderUnit", "netPrice", "currency", "netOrderValue", "qtyDelivered", "valDelivered",
                         "qtyInvoiced", "valInvoiced", "assignmentCat", "purchasingGroup", "materialGroup",
@@ -73,7 +74,7 @@ public class InputInvoicePoSapServiceImpl extends ServiceImpl<InputInvoicePoSapD
                 }
                 List<InputInvoicePoSapEntity> dataList = reader.read(0, 1, InputInvoicePoSapEntity.class);
 
-                if(CollectionUtils.isEmpty(dataList)){
+                if (CollectionUtils.isEmpty(dataList)) {
                     log.error("上传的{}Excel为空,请重新上传");
 //                    throw new RRException("上传的Excel为空,请重新上传");
                     continue;
@@ -82,39 +83,36 @@ public class InputInvoicePoSapServiceImpl extends ServiceImpl<InputInvoicePoSapD
                 int count = 1;
                 for (InputInvoicePoSapEntity entity : dataList) {
                     count++;
-                        // 去除Excel中重复数据
-                        String repeatData = entity.getOutlineAgreement() + entity.getPurchasingDocument();
-                        if(CollectionUtil.contains(repeatDataList, repeatData)){
-                            fail += 1;
-                            if(!org.apache.commons.lang3.StringUtils.contains(sb.toString(), filename)){
-                                sb.append("文件" + filename + "的错误行号为:");
-                            }
-                            sb.append(count + ",");
-                            continue;
+                    // 参数校验
+                    if (StringUtils.isBlank(entity.getPurchOrganization()) || StringUtils.isBlank(entity.getPurchasingDocument())) {
+                        // 参数有误
+                        fail += 1;
+                        if (!StringUtils.contains(sb.toString(), filename)) {
+                            sb.append("文件" + filename + "的错误行号为:");
                         }
-                        repeatDataList.add(repeatData);
-
-                        // 数据库验重
-                    InputInvoicePoSapEntity poSap = super.getOne(
+                        sb.append(count + ",");
+                    } else {// 数据库验重
+                        InputInvoicePoSapEntity poSap = super.getOne(
                                 new QueryWrapper<InputInvoicePoSapEntity>()
                                         .eq("outline_agreement", entity.getOutlineAgreement())
                                         .eq("purchasing_document", entity.getPurchasingDocument())
                         );
-                        if(null != poSap){
+                        if (null != poSap) {
                             entity.setUpdateBy(String.valueOf(ShiroUtils.getUserId()));
                             entity.setUpdateTime(new Date());
                             duplicateList.add(entity);
-                        }else {
+                        } else {
                             entity.setCreateBy(String.valueOf(ShiroUtils.getUserId()));
                             entity.setCreateTime(new Date());
                             entityList.add(entity);
                         }
+                    }
                 }
-                if(sb.toString().endsWith(",")){
+                if (sb.toString().endsWith(",")) {
                     sb.deleteCharAt(sb.lastIndexOf(",")).append(";");
                 }
             }
-            if(sb.toString().endsWith(";")){
+            if (sb.toString().endsWith(";")) {
                 sb.deleteCharAt(sb.lastIndexOf(";")).append("。");
             }
 
@@ -123,14 +121,14 @@ public class InputInvoicePoSapServiceImpl extends ServiceImpl<InputInvoicePoSapD
             resMap.put("fail", fail);
             resMap.put("failDetail", sb.toString());
 
-            if(CollectionUtil.isNotEmpty(duplicateList)){
+            if (CollectionUtil.isNotEmpty(duplicateList)) {
                 super.updateBatchById(duplicateList);
             }
-            if(CollectionUtil.isNotEmpty(entityList)){
+            if (CollectionUtil.isNotEmpty(entityList)) {
                 super.saveBatch(entityList);
             }
             return resMap;
-        } catch (RRException e){
+        } catch (RRException e) {
             throw e;
         } catch (Exception e) {
             log.error("SAP抓取PO明细出错: {}", e);

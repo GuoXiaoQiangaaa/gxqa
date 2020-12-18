@@ -44,7 +44,7 @@ public class InputCompanyServiceImpl extends ServiceImpl<InputCompanyDao, InputC
         IPage<InputCompanyEntity> page = this.page(
                 new Query<InputCompanyEntity>().getPage(params),
                 new QueryWrapper<InputCompanyEntity>()
-                        .apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))
+                        //.apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))
         );
         for (InputCompanyEntity companyEntity : page.getRecords()) {
             SysDeptEntity deptEntity = sysDeptService.getById(companyEntity.getDeptId());
@@ -93,7 +93,7 @@ public class InputCompanyServiceImpl extends ServiceImpl<InputCompanyDao, InputC
                         .eq(StringUtils.isNotBlank(companyName), "company_name", companyName)
                         .like(StringUtils.isNotBlank(taxCode), "company_duty_paragraph", taxCode)
                         .eq(StringUtils.isNotBlank(status), "status", status)
-                        .apply(null != params.get(Constant.SQL_FILTER), (String) params.get(Constant.SQL_FILTER))
+                        //.apply(null != params.get(Constant.SQL_FILTER), (String) params.get(Constant.SQL_FILTER))
         );
 
         return new PageUtils(page);

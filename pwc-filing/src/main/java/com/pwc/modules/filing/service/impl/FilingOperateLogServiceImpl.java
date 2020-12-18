@@ -53,7 +53,7 @@ public class FilingOperateLogServiceImpl extends ServiceImpl<FilingOperateLogDao
                 new Query<FilingOperateLogEntity>().getPage(params),
                 new QueryWrapper<FilingOperateLogEntity>()
                         .eq(StrUtil.isNotBlank(filingId), "filing_id", filingId)
-                        .apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
+                        //.apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
                         .orderByDesc("create_time")
         );
 

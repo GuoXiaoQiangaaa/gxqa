@@ -738,16 +738,15 @@ public class InvoiceController {
      * 查看退票信息
      */
     @RequestMapping("/findRefund/{id}")
-    //   @RequiresPermissions("inpput:invoice:findRefund")
     public R findRefund(@PathVariable("id") Integer id) {
         InputInvoiceRefundEntity invoiceRefund = invoiceRefundService.getOne(new QueryWrapper<InputInvoiceRefundEntity>().eq("invoice_id", id));
         return R.ok().put("invoiceRefund", invoiceRefund);
     }
 
     @GetMapping(value = "exportRecordListByIds")
-    //   @RequiresPermissions("input:invoice:exportRecordListByIds")
     public R exportRecordListByIds(@RequestParam Map<String, Object> params, HttpServletResponse response) {
         String title = (String) params.get("title");
+        String type = ParamsMap.findMap(params, "type");
         InputInvoiceEntity invoiceEntity = JSON.parseObject(JSON.toJSONString(params), InputInvoiceEntity.class);
         System.out.println(invoiceEntity);
         List<InputInvoiceEntity> invoiceEntityList = invoiceService.getListById(invoiceEntity);
@@ -785,7 +784,15 @@ public class InvoiceController {
 
         try {
             String fileName = title + DateUtils.format(new Date(), "yyyyMMddHHmmss") + ".xlsx";
-            new ExportExcel(title, InputInvoiceEntity.class).setDataList(invoiceEntityList).write(response, fileName).dispose();
+            if(type != null){
+                if(type.equals("1")){
+                    new ExportExcel(title, InvoiceCheckVo.class).setDataList(invoiceEntityList).write(response, fileName).dispose();
+                }else if(type.equals("2")){
+                    new ExportExcel(title, InvoiceAbnormalVo.class).setDataList(invoiceEntityList).write(response, fileName).dispose();
+                }
+            }else{
+                new ExportExcel(title, InputInvoiceEntity.class).setDataList(invoiceEntityList).write(response, fileName).dispose();
+            }
             return null;
         } catch (Exception e) {
             e.printStackTrace();
@@ -794,9 +801,9 @@ public class InvoiceController {
     }
 
     @GetMapping(value = "exportRecordList")
-    //  @RequiresPermissions("input:invoice:exportRecordList")
     public R exportRecordList(@RequestParam Map<String, Object> params, HttpServletResponse response) {
         String title = (String) params.get("title");
+        String type = ParamsMap.findMap(params, "type");
         String[] state = null;
         if (StringUtils.isNotBlank((String) params.get("invoiceStatus"))) {
             state = new String[]{
@@ -829,7 +836,15 @@ public class InvoiceController {
 //        }
         try {
             String fileName = title + DateUtils.format(new Date(), "yyyyMMddHHmmss") + ".xlsx";
-            new ExportExcel(title, InputInvoiceEntity.class).setDataList(invoiceEntities).write(response, fileName).dispose();
+            if(type != null){
+                if(type.equals("1")){
+                    new ExportExcel(title, InvoiceCheckVo.class).setDataList(invoiceEntityList).write(response, fileName).dispose();
+                }else if(type.equals("2")){
+                    new ExportExcel(title, InvoiceAbnormalVo.class).setDataList(invoiceEntityList).write(response, fileName).dispose();
+                }
+            }else{
+                new ExportExcel(title, InputInvoiceEntity.class).setDataList(invoiceEntityList).write(response, fileName).dispose();
+            }
             return null;
         } catch (Exception e) {
             e.printStackTrace();

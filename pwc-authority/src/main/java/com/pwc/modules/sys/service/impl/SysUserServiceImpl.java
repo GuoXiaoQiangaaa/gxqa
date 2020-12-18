@@ -69,7 +69,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
 				.like(StringUtils.isNotBlank(username),"username", username)
 				.like(StringUtils.isNotBlank(mobile),"mobile", mobile)
 				.in(CollUtil.isNotEmpty(deptIds),"dept_id", deptIds)
-				.apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
+			//	.apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
 					.orderByDesc("user_id")
 		);
 

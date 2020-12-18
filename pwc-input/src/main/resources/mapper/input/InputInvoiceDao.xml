@@ -17,6 +17,7 @@
 		a.entry_message AS "entryMessage",
 		a.invoice_type AS "invoiceType",
 		a.invoice_entity AS "invoiceEntity",
+		a.invoice_class AS "invoiceClass",
 		a.invoice_fromto AS "invoiceFromto",
 		a.invoice_upload_type AS "invoiceUploadType",
 		a.invoice_image AS "invoiceImage",

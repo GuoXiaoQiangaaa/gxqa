@@ -174,7 +174,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
      * @return
      */
     @Override
-    @DataFilter(deptId = "company_id", subDept = true, user = false)
+    @DataFilter(deptId = "company_ids", subDept = true, user = false)
     public PageUtils queryPage(Map<String, Object> params, InputInvoiceEntity inputInvoiceEntity) {
         // 发票分类
         String invoiceStyle = ParamsMap.findMap(params, "invoiceStyle");
@@ -257,7 +257,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                         .eq(StringUtils.isNotBlank(invoiceMatch), "invoice_match", invoiceMatch)
                         .orderByDesc("upload_create_time", "invoice_batch_number") //先根据上传时间排序
                         //临时去掉验证
-                        //.apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))
+                        .apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))
         );
         return new PageUtils(page);
     }
@@ -322,7 +322,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                         .le(StringUtils.isNotBlank(ientryDateArray), "entry_date", !StringUtils.isNotBlank(ientryDateArray) ? "" : ientryDateArray.split(",")[1])
                         .ge(invoiceEntity.getInvoiceTotalPriceBegin() != null && !"".equals(invoiceEntity.getInvoiceTotalPriceBegin()), "invoice_total_price", invoiceEntity.getInvoiceTotalPriceBegin())
                         .le(invoiceEntity.getInvoiceTotalPriceEnd() != null && !"".equals(invoiceEntity.getInvoiceTotalPriceEnd()), "invoice_total_price", invoiceEntity.getInvoiceTotalPriceEnd())
-                        .apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))
+                        //.apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))
         );
         return new PageUtils(page);
     }
@@ -1420,7 +1420,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                         .le(StringUtils.isNotBlank(invoiceCreateDateArray), "invoice_create_date", !StringUtils.isNotBlank(invoiceCreateDateArray) ? "" : invoiceCreateDateArray.split(",")[1])
                         .ge(invoiceTotalPriceBegin != null && !"".equals(invoiceTotalPriceBegin), "invoice_total_price", invoiceTotalPriceBegin)
                         .le(invoiceTotalPriceEnd != null && !"".equals(invoiceTotalPriceEnd), "invoice_total_price", invoiceTotalPriceEnd)
-                        .apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))
+                        //.apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))
         );
         return new PageUtils(page);
 
@@ -1478,7 +1478,7 @@ public class InputInvoiceServiceImpl extends ServiceImpl<InputInvoiceDao, InputI
                         .le(StringUtils.isNotBlank(invoiceCreateDateArray), "invoice_create_date", !StringUtils.isNotBlank(invoiceCreateDateArray) ? "" : invoiceCreateDateArray.split(",")[1])
                         .ge(invoiceTotalPriceBegin != null && !"".equals(invoiceTotalPriceBegin), "invoice_total_price", invoiceTotalPriceBegin)
                         .le(invoiceTotalPriceEnd != null && !"".equals(invoiceTotalPriceEnd), "invoice_total_price", invoiceTotalPriceEnd)
-                        .apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))
+                        //.apply(params.get(Constant.SQL_FILTER) != null, (String) params.get(Constant.SQL_FILTER))
 
         );
         return new PageUtils(page);

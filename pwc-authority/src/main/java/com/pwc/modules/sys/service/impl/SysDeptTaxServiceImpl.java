@@ -79,7 +79,7 @@ public class SysDeptTaxServiceImpl extends ServiceImpl<SysDeptTaxDao, SysDeptTax
                 new QueryWrapper<SysDeptTaxEntity>()
                         .in(CollUtil.isNotEmpty(deptIds),"dept_id", deptIds)
                         .groupBy("dept_id")
-                        .apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
+                        //.apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
         );
 
         for(SysDeptTaxEntity sysDeptTaxEntity : page.getRecords()){

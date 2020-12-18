@@ -30,7 +30,6 @@ public class InvoiceSapController {
     private InputInvoiceSapService inputInvoiceSapService;
 
     @RequestMapping("/getImportBySap")
-    // @RequiresPermissions("input:invoicesap:getImportBySap")
     public R getImportBySap(@RequestParam("files") MultipartFile file){
         try {
             inputInvoiceSapService.getImportBySap(file);
@@ -47,7 +46,6 @@ public class InvoiceSapController {
      * @return
      */
     @RequestMapping("/getListBySap")
-        // @RequiresPermissions("input:invoicesap:getListBySap")
     public R  getListBySap(@RequestParam Map<String, Object> params){
         PageUtils page=inputInvoiceSapService.getListBySap(params);
         return R.ok().put("page",page);

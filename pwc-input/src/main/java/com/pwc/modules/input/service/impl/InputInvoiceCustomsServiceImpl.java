@@ -562,13 +562,13 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
     @Override
     public PageUtils getMonthCredBeforeResult(Map<String, Object> params){
         String yearAndMonth=ParamsMap.findMap(params, "yearAndMonth");
-
         String deptId=ParamsMap.findMap(params, "deptId");
         String payNo=ParamsMap.findMap(params, "payNo");
         String voucherCode=ParamsMap.findMap(params, "voucherCode");
         String batchNo=ParamsMap.findMap(params, "batchNo");
         SysDeptEntity sysDeptEntity = sysDeptService.getById(deptId);
         String resultType=ParamsMap.findMap(params, "resultType");
+        //1 - 前期认证本月入账 2 -本月认证未入账
         if(resultType.equals("1")){
             String newYearAndMonth = yearAndMonth.substring(0,7) + "-01";
             IPage<InputInvoiceCustomsEntity> page = this.page(
@@ -590,6 +590,7 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
                     new QueryWrapper<InputInvoiceCustomsEntity>()
                             .eq(StringUtils.isNotBlank(sysDeptEntity.getTaxCode()), "purchaser_tax_no", sysDeptEntity.getTaxCode())
                             .ne("entry_state", "1")
+                            .eq("deductible", "1")
                             .like("billing_date", yearAndMonth)
                             .like(StringUtils.isNotBlank(payNo), "pay_no", payNo)
                             .like(StringUtils.isNotBlank(voucherCode), "voucher_code", voucherCode)

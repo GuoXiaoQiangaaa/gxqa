@@ -35,8 +35,9 @@ public class SysNoticeServiceImpl extends ServiceImpl<SysNoticeDao, SysNoticeEnt
     @DataFilter(subDept = true, user = false, tableAlias = "f")
     public PageUtils queryPage(Map<String, Object> params) {
 
-        QueryWrapper<SysNoticeEntity> queryWrapper = new QueryWrapper<SysNoticeEntity>()
-                .apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER));
+        QueryWrapper<SysNoticeEntity> queryWrapper = new QueryWrapper<SysNoticeEntity>();
+                //.apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER)
+
 
         int pageSise = MapUtil.getInt(params, "limit");
         int currPage = MapUtil.getInt(params, "page");

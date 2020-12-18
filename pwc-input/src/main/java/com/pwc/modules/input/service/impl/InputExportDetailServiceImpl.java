@@ -93,18 +93,6 @@ public class InputExportDetailServiceImpl extends ServiceImpl<InputExportDetailD
                         }
                         sb.append(count + ",");
                     }else {
-                        // 去除Excel中重复数据
-                        String repeatData = entity.getCompanyCode() + entity.getDocumentNo() + entity.getPstngDate();
-                        if(CollectionUtil.contains(repeatDataList, repeatData)){
-                            fail += 1;
-                            if(!StringUtils.contains(sb.toString(), filename)){
-                                sb.append("文件" + filename + "的错误行号为:");
-                            }
-                            sb.append(count + ",");
-                            continue;
-                        }
-                        repeatDataList.add(repeatData);
-
                         // 数据库验重
                         InputExportDetailEntity duplicate = super.getOne(
                                 new QueryWrapper<InputExportDetailEntity>()
@@ -172,7 +160,7 @@ public class InputExportDetailServiceImpl extends ServiceImpl<InputExportDetailD
                 StringUtils.isBlank(entity.getDocumentType()) || StringUtils.isBlank(entity.getDocDate()) ||
                 StringUtils.isBlank(entity.getPstngDate()) || null == entity.getAmountInLocal() ||
                 StringUtils.isBlank(entity.getCurr()) || null == entity.getAmountInLocal() ||
-                StringUtils.isBlank(entity.getText()) || StringUtils.isBlank(entity.getTx())){
+                StringUtils.isBlank(entity.getText())){
             return 1;
         }
 

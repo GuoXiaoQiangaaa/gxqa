@@ -60,7 +60,7 @@ public class InputUnformatInvoiceServiceImpl extends ServiceImpl<InputUnformatIn
                 new QueryWrapper<InputUnformatInvoiceEntity>()
                     .eq("unformat_delete", "0")
                     .in("id", ids)
-                        .apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
+                        //.apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
 
             );
             return new PageUtils(page);
@@ -71,8 +71,8 @@ public class InputUnformatInvoiceServiceImpl extends ServiceImpl<InputUnformatIn
             IPage<InputUnformatInvoiceEntity> page = this.page(
                 new Query<InputUnformatInvoiceEntity>().getPage(params, null, true),
                 new QueryWrapper<InputUnformatInvoiceEntity>()
-                    .eq("unformat_delete", "5")
-                        .apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER)));
+                    .eq("unformat_delete", "5"));
+                        //.apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER)));
             return new PageUtils(page);
 
 

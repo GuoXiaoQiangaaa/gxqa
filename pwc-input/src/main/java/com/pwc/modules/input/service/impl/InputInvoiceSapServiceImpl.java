@@ -104,12 +104,10 @@ public class InputInvoiceSapServiceImpl extends ServiceImpl<InputInvoiceSapDao, 
                     duplicate.setAssignment(entity.getAssignment());
                     duplicate.setText(entity.getText());
                     duplicate.setTradingPartner(entity.getTradingPartner());
-                    duplicate.setUpdateBy(ShiroUtils.getUserId().intValue());
                     duplicate.setUpdateTime(new Date());
                     this.paraphraseParams(duplicate);
                     super.updateById(duplicate);
                 } else {
-                    entity.setCreateBy(ShiroUtils.getUserId().intValue());
                     entity.setCreateTime(new Date());
                     this.paraphraseParams(entity);
                     super.save(entity);
@@ -254,7 +252,7 @@ public class InputInvoiceSapServiceImpl extends ServiceImpl<InputInvoiceSapDao, 
             entity.setCurr("0");
         }*/
         // 对类型转义 1:发票; 2:海关通知单; 3:红字通知单
-        if(entity.getCompanyCode().equals("2520")){
+        if(entity.getCompanyCode() != null && entity.getCompanyCode().equals("2520")){
             if (org.apache.commons.lang3.StringUtils.contains(accout, "165101") && amountInDoc.compareTo(BigDecimal.ZERO) < 0) {
                 entity = inputRedInvoiceService.voluntaryEntry(entity);
                 entity.setMatchType("3");
@@ -293,7 +291,7 @@ public class InputInvoiceSapServiceImpl extends ServiceImpl<InputInvoiceSapDao, 
                     entity.setDeptId(String.valueOf(deptEntity.getDeptId()));
                 }
             }
-        }else{
+        } else {
             SysDeptEntity deptEntity = sysDeptService.getBySapDeptCode(entity.getCompanyCode());
             if (org.apache.commons.lang3.StringUtils.contains(accout, "165101") && amountInDoc.compareTo(BigDecimal.ZERO) < 0) {
                 entity = inputRedInvoiceService.voluntaryEntry(entity);

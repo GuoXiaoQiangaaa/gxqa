@@ -769,6 +769,7 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
         String documentNo=ParamsMap.findMap(params, "documentNo");
         SysDeptEntity sysDeptEntity = sysDeptService.getById(deptId);
         String resultType=ParamsMap.findMap(params, "resultType");
+        //1 - 前期认证本月入账 2 -本月认证未入账
         if(resultType.equals("1")){
             IPage<InputRedInvoiceEntity> page = this.page(
                     new Query<InputRedInvoiceEntity>().getPage(params),

@@ -66,6 +66,7 @@ public class InputConstant {
     private static Map<String, String> ABNORMALTYPE_MAP = Maps.newHashMap();
     private static Map<String, String> APPLYSTATUS_MAP = Maps.newHashMap();
     private static Map<String, String> INVOICESTATUS_MAP = Maps.newHashMap();
+    private static Map<String, String> PROGRESSRATE_MAP = Maps.newHashMap();
 
 
     static {
@@ -88,6 +89,18 @@ public class InputConstant {
         ABNORMALTYPE_MAP.put("8", "其它异常");
         ABNORMALTYPE_MAP.put("9", "不符合不符录入条件");
         ALL.put("abnormalType", ABNORMALTYPE_MAP);
+
+        PROGRESSRATE_MAP.put("0", "已正常入账");
+        PROGRESSRATE_MAP.put("1", "联系不到");
+        PROGRESSRATE_MAP.put("2", "未回应");
+        PROGRESSRATE_MAP.put("3", "已退回");
+        PROGRESSRATE_MAP.put("4", "不符—退票—已退回");
+        PROGRESSRATE_MAP.put("5", "不符—退票—联系不到");
+        PROGRESSRATE_MAP.put("6", "不符—退票—未回应");
+        PROGRESSRATE_MAP.put("7", "相符—通知AP");
+        PROGRESSRATE_MAP.put("8", "通知EU修改PO或vendor退票");
+        PROGRESSRATE_MAP.put("9", "未入账-查看原因");
+        ALL.put("progressRate", PROGRESSRATE_MAP);
 
         AUDITSTATUS_MAP.put("0", "稽核中");
         AUDITSTATUS_MAP.put("1", "相符");

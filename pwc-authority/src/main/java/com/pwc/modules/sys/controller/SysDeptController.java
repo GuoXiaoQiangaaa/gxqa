@@ -41,7 +41,6 @@ public class SysDeptController extends AbstractController {
 	 * 部门列表(不含层级,只有子部门数量)
 	 */
 	@GetMapping("/list")
-	@RequiresPermissions("sys:dept:list")
 	public R list(@RequestParam Map<String, Object> params){
 		// super admin 拥有所有权限
 		List<Long> roleIds = sysUserRoleService.queryRoleIdList(getUserId());
@@ -82,7 +81,6 @@ public class SysDeptController extends AbstractController {
 	 * 列表(含层级,部门详细信息)
 	 */
 	@GetMapping("/treeList")
-	@RequiresPermissions("sys:dept:list")
 	public R list(){
 		List<SysDeptEntity> deptList = sysDeptService.getTreeDeptList(0L);
 
@@ -93,7 +91,6 @@ public class SysDeptController extends AbstractController {
 	 * 列表(含层级,只有部门名称和id)
 	 */
 	@GetMapping("/treeSelect")
-	@RequiresPermissions("sys:dept:list")
 	public R treeSelect(){
 		Long userId = getUserId();
 		Long deptId = 0L;

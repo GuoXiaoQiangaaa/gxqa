@@ -58,17 +58,17 @@ public class InputInvoiceCustomsEntity implements Serializable {
 	/**
 	 * 勾选状态 0:未勾选认证; 1:已勾选认证; 2:勾选中; 3:勾选认证失败; 4:撤销勾选认证中; 5:已作废
 	 */
-	@ExcelField(title="海关缴款书状态", align=1, sort=90,dictType = "deductible")
+	@ExcelField(title="认证状态", align=1, sort=90,dictType = "deductible")
 	private String deductible;
 	/**
 	 * 勾选属期 YYYYMM
 	 */
-	@ExcelField(title="海关缴款书勾选所属期", align=1, sort=70)
+	@ExcelField(title="认证所属期", align=1, sort=70)
 	private String deductiblePeriod;
 	/**
 	 * 勾选日期 YYYY-MM-DD
 	 */
-	@ExcelField(title="海关缴款书勾选日期", align=1, sort=60)
+	@ExcelField(title="勾选日期", align=1, sort=60)
 	private String deductibleDate;
 	/**
 	 * 勾选结果
@@ -142,7 +142,7 @@ public class InputInvoiceCustomsEntity implements Serializable {
 	/**
 	 * 统计状态 0 未统计确认 1 统计确认成功 2 统计确认失败
 	 */
-	@ExcelField(title="统计确认状态", align=1, sort=100,dictType ="statisticsState")
+	@ExcelField(title="统计状态", align=1, sort=100,dictType ="statisticsState")
 	private String statisticsState;
 
 	/**
