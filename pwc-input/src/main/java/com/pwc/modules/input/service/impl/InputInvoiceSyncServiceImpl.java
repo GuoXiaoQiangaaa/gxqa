@@ -77,7 +77,7 @@ public class InputInvoiceSyncServiceImpl extends ServiceImpl<InputInvoiceSyncDao
     private Log log = Log.get(this.getClass());
 
     @Override
-    @DataFilter(subDept = true)
+    @DataFilter(subDept = true,user = false)
     public PageUtils queryPage(Map<String, Object> params, InputInvoiceSyncEntity invoiceSyncEntity) {
         // 所属公司
         String originalPeriod = (String) params.get("originalPeriod"); // 认证所属期

@@ -13,9 +13,9 @@ import com.fapiao.neon.model.in.CustomsInvoiceResult;
 import com.fapiao.neon.param.in.CommonParamBody;
 import com.fapiao.neon.param.in.CustomsApplyInvoice;
 import com.fapiao.neon.param.in.CustomsApplyParamBody;
+import com.pwc.common.annotation.DataFilter;
 import com.pwc.common.exception.RRException;
-import com.pwc.common.utils.DateUtils;
-import com.pwc.common.utils.ParamsMap;
+import com.pwc.common.utils.*;
 import com.pwc.modules.input.dao.InputInvoiceCustomsGatherDao;
 import com.pwc.modules.input.entity.InputInvoiceCustomsGatherEntity;
 import com.pwc.modules.input.entity.InputInvoiceWhtEntity;
@@ -33,8 +33,6 @@ import java.util.*;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.pwc.common.utils.PageUtils;
-import com.pwc.common.utils.Query;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -50,6 +48,7 @@ public class InputInvoiceCustomsGatherServiceImpl extends ServiceImpl<InputInvoi
     private CollectCustomsClient collectCustomsClient;
 
     @Override
+    @DataFilter(subDept = true,userId = "upload_by")
     public PageUtils queryPage(Map<String, Object> params) {
         //缴款书号码
         String payNo = (String) params.get("payNo");
@@ -95,6 +94,7 @@ public class InputInvoiceCustomsGatherServiceImpl extends ServiceImpl<InputInvoi
                         .eq("del_flag", 0)
                         .between(StringUtils.isNotBlank(billingDateStart) && StringUtils.isNotBlank(billingDateEnd), "billing_date", billingDateStart, billingDateEnd)
                         .between(StringUtils.isNotBlank(deductibleDateStart) && StringUtils.isNotBlank(deductibleDateEnd), "gather_date", deductibleDateStart, deductibleDateEnd)
+                        .apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
                         .orderByDesc("upload_date")
         );
         return new PageUtils(page);
@@ -179,6 +179,7 @@ public class InputInvoiceCustomsGatherServiceImpl extends ServiceImpl<InputInvoi
     private InputInvoiceCustomsGatherEntity paraphraseParams(InputInvoiceCustomsGatherEntity entity) {
         SysDeptEntity dept = sysDeptService.getByTaxCode(entity.getPurchaserTaxNo());
         entity.setPurchaserName(dept.getName());
+        entity.setDeptId(dept.getDeptId().intValue());
         String strMsg = entity.getBillingDate().replace("/", "-");
         Date entryDate = DateUtils.stringToDate(strMsg.substring(0, 10), "yyyy-MM-dd");
 

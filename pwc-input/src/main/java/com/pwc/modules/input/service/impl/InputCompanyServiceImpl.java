@@ -79,7 +79,7 @@ public class InputCompanyServiceImpl extends ServiceImpl<InputCompanyDao, InputC
      * 统计情况列表
      */
     @Override
-    @DataFilter(subDept = true, user = false)
+    @DataFilter(subDept = true, userId = "create_by")
     public PageUtils list(Map<String, Object> params) {
         String companyNumber = (String) params.get("companyNumber");
         String companyName = (String) params.get("companyName");
@@ -93,7 +93,7 @@ public class InputCompanyServiceImpl extends ServiceImpl<InputCompanyDao, InputC
                         .eq(StringUtils.isNotBlank(companyName), "company_name", companyName)
                         .like(StringUtils.isNotBlank(taxCode), "company_duty_paragraph", taxCode)
                         .eq(StringUtils.isNotBlank(status), "status", status)
-                        //.apply(null != params.get(Constant.SQL_FILTER), (String) params.get(Constant.SQL_FILTER))
+                        .apply(null != params.get(Constant.SQL_FILTER), (String) params.get(Constant.SQL_FILTER))
         );
 
         return new PageUtils(page);

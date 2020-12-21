@@ -16,6 +16,7 @@ import com.fapiao.neon.param.in.InvoiceInspectionParamBody;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.pwc.common.annotation.DataFilter;
 import com.pwc.common.exception.RRException;
 import com.pwc.common.utils.*;
 import com.pwc.modules.input.dao.InputRedInvoiceDao;
@@ -72,6 +73,7 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
     private SysDeptService sysDeptService;
 
     @Override
+    @DataFilter(subDept = true, userId = "create_by")
     public PageUtils queryPage(Map<String, Object> params) {
         Long deptId = (Long) params.get("deptId");
         String redNoticeNumber = (String) params.get("redNoticeNumber");
@@ -90,6 +92,7 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
                         .eq(StringUtils.isNotBlank(blueInvoiceNumber), "blue_invoice_number", blueInvoiceNumber)
                         .eq(StringUtils.isNotBlank(redStatus), "red_status", redStatus)
                         .eq(StringUtils.isNotBlank(entryState), "entry_state", entryState)
+                        .apply(null != params.get(Constant.SQL_FILTER), (String) params.get(Constant.SQL_FILTER))
                         .orderByDesc("create_time")
         );
         return new PageUtils(page);
@@ -131,6 +134,7 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
      * @return 查询结果
      */
     @Override
+    @DataFilter(subDept = true, userId = "create_by")
     public PageUtils conditionList(Map<String, Object> params, InputRedInvoiceEntity redInvoiceEntity) {
         this.linkDept(redInvoiceEntity.getDeptId());
         String freePrice = String.valueOf(redInvoiceEntity.getFreePrice());
@@ -146,6 +150,7 @@ public class InputRedInvoiceServiceImpl extends ServiceImpl<InputRedInvoiceDao, 
                         .le(freePriceEnd != null && !"".equals(freePriceEnd), "free_price", freePriceEnd)
                         .like(StringUtils.isNotBlank(redInvoiceEntity.getBlueInvoiceNumber()), "blue_invoice_number", redInvoiceEntity.getBlueInvoiceNumber())
                         .eq(StringUtils.isNotBlank(redInvoiceEntity.getRedStatus()), "red_status", StringUtils.isBlank(redInvoiceEntity.getRedStatus()) ? "0" : redInvoiceEntity.getRedStatus())
+                        .apply(null != params.get(Constant.SQL_FILTER), (String) params.get(Constant.SQL_FILTER))
         );
         return new PageUtils(page);
     }

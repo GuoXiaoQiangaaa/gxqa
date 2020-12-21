@@ -10,12 +10,10 @@ import com.pwc.common.utils.PageUtils;
 import com.pwc.common.utils.R;
 import com.pwc.common.utils.StatusDefine;
 import com.pwc.common.validator.ValidatorUtils;
-import com.pwc.modules.sys.entity.SysDeptEntity;
-import com.pwc.modules.sys.entity.SysMenuEntity;
-import com.pwc.modules.sys.entity.SysRoleDeptEntity;
-import com.pwc.modules.sys.entity.TreeSelectVo;
+import com.pwc.modules.sys.entity.*;
 import com.pwc.modules.sys.service.SysDeptService;
 import com.pwc.modules.sys.service.SysRoleDeptService;
+import com.pwc.modules.sys.service.SysRoleService;
 import com.pwc.modules.sys.service.SysUserRoleService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +36,8 @@ public class SysDeptController extends AbstractController {
     private SysUserRoleService sysUserRoleService;
     @Autowired
     private SysRoleDeptService sysRoleDeptService;
-
+    @Autowired
+    private SysRoleService sysRoleService;
 
     /**
      * 部门列表(不含层级,只有子部门数量)
@@ -103,27 +102,40 @@ public class SysDeptController extends AbstractController {
     @GetMapping("/treeSelect")
     public R treeSelect() {
         Long userId = getUserId();
-        Long deptId = 0L;
+        Long deptId = getDeptId();
         if (userId == 1) {
             deptId = 0L;
         }
 
-        //去掉所属公司限制
-        //List<TreeSelectVo> resultList = new ArrayList<>();
-        List<TreeSelectVo> deptList = sysDeptService.getTreeSelectList(deptId);
-        /*if (deptId != 0) {
+        List<TreeSelectVo> resultList = new ArrayList<>();
+        if (deptId != 0) {
 		//根据部门ID获取部门信息
-			SysDeptEntity sysDeptEntity = sysDeptService.getById(deptId);
+			/*SysDeptEntity sysDeptEntity = sysDeptService.getById(deptId);
 			if (null != sysDeptEntity) {
 				TreeSelectVo treeSelectVo = new TreeSelectVo();
 				treeSelectVo.setKey(sysDeptEntity.getDeptId().toString());
 				treeSelectVo.setTitle(sysDeptEntity.getDeptCode()+" "+sysDeptEntity.getName());
 				treeSelectVo.setChildren(deptList);
 				resultList.add(treeSelectVo);
-			}
-			return R.ok().put("data", resultList);
-		}*/
-        return R.ok().put("data", deptList);
+			}*/
+            SysUserRoleEntity role = sysRoleService.findRoleIdByUserId(userId);
+            if(role != null){
+                List<Long> deptIdList = sysRoleDeptService.queryDeptIdList(new Long[]{role.getRoleId()});
+                for(int i = 0;i<deptIdList.size();i++){
+                    SysDeptEntity aa = sysDeptService.getById(deptIdList.get(i));
+                    List<TreeSelectVo> deptList = sysDeptService.getTreeSelectList(deptIdList.get(i));
+                    TreeSelectVo treeSelectVo = new TreeSelectVo();
+                    treeSelectVo.setKey(aa.getDeptId().toString());
+                    treeSelectVo.setTitle(aa.getDeptCode()+" "+aa.getName());
+                    treeSelectVo.setChildren(deptList);
+                    resultList.add(treeSelectVo);
+                }
+            }
+		}else{
+            resultList = sysDeptService.getTreeSelectList(deptId);
+        }
+        return R.ok().put("data", resultList);
+        //return R.ok().put("data", deptList);
     }
 
     /**

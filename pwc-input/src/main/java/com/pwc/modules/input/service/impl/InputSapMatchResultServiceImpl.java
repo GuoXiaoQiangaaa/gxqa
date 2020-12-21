@@ -471,7 +471,7 @@ public class InputSapMatchResultServiceImpl extends ServiceImpl<InputSqpMatchRes
         resultVo.setSort(2);
         resultVo.setCredittax(creditTax.toString());
         resultVo.setCertificationtax(certificationTax.toString());
-        BigDecimal differenceTax = creditTax.subtract(certificationTax);
+        BigDecimal differenceTax = certificationTax.subtract(creditTax);
         resultVo.setDifferencetax(differenceTax.toString());
         BigDecimal adjustmentTax = monthCredTax.add(monthCredBeforeTax).add(monthCertBeforeTax).add(monthCertTax);
         resultVo.setAdjustmenttax(adjustmentTax.toString());
@@ -537,7 +537,7 @@ public class InputSapMatchResultServiceImpl extends ServiceImpl<InputSqpMatchRes
         resultVo.setSort(1);
         resultVo.setCredittax(creditTax.toString());
         resultVo.setCertificationtax(certificationTax.toString());
-        BigDecimal differenceTax = creditTax.subtract(certificationTax);
+        BigDecimal differenceTax = certificationTax.subtract(creditTax);
         resultVo.setDifferencetax(differenceTax.toString());
         BigDecimal adjustmentTax = monthCredTax.add(monthCredBeforeTax).add(monthCertBeforeTax).add(monthCertTax);
         resultVo.setAdjustmenttax(adjustmentTax.toString());
@@ -604,7 +604,7 @@ public class InputSapMatchResultServiceImpl extends ServiceImpl<InputSqpMatchRes
         resultVo.setSort(0);
         resultVo.setCredittax(creditTax.toString());
         resultVo.setCertificationtax(certificationTax.toString());
-        BigDecimal differenceTax = creditTax.subtract(certificationTax);
+        BigDecimal differenceTax = certificationTax.subtract(creditTax);
         resultVo.setDifferencetax(differenceTax.toString());
         /*BigDecimal adjustmentTax = (monthCredTax.add(monthCredBeforeTax)).subtract(monthCertTax.add(monthCertBeforeTax));*/
         BigDecimal adjustmentTax = monthCredTax.add(monthCredBeforeTax).add(monthCertBeforeTax).add(monthCertTax);

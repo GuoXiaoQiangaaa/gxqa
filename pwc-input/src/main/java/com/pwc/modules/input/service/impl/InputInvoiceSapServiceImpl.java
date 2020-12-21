@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.pwc.common.annotation.DataFilter;
 import com.pwc.common.exception.RRException;
 import com.pwc.common.utils.*;
 import com.pwc.modules.input.dao.InputInvoiceSapDao;
@@ -133,6 +134,7 @@ public class InputInvoiceSapServiceImpl extends ServiceImpl<InputInvoiceSapDao, 
      * 查询列表
      */
     @Override
+    @DataFilter(subDept = true, userId = "create_by")
     public PageUtils getListBySap(Map<String, Object> params) {
         // 公司代码
         String companyCode = ParamsMap.findMap(params, "companyCode");
@@ -170,6 +172,7 @@ public class InputInvoiceSapServiceImpl extends ServiceImpl<InputInvoiceSapDao, 
                         .eq(StringUtils.isNotBlank(assignment), "assignment", assignment)
                         .in("sap_match", match)
                         .like(StringUtils.isNotBlank(headerText), "header_text", headerText)
+                        .apply(null != params.get(Constant.SQL_FILTER), (String) params.get(Constant.SQL_FILTER))
         );
         return new PageUtils(page);
     }

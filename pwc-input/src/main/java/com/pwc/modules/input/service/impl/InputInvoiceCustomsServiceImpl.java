@@ -75,6 +75,7 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
     private InputInvoiceCustomsService inputInvoiceCustomsService;
 
     @Override
+    @DataFilter(subDept = true,userId = "upload_by")
     public PageUtils queryPage(Map<String, Object> params) {
         String payNo = (String) params.get("payNo");
         String deptId = ParamsMap.findMap(params, "deptId");
@@ -119,6 +120,7 @@ public class InputInvoiceCustomsServiceImpl extends ServiceImpl<InputInvoiceCust
                         .eq(StringUtils.isNotBlank(deductiblePeriod), "deductible_period", deductiblePeriod)
                         .between(StringUtils.isNotBlank(billingDateStart) && StringUtils.isNotBlank(billingDateEnd), "billing_date", billingDateStart, billingDateEnd)
                         .between(StringUtils.isNotBlank(deductibleDateStart) && StringUtils.isNotBlank(deductibleDateEnd), "deductible_date", deductibleDateStart, deductibleDateEnd)
+                        .apply(params.get(Constant.SQL_FILTER) != null, (String)params.get(Constant.SQL_FILTER))
                         .orderByDesc("upload_date")
         );
 
