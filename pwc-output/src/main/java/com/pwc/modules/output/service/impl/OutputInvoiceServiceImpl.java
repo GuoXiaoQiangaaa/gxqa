@@ -32,4 +32,5 @@ public class OutputInvoiceServiceImpl extends ServiceImpl<OutputInvoiceDao, Outp
         return new PageUtils(page);
     }
 
+
 }

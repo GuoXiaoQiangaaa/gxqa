@@ -133,7 +133,11 @@ public class OutputInvoiceEntity implements Serializable {
 	 */
 	private String sellerBank;
 	/**
-	 * 发票状态：1.待申请 2.待审批 3.审批驳回 4.已撤销 5.待开票 6.开具失败 7.已开具 8.线下开具 9.已打印 10.红冲待审批 11.红冲驳回 12.红冲已开具 13.红冲已打印 14.作废待审批 15.作废驳回 16.已作废
+	 * 开票申请状态：1.待提交 2.待审核 3.已撤销 4.审批驳回
+	 */
+	private Integer InvoiceRequisitionStatus;
+	/**
+	 * 发票状态：1.正常 2.失控 3.作废 4.红冲 5.异常
 	 */
 	private Integer invoiceStatus;
 	/**

@@ -9,7 +9,9 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -32,9 +34,21 @@ public class OutputInvoiceController {
     @GetMapping("/list")
     @RequiresPermissions("output:outputinvoice:list")
     public R list(@RequestParam Map<String, Object> params){
-        PageUtils page = outputInvoiceService.queryPage(params);
-
-        return R.ok().put("page", page);
+        //PageUtils page = outputInvoiceService.queryPage(params);
+        HashMap<String, Object> p = new HashMap<>();
+        p.put("invoice_id", "1");
+        p.put("apply_number", "1");
+        p.put("agreement","");
+        p.put("apply_user","admin");
+        p.put("apply_time",new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+        p.put("purchase_name","AAA有限公司");
+        p.put("seller_name","CBC-SH");
+        p.put("invoice_type","增值随专用发票");
+        p.put("invoice_entity","纸质发票");
+        p.put("Invoice_requisition_status","2");
+        p.put("invoice_status","1");
+        PageUtils p1 = outputInvoiceService.queryPage(p);
+        return R.ok().put("page", p1);
     }
 
 
